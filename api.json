@@ -1,0 +1,47 @@
+{
+    "operators": {
+        "Authorization": {
+            "name": "Authorization",
+            "methods": {
+                "Auth": {
+                    "name": "Auth",
+                    "inputs": {
+                        "AuthRequest": {
+                            "name": "AuthRequest",
+                            "imports": [
+                                [
+                                    "en",
+                                    "profzone/eden-map-server/internal/constants/enums"
+                                ]
+                            ],
+                            "fields": [
+                                {
+                                    "key": "Key",
+                                    "type": "string"
+                                },
+                                {
+                                    "key": "Status",
+                                    "type": "en.Status"
+                                }
+                            ]
+                        }
+                    },
+                    "outputs": {
+                        "AuthResponse": {
+                            "name": "AuthResponse",
+                            "imports": [],
+                            "fields": [
+                                {
+                                    "key": "Token",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "isPush": false
+        }
+    },
+    "models": ""
+}
