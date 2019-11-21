@@ -69,8 +69,11 @@ func (m *ModelScanner) Visit(node ast.Node) ast.Visitor {
 					continue
 				}
 
-				model := m.Api.AddModel(typeSpec.Name.Name)
+				if !m.Api.ExistModelDef(typeSpec.Name.Name) {
+					continue
+				}
 
+				model := m.Api.AddModel(typeSpec.Name.Name)
 				structType, ok := typeSpec.Type.(*ast.StructType)
 				if !ok {
 					continue

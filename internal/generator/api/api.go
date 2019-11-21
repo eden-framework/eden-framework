@@ -33,3 +33,18 @@ func (a *Api) AddModel(name string) *OperatorModel {
 
 	return a.Models[name]
 }
+
+func (a *Api) ExistModelDef(name string) bool {
+	for _, group := range a.Operators {
+		for _, method := range group.Methods {
+			if _, ok := method.inputDef[name]; ok {
+				return true
+			}
+			if _, ok := method.outputDef[name]; ok {
+				return true
+			}
+		}
+	}
+
+	return false
+}
