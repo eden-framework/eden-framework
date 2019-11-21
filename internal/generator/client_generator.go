@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"path"
 	"profzone/eden-framework/internal/generator/api"
+	"profzone/eden-framework/internal/generator/files"
 )
 
 type ClientGenerator struct {
@@ -34,7 +35,7 @@ func (c *ClientGenerator) Load(path string) {
 	}
 
 	if c.ServiceName == "" {
-		c.ServiceName = "client-" + c.Api.ServiceName
+		c.ServiceName = c.Api.ServiceName
 	}
 }
 
@@ -68,11 +69,12 @@ func (c *ClientGenerator) Pick() {
 
 func (c *ClientGenerator) Output(outputPath string) Outputs {
 	outputs := Outputs{}
-	packageName := ToLowerSnakeCase(c.ServiceName)
 
-	outputs.Add(GeneratedSuffix(path.Join(packageName, "client.go")), "package "+packageName)
-	outputs.Add(GeneratedSuffix(path.Join(packageName, "types.go")), "package "+packageName)
-	outputs.Add(GeneratedSuffix(path.Join(packageName, "enums.go")), "package "+packageName)
+	clientFile := files.NewClientFile(c.ServiceName, &c.Api)
+
+	outputs.Add(GeneratedSuffix(path.Join(clientFile.PackageName, "client.go")), clientFile.String())
+	outputs.Add(GeneratedSuffix(path.Join(clientFile.PackageName, "types.go")), "package "+clientFile.PackageName)
+	outputs.Add(GeneratedSuffix(path.Join(clientFile.PackageName, "enums.go")), "package "+clientFile.PackageName)
 
 	return outputs
 }
