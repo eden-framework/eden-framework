@@ -10,7 +10,7 @@ import (
 )
 
 type Generator interface {
-	Load(cwd string)
+	Load(path string)
 	Pick()
 	Output(outputPath string) Outputs
 }
@@ -53,14 +53,14 @@ func (outputs Outputs) WriteFiles() {
 	}
 }
 
-func Generate(generator Generator, cwd string) {
+func Generate(generator Generator, path string) {
 	cost := duration.NewDuration()
 	defer func() {
 		cost.ToLogger().Infof("generate by %s done", reflect.TypeOf(generator).String())
 	}()
 
-	generator.Load(cwd)
+	generator.Load(path)
 	generator.Pick()
-	outputs := generator.Output(cwd)
+	outputs := generator.Output(path)
 	outputs.WriteFiles()
 }

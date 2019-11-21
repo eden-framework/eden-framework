@@ -17,6 +17,7 @@ package main
 
 import (
 	"fmt"
+	"profzone/eden-framework/internal/generator"
 
 	"github.com/spf13/cobra"
 )
@@ -29,11 +30,12 @@ var clientCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  fmt.Sprintf("%s\ngenerate client", CommandHelpHeader),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("client called")
+		gen := &generator.ClientGenerator{}
+		generator.Generate(gen, clientCmdApiPath)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(clientCmd)
+	generateCmd.AddCommand(clientCmd)
 	clientCmd.Flags().StringVarP(&clientCmdApiPath, "api-path", "f", "", "eden generate api --api-path=/go/src/eden-server/api.json")
 }

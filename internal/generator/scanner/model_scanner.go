@@ -7,6 +7,7 @@ import (
 )
 
 type ModelScanner struct {
+	Api                *api.Api
 	inputModelReferer  map[string][]*api.OperatorMethod
 	outputModelReferer map[string][]*api.OperatorMethod
 }
@@ -68,7 +69,8 @@ func (m *ModelScanner) Visit(node ast.Node) ast.Visitor {
 					continue
 				}
 
-				model := api.NewOperatorModel(typeSpec.Name.Name)
+				model := m.Api.AddModel(typeSpec.Name.Name)
+
 				structType, ok := typeSpec.Type.(*ast.StructType)
 				if !ok {
 					continue

@@ -29,8 +29,8 @@ type OperatorMethod struct {
 	Name      string         `json:"name"`
 	inputDef  map[string]bool
 	outputDef map[string]bool
-	Inputs    map[string]OperatorModel `json:"inputs"`
-	Outputs   map[string]OperatorModel `json:"outputs"`
+	Inputs    []string `json:"inputs"`
+	Outputs   []string `json:"outputs"`
 }
 
 func NewOperatorMethod(group *OperatorGroup, name string) *OperatorMethod {
@@ -39,8 +39,8 @@ func NewOperatorMethod(group *OperatorGroup, name string) *OperatorMethod {
 		Name:      name,
 		inputDef:  make(map[string]bool),
 		outputDef: make(map[string]bool),
-		Inputs:    make(map[string]OperatorModel),
-		Outputs:   make(map[string]OperatorModel),
+		Inputs:    make([]string, 0),
+		Outputs:   make([]string, 0),
 	}
 }
 
@@ -52,10 +52,10 @@ func (m *OperatorMethod) AddOutputDef(name string) {
 	m.outputDef[name] = true
 }
 
-func (m *OperatorMethod) AddInput(model OperatorModel) {
-	m.Inputs[model.Name] = model
+func (m *OperatorMethod) AddInput(model *OperatorModel) {
+	m.Inputs = append(m.Inputs, model.Name)
 }
 
-func (m *OperatorMethod) AddOutput(model OperatorModel) {
-	m.Outputs[model.Name] = model
+func (m *OperatorMethod) AddOutput(model *OperatorModel) {
+	m.Outputs = append(m.Outputs, model.Name)
 }

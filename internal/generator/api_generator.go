@@ -2,7 +2,6 @@ package generator
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"go/ast"
 	"golang.org/x/tools/go/packages"
@@ -41,9 +40,6 @@ func (a *ApiGenerator) Pick() {
 		}
 	})
 	packages.Visit(a.pkgs, nil, func(i *packages.Package) {
-		if i.Name == "models" {
-			fmt.Println(i.Name)
-		}
 		for _, f := range i.Syntax {
 			ast.Walk(a.ModelScanner, f)
 		}
