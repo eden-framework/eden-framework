@@ -1,4 +1,5 @@
 {
+    "name": "eden-map-server",
     "operators": {
         "Authorization": {
             "name": "Authorization",
@@ -22,7 +23,7 @@
             "imports": [
                 [
                     "en",
-                    "eden/eden-map-server/internal/constants/enums"
+                    "profzone/eden-map-server/internal/constants/enums"
                 ]
             ],
             "fields": [

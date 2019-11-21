@@ -5,8 +5,11 @@ import (
 	"github.com/sirupsen/logrus"
 	"go/ast"
 	"golang.org/x/tools/go/packages"
+	"os"
+	"path"
 	"profzone/eden-framework/internal/generator/api"
 	"profzone/eden-framework/internal/generator/scanner"
+	"profzone/eden-framework/internal/project"
 )
 
 type ApiGenerator struct {
@@ -25,9 +28,16 @@ func NewApiGenerator(op *scanner.OperatorScanner, model *scanner.ModelScanner) *
 }
 
 func (a *ApiGenerator) Load(cwd string) {
+	entryPath := path.Join(cwd, "cmd")
+	_, err := os.Stat(entryPath)
+	if err != nil {
+		if !os.IsExist(err) {
+			logrus.Panicf("entry path does not exist: %s", entryPath)
+		}
+	}
 	cfg := &packages.Config{
 		Mode: packages.NeedName | packages.NeedSyntax | packages.NeedDeps | packages.NeedFiles | packages.NeedImports | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedTypesSizes,
-		Dir:  cwd,
+		Dir:  entryPath,
 	}
 
 	pkgs, err := packages.Load(cfg)
@@ -41,6 +51,14 @@ func (a *ApiGenerator) Load(cwd string) {
 	}
 
 	a.pkgs = pkgs
+
+	proj := project.Project{}
+	err = proj.UnmarshalFromFile(cwd, "")
+	if err != nil {
+		logrus.Panic(err)
+	}
+
+	a.Api.ServiceName = proj.Name
 }
 
 func (a *ApiGenerator) Pick() {

@@ -6,11 +6,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 	"profzone/eden-framework/internal/generator/api"
 )
 
 type ClientGenerator struct {
-	Api api.Api
+	Api         api.Api
+	ServiceName string
 }
 
 func (c *ClientGenerator) Load(path string) {
@@ -29,6 +31,10 @@ func (c *ClientGenerator) Load(path string) {
 	}
 	if err != nil {
 		logrus.Panic(err)
+	}
+
+	if c.ServiceName == "" {
+		c.ServiceName = "client-" + c.Api.ServiceName
 	}
 }
 
@@ -61,5 +67,12 @@ func (c *ClientGenerator) Pick() {
 }
 
 func (c *ClientGenerator) Output(outputPath string) Outputs {
-	return Outputs{}
+	outputs := Outputs{}
+	packageName := ToLowerSnakeCase(c.ServiceName)
+
+	outputs.Add(GeneratedSuffix(path.Join(packageName, "client.go")), "package "+packageName)
+	outputs.Add(GeneratedSuffix(path.Join(packageName, "types.go")), "package "+packageName)
+	outputs.Add(GeneratedSuffix(path.Join(packageName, "enums.go")), "package "+packageName)
+
+	return outputs
 }

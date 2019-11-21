@@ -22,7 +22,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var clientCmdApiPath string
+var (
+	clientCmdApiPath, clientCmdPackageName string
+)
 
 // clientCmd represents the client command
 var clientCmd = &cobra.Command{
@@ -30,12 +32,15 @@ var clientCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  fmt.Sprintf("%s\ngenerate client", CommandHelpHeader),
 	Run: func(cmd *cobra.Command, args []string) {
-		gen := &generator.ClientGenerator{}
+		gen := &generator.ClientGenerator{
+			ServiceName: clientCmdPackageName,
+		}
 		generator.Generate(gen, clientCmdApiPath)
 	},
 }
 
 func init() {
 	generateCmd.AddCommand(clientCmd)
+	clientCmd.Flags().StringVarP(&clientCmdPackageName, "package-name", "p", "", "eden generate api --package-name=client_account")
 	clientCmd.Flags().StringVarP(&clientCmdApiPath, "api-path", "f", "", "eden generate api --api-path=/go/src/eden-server/api.json")
 }

@@ -1,8 +1,9 @@
 package api
 
 type Api struct {
-	Operators map[string]*OperatorGroup `json:"operators"`
-	Models    map[string]*OperatorModel `json:"models"`
+	ServiceName string                    `json:"name"`
+	Operators   map[string]*OperatorGroup `json:"operators"`
+	Models      map[string]*OperatorModel `json:"models"`
 }
 
 func NewApi() Api {
