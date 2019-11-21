@@ -10,14 +10,13 @@ import (
 )
 
 type OperatorScanner struct {
-	Api           api.Api
+	Api           *api.Api
 	orphanMethods map[string][]*api.OperatorMethod
 	modelScanner  *ModelScanner
 }
 
 func NewOperatorScanner(modelScanner *ModelScanner) *OperatorScanner {
 	return &OperatorScanner{
-		Api:           api.NewApi(),
 		orphanMethods: make(map[string][]*api.OperatorMethod),
 		modelScanner:  modelScanner,
 	}

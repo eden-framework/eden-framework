@@ -37,11 +37,11 @@ var apiCmd = &cobra.Command{
 		}
 		modelScanner := scanner.NewModelScanner()
 		operatorScanner := scanner.NewOperatorScanner(modelScanner)
-		modelScanner.Api = &operatorScanner.Api
-		gen := &generator.ApiGenerator{
-			OperatorScanner: operatorScanner,
-			ModelScanner:    modelScanner,
-		}
+		gen := generator.NewApiGenerator(operatorScanner, modelScanner)
+
+		modelScanner.Api = &gen.Api
+		operatorScanner.Api = &gen.Api
+
 		generator.Generate(gen, apiCmdCWD)
 	},
 }

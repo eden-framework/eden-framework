@@ -5,13 +5,23 @@ import (
 	"github.com/sirupsen/logrus"
 	"go/ast"
 	"golang.org/x/tools/go/packages"
+	"profzone/eden-framework/internal/generator/api"
 	"profzone/eden-framework/internal/generator/scanner"
 )
 
 type ApiGenerator struct {
+	Api             api.Api
 	OperatorScanner *scanner.OperatorScanner
 	ModelScanner    *scanner.ModelScanner
 	pkgs            []*packages.Package
+}
+
+func NewApiGenerator(op *scanner.OperatorScanner, model *scanner.ModelScanner) *ApiGenerator {
+	return &ApiGenerator{
+		Api:             api.NewApi(),
+		OperatorScanner: op,
+		ModelScanner:    model,
+	}
 }
 
 func (a *ApiGenerator) Load(cwd string) {
@@ -47,7 +57,7 @@ func (a *ApiGenerator) Pick() {
 }
 
 func (a *ApiGenerator) Output(outputPath string) Outputs {
-	data, err := json.MarshalIndent(a.OperatorScanner.Api, "", "    ")
+	data, err := json.MarshalIndent(a.Api, "", "    ")
 	if err != nil {
 		logrus.Panic(err)
 	}
