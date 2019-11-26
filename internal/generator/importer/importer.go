@@ -21,7 +21,7 @@ func NewPackageImporter(packagePath string) *PackageImporter {
 }
 
 func (i *PackageImporter) Import(importPath string, useAlias bool) *Package {
-	importPath = parseVendor(importPath)
+	importPath = ParseVendor(importPath)
 	p, ok := i.pkgs[importPath]
 	if !ok {
 		pkgs, err := packages.Load(nil, importPath)

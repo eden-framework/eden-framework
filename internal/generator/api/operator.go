@@ -24,38 +24,44 @@ func (g *OperatorGroup) AddMethods(methods ...*OperatorMethod) {
 	}
 }
 
+func (g *OperatorGroup) WalkMethods(walker func(m *OperatorMethod)) {
+	for _, method := range g.Methods {
+		walker(method)
+	}
+}
+
 type OperatorMethod struct {
-	Group     *OperatorGroup `json:"-"`
-	Name      string         `json:"name"`
-	inputDef  map[string]bool
-	outputDef map[string]bool
-	Inputs    []string `json:"inputs"`
-	Outputs   []string `json:"outputs"`
+	Group   *OperatorGroup `json:"-"`
+	Name    string         `json:"name"`
+	Inputs  []string       `json:"inputs"`
+	Outputs []string       `json:"outputs"`
 }
 
 func NewOperatorMethod(group *OperatorGroup, name string) *OperatorMethod {
 	return &OperatorMethod{
-		Group:     group,
-		Name:      name,
-		inputDef:  make(map[string]bool),
-		outputDef: make(map[string]bool),
-		Inputs:    make([]string, 0),
-		Outputs:   make([]string, 0),
+		Group:   group,
+		Name:    name,
+		Inputs:  make([]string, 0),
+		Outputs: make([]string, 0),
 	}
 }
 
-func (m *OperatorMethod) AddInputDef(name string) {
-	m.inputDef[name] = true
-}
-
-func (m *OperatorMethod) AddOutputDef(name string) {
-	m.outputDef[name] = true
-}
-
 func (m *OperatorMethod) AddInput(model *OperatorModel) {
-	m.Inputs = append(m.Inputs, model.Name)
+	m.Inputs = append(m.Inputs, model.ID)
 }
 
 func (m *OperatorMethod) AddOutput(model *OperatorModel) {
-	m.Outputs = append(m.Outputs, model.Name)
+	m.Outputs = append(m.Outputs, model.ID)
+}
+
+func (m *OperatorMethod) WalkInputs(walker func(i string)) {
+	for _, input := range m.Inputs {
+		walker(input)
+	}
+}
+
+func (m *OperatorMethod) WalkOutputs(walker func(i string)) {
+	for _, input := range m.Outputs {
+		walker(input)
+	}
 }

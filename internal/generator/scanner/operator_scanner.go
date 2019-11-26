@@ -5,8 +5,10 @@ import (
 	"github.com/henrylee2cn/erpc/v6"
 	"github.com/sirupsen/logrus"
 	"go/ast"
+	"golang.org/x/tools/go/packages"
 	"profzone/eden-framework/internal/generator/api"
 	"reflect"
+	"strings"
 )
 
 type OperatorScanner struct {
@@ -41,97 +43,158 @@ func (v *OperatorScanner) ResolveOrphanMethod(groupName string) error {
 	return nil
 }
 
-func (v *OperatorScanner) Visit(node ast.Node) (w ast.Visitor) {
-	switch node.(type) {
-	case *ast.TypeSpec:
-		typeSpec := node.(*ast.TypeSpec)
-		structType, ok := typeSpec.Type.(*ast.StructType)
+func (v *OperatorScanner) NewInspector(pkg *packages.Package) func(node ast.Node) bool {
+	return func(node ast.Node) bool {
+		file, ok := node.(*ast.File)
 		if !ok {
-			return nil
+			return false
 		}
 
-		for _, filed := range structType.Fields.List {
-			selectorExpr, ok := filed.Type.(*ast.SelectorExpr)
-			if !ok {
-				continue
+		importPath := make(map[string]string)
+		for _, ipt := range file.Imports {
+			var packageName string
+			if ipt.Name == nil {
+				packageName = RetrievePackageName(ipt.Path.Value)
+			} else {
+				packageName = ipt.Name.Name
 			}
-
-			indentPackage, ok := selectorExpr.X.(*ast.Ident)
-			if !ok {
-				continue
-			}
-
-			if indentPackage.Name == "erpc" && selectorExpr.Sel.Name == "CallCtx" {
-				group := v.Api.AddGroup(typeSpec.Name.Name)
-				if err := v.ResolveOrphanMethod(group.Name); err != nil {
-					logrus.Panic(err)
-				}
-			} else if indentPackage.Name == "erpc" && selectorExpr.Sel.Name == "PushCtx" {
-				group := v.Api.AddGroup(typeSpec.Name.Name)
-				group.IsPush = true
-				if err := v.ResolveOrphanMethod(group.Name); err != nil {
-					logrus.Panic(err)
-				}
-			}
-		}
-	case *ast.FuncDecl:
-		funcDecl := node.(*ast.FuncDecl)
-		if funcDecl.Recv == nil {
-			return nil
-		}
-		starExpr, ok := funcDecl.Recv.List[0].Type.(*ast.StarExpr)
-		if !ok {
-			return nil
-		}
-		groupNameIdent, ok := starExpr.X.(*ast.Ident)
-		if !ok {
-			return nil
-		}
-		groupName := groupNameIdent.Name
-		funcName := funcDecl.Name.Name
-		method := api.NewOperatorMethod(nil, funcName)
-		if group := v.Api.GetGroup(groupName); group != nil {
-			method.Group = group
-			group.AddMethod(method)
-		} else {
-			v.AddOrphanMethod(method, groupName)
+			importPath[packageName] = strings.Trim(ipt.Path.Value, "\"")
 		}
 
-		if funcDecl.Type.Params != nil {
-			for _, input := range funcDecl.Type.Params.List {
-				inputExpr, ok := input.Type.(*ast.StarExpr)
-				if !ok {
-					break
-				}
-				inputSelectorExpr, ok := inputExpr.X.(*ast.SelectorExpr)
-				if !ok {
-					break
-				}
-				inputIdent := inputSelectorExpr.Sel.Name
-				v.modelScanner.RegisterInputModelWithReferer(inputIdent, method)
-				method.AddInputDef(inputIdent)
-			}
-		}
+		for _, decl := range file.Decls {
+			switch decl.(type) {
+			case *ast.GenDecl:
+				for _, spec := range decl.(*ast.GenDecl).Specs {
+					if typeSpec, ok := spec.(*ast.TypeSpec); ok {
+						structType, ok := typeSpec.Type.(*ast.StructType)
+						if !ok {
+							return false
+						}
 
-		if funcDecl.Type.Results != nil {
-			for _, output := range funcDecl.Type.Results.List {
-				outputExpr, ok := output.Type.(*ast.StarExpr)
-				if !ok {
-					break
+						for _, filed := range structType.Fields.List {
+							selectorExpr, ok := filed.Type.(*ast.SelectorExpr)
+							if !ok {
+								continue
+							}
+
+							indentPackage, ok := selectorExpr.X.(*ast.Ident)
+							if !ok {
+								continue
+							}
+
+							if indentPackage.Name == "erpc" && selectorExpr.Sel.Name == "CallCtx" {
+								group := v.Api.AddGroup(typeSpec.Name.Name)
+								if err := v.ResolveOrphanMethod(group.Name); err != nil {
+									logrus.Panic(err)
+								}
+							} else if indentPackage.Name == "erpc" && selectorExpr.Sel.Name == "PushCtx" {
+								group := v.Api.AddGroup(typeSpec.Name.Name)
+								group.IsPush = true
+								if err := v.ResolveOrphanMethod(group.Name); err != nil {
+									logrus.Panic(err)
+								}
+							}
+						}
+					}
 				}
-				outputSelectorExpr, ok := outputExpr.X.(*ast.SelectorExpr)
-				if !ok {
-					break
+			case *ast.FuncDecl:
+				funcDecl := decl.(*ast.FuncDecl)
+				if funcDecl.Recv == nil {
+					return false
 				}
-				outputIdent := outputSelectorExpr.Sel.Name
-				if outputIdent == reflect.TypeOf(erpc.Status{}).Name() {
-					// Status
+				starExpr, ok := funcDecl.Recv.List[0].Type.(*ast.StarExpr)
+				if !ok {
+					return false
+				}
+				groupNameIdent, ok := starExpr.X.(*ast.Ident)
+				if !ok {
+					return false
+				}
+				groupName := groupNameIdent.Name
+				funcName := funcDecl.Name.Name
+				method := api.NewOperatorMethod(nil, funcName)
+				if group := v.Api.GetGroup(groupName); group != nil {
+					method.Group = group
+					group.AddMethod(method)
 				} else {
-					v.modelScanner.RegisterOutputModelWithReferer(outputIdent, method)
-					method.AddOutputDef(outputIdent)
+					v.AddOrphanMethod(method, groupName)
+				}
+
+				if funcDecl.Type.Params != nil {
+					for _, input := range funcDecl.Type.Params.List {
+						var model *api.OperatorModel
+						inputExpr, ok := input.Type.(*ast.StarExpr)
+						if !ok {
+							break
+						}
+						switch inputExpr.X.(type) {
+						case *ast.SelectorExpr:
+							inputSelectorExpr, ok := inputExpr.X.(*ast.SelectorExpr)
+							if !ok {
+								break
+							}
+							inputAlias, ok := inputSelectorExpr.X.(*ast.Ident)
+							if !ok {
+								break
+							}
+							pkgID, ok := importPath[inputAlias.Name]
+							if !ok {
+								break
+							}
+							inputIdent := inputSelectorExpr.Sel.Name
+							model = v.modelScanner.GetModel(inputIdent, pkgID)
+						case *ast.Ident:
+							inputIdent := inputExpr.X.(*ast.Ident).Name
+							model = v.modelScanner.GetModel(inputIdent, pkg.ID)
+						}
+						if model != nil {
+							method.AddInput(model)
+						}
+					}
+				}
+
+				if funcDecl.Type.Results != nil {
+					for _, output := range funcDecl.Type.Results.List {
+						var model *api.OperatorModel
+						var outputIdent string
+						outputExpr, ok := output.Type.(*ast.StarExpr)
+						if !ok {
+							break
+						}
+
+						switch outputExpr.X.(type) {
+						case *ast.SelectorExpr:
+							outputSelectorExpr, ok := outputExpr.X.(*ast.SelectorExpr)
+							if !ok {
+								break
+							}
+							outputAlias, ok := outputSelectorExpr.X.(*ast.Ident)
+							if !ok {
+								break
+							}
+							pkgID, ok := importPath[outputAlias.Name]
+							if !ok {
+								break
+							}
+							outputIdent = outputSelectorExpr.Sel.Name
+							model = v.modelScanner.GetModel(outputIdent, pkgID)
+						case *ast.Ident:
+							outputIdent = outputExpr.X.(*ast.Ident).Name
+							model = v.modelScanner.GetModel(outputIdent, pkg.ID)
+						}
+
+						if outputIdent != reflect.TypeOf(erpc.Status{}).Name() {
+							if model != nil {
+								method.AddOutput(model)
+							}
+						} else {
+							// Status
+						}
+					}
 				}
 			}
 		}
+
+		return true
 	}
-	return v
 }

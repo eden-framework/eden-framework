@@ -64,13 +64,30 @@ func (a *ApiGenerator) Load(cwd string) {
 func (a *ApiGenerator) Pick() {
 	packages.Visit(a.pkgs, nil, func(i *packages.Package) {
 		for _, f := range i.Syntax {
-			ast.Walk(a.OperatorScanner, f)
+			ast.Inspect(f, a.ModelScanner.NewInspector(i))
 		}
 	})
 	packages.Visit(a.pkgs, nil, func(i *packages.Package) {
 		for _, f := range i.Syntax {
-			ast.Walk(a.ModelScanner, f)
+			ast.Inspect(f, a.OperatorScanner.NewInspector(i))
 		}
+	})
+
+	a.Api.WalkOperators(func(g *api.OperatorGroup) {
+		g.WalkMethods(func(m *api.OperatorMethod) {
+			m.WalkInputs(func(i string) {
+				model := a.ModelScanner.GetModelByID(i)
+				if model != nil {
+					a.RecursiveAddModel(model)
+				}
+			})
+			m.WalkOutputs(func(i string) {
+				model := a.ModelScanner.GetModelByID(i)
+				if model != nil {
+					a.RecursiveAddModel(model)
+				}
+			})
+		})
 	})
 }
 
@@ -82,4 +99,18 @@ func (a *ApiGenerator) Output(outputPath string) Outputs {
 	return Outputs{
 		"api.json": string(data),
 	}
+}
+
+func (a *ApiGenerator) RecursiveAddModel(model *api.OperatorModel) {
+	a.Api.AddModel(model)
+	model.WalkFields(func(f api.OperatorField) {
+		importPath := f.Imports
+		if importPath == "" {
+			importPath = model.Package
+		}
+		subModel := a.ModelScanner.GetModel(f.Type, importPath)
+		if subModel != nil {
+			a.RecursiveAddModel(subModel)
+		}
+	})
 }

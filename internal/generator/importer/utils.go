@@ -12,7 +12,7 @@ func getPackagePathAndDecl(path string) (importPath, decl string) {
 	return path, ""
 }
 
-func parseVendor(path string) string {
+func ParseVendor(path string) string {
 	paths := strings.Split(path, "/vendor/")
 	return paths[len(paths)-1]
 }

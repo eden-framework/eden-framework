@@ -1,31 +1,42 @@
 package api
 
+import "strings"
+
 type OperatorModel struct {
-	Name    string          `json:"name"`
-	Imports [][]string      `json:"imports"`
-	Fields  []OperatorField `json:"fields"`
+	ID        string          `json:"id"`
+	Name      string          `json:"name"`
+	Package   string          `json:"package"`
+	Fields    []OperatorField `json:"fields,omitempty"`
+	NeedAlias bool            `json:"needAlias"`
 }
 
-func NewOperatorModel(name string) OperatorModel {
+func NewOperatorModel(name string, pkgID string) OperatorModel {
 	return OperatorModel{
+		ID:      strings.Join([]string{pkgID, name}, "."),
 		Name:    name,
-		Imports: make([][]string, 0),
+		Package: pkgID,
 		Fields:  make([]OperatorField, 0),
 	}
 }
 
-func (m *OperatorModel) AddField(key, keyType string) {
+func (m *OperatorModel) AddField(key, keyType, alias, ipt string) {
 	m.Fields = append(m.Fields, OperatorField{
-		Key:  key,
-		Type: keyType,
+		Key:     key,
+		Type:    keyType,
+		Alias:   alias,
+		Imports: ipt,
 	})
 }
 
-func (m *OperatorModel) AddImport(path, alias string) {
-	m.Imports = append(m.Imports, []string{alias, path})
+func (m *OperatorModel) WalkFields(walker func(f OperatorField)) {
+	for _, field := range m.Fields {
+		walker(field)
+	}
 }
 
 type OperatorField struct {
-	Key  string `json:"key"`
-	Type string `json:"type"`
+	Key     string `json:"key"`
+	Type    string `json:"type"`
+	Alias   string `json:"alias"`
+	Imports string `json:"imports"`
 }

@@ -26,26 +26,14 @@ func (a *Api) GetGroup(name string) *OperatorGroup {
 	return a.Operators[name]
 }
 
-func (a *Api) AddModel(name string) *OperatorModel {
-	if _, ok := a.Models[name]; !ok {
-		model := NewOperatorModel(name)
-		a.Models[model.Name] = &model
+func (a *Api) WalkOperators(walker func(g *OperatorGroup)) {
+	for _, group := range a.Operators {
+		walker(group)
 	}
-
-	return a.Models[name]
 }
 
-func (a *Api) ExistModelDef(name string) bool {
-	for _, group := range a.Operators {
-		for _, method := range group.Methods {
-			if _, ok := method.inputDef[name]; ok {
-				return true
-			}
-			if _, ok := method.outputDef[name]; ok {
-				return true
-			}
-		}
+func (a *Api) AddModel(model *OperatorModel) {
+	if _, ok := a.Models[model.ID]; !ok {
+		a.Models[model.ID] = model
 	}
-
-	return false
 }

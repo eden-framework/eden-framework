@@ -1,120 +1,131 @@
 package scanner
 
 import (
+	"fmt"
 	"go/ast"
+	"golang.org/x/tools/go/packages"
 	"profzone/eden-framework/internal/generator/api"
 	"strings"
 )
 
 type ModelScanner struct {
-	Api                *api.Api
-	inputModelReferer  map[string][]*api.OperatorMethod
-	outputModelReferer map[string][]*api.OperatorMethod
+	Api    *api.Api
+	models map[string]*api.OperatorModel
 }
 
 func NewModelScanner() *ModelScanner {
 	return &ModelScanner{
-		inputModelReferer:  make(map[string][]*api.OperatorMethod),
-		outputModelReferer: make(map[string][]*api.OperatorMethod),
+		models: make(map[string]*api.OperatorModel),
 	}
 }
 
-func (m *ModelScanner) RegisterInputModelWithReferer(name string, method *api.OperatorMethod) {
-	if _, ok := m.inputModelReferer[name]; !ok {
-		m.inputModelReferer[name] = make([]*api.OperatorMethod, 0)
+func (m *ModelScanner) NewModel(name string, pkgID string) *api.OperatorModel {
+	id := strings.Join([]string{pkgID, name}, ".")
+	if id == "time.Time" {
+		fmt.Println()
 	}
-	m.inputModelReferer[name] = append(m.inputModelReferer[name], method)
+	if _, ok := m.models[id]; !ok {
+		model := api.NewOperatorModel(name, pkgID)
+		m.models[id] = &model
+	}
+
+	return m.models[id]
 }
 
-func (m *ModelScanner) RegisterOutputModelWithReferer(name string, method *api.OperatorMethod) {
-	if _, ok := m.outputModelReferer[name]; !ok {
-		m.outputModelReferer[name] = make([]*api.OperatorMethod, 0)
+func (m *ModelScanner) RegisterModel(model *api.OperatorModel) {
+	if _, ok := m.models[model.ID]; !ok {
+		m.models[model.ID] = model
 	}
-	m.outputModelReferer[name] = append(m.outputModelReferer[name], method)
 }
 
-func (m *ModelScanner) Visit(node ast.Node) ast.Visitor {
-	file, ok := node.(*ast.File)
-	if !ok {
+func (m *ModelScanner) GetModel(name string, pkgID string) *api.OperatorModel {
+	id := strings.Join([]string{pkgID, name}, ".")
+	if _, ok := m.models[id]; !ok {
 		return nil
 	}
 
-	importPath := make(map[string]string)
-	for _, ipt := range file.Imports {
-		var packageName string
-		if ipt.Name == nil {
-			packageName = RetrievePackageName(ipt.Path.Value)
-		} else {
-			packageName = ipt.Name.Name
-		}
-		importPath[packageName] = strings.Trim(ipt.Path.Value, "\"")
+	return m.models[id]
+}
+
+func (m *ModelScanner) GetModelByID(id string) *api.OperatorModel {
+	if _, ok := m.models[id]; !ok {
+		return nil
 	}
 
-	for _, decl := range file.Decls {
-		genDecl, ok := decl.(*ast.GenDecl)
+	return m.models[id]
+}
+
+func (m *ModelScanner) NewInspector(pkg *packages.Package) func(node ast.Node) bool {
+	return func(node ast.Node) bool {
+		file, ok := node.(*ast.File)
 		if !ok {
-			continue
+			return false
 		}
-		for _, spec := range genDecl.Specs {
-			if typeSpec, ok := spec.(*ast.TypeSpec); ok {
-				var isInput bool
-				var operatorList []*api.OperatorMethod
-				if ops, ok := m.inputModelReferer[typeSpec.Name.Name]; ok {
-					operatorList = ops
-					isInput = true
-				} else if ops, ok := m.outputModelReferer[typeSpec.Name.Name]; ok {
-					operatorList = ops
-					isInput = false
-				} else {
-					continue
-				}
 
-				if !m.Api.ExistModelDef(typeSpec.Name.Name) {
-					continue
-				}
+		importPath := make(map[string]string)
+		for _, ipt := range file.Imports {
+			var packageName string
+			if ipt.Name == nil {
+				packageName = RetrievePackageName(ipt.Path.Value)
+			} else {
+				packageName = ipt.Name.Name
+			}
+			importPath[packageName] = strings.Trim(ipt.Path.Value, "\"")
+		}
 
-				model := m.Api.AddModel(typeSpec.Name.Name)
-				structType, ok := typeSpec.Type.(*ast.StructType)
-				if !ok {
-					continue
-				}
-				for _, field := range structType.Fields.List {
-					var key, keyType string
-					if field.Names != nil {
-						key = field.Names[0].Name
+		for _, decl := range file.Decls {
+			genDecl, ok := decl.(*ast.GenDecl)
+			if !ok {
+				continue
+			}
+			for _, spec := range genDecl.Specs {
+				if typeSpec, ok := spec.(*ast.TypeSpec); ok {
+					model := m.ResolveStdType(typeSpec.Name.Name, pkg.ID)
+					if model != nil {
+						m.RegisterModel(model)
+						continue
 					}
-					switch field.Type.(type) {
-					case *ast.Ident:
-						keyType = field.Type.(*ast.Ident).Name
-					case *ast.SelectorExpr:
-						selectorExpr := field.Type.(*ast.SelectorExpr)
-						switch selectorExpr.X.(type) {
+					model = m.NewModel(typeSpec.Name.Name, pkg.ID)
+					structType, ok := typeSpec.Type.(*ast.StructType)
+					if !ok {
+						continue
+					}
+					for _, field := range structType.Fields.List {
+						var key, keyType, alias, path string
+						if field.Names != nil {
+							key = field.Names[0].Name
+						}
+						switch field.Type.(type) {
 						case *ast.Ident:
-							keyType = selectorExpr.X.(*ast.Ident).Name
-							if path, ok := importPath[keyType]; ok {
-								model.AddImport(path, keyType)
+							keyType = field.Type.(*ast.Ident).Name
+						case *ast.SelectorExpr:
+							selectorExpr := field.Type.(*ast.SelectorExpr)
+							switch selectorExpr.X.(type) {
+							case *ast.Ident:
+								keyType = selectorExpr.X.(*ast.Ident).Name
+								if _, ok := importPath[keyType]; ok {
+									path = importPath[keyType]
+									alias = keyType
+								}
 							}
-						}
-						if keyType == "" {
 							keyType = selectorExpr.Sel.Name
-						} else {
-							keyType = strings.Join([]string{keyType, selectorExpr.Sel.Name}, ".")
 						}
-					}
 
-					model.AddField(key, keyType)
-				}
-
-				for _, op := range operatorList {
-					if isInput {
-						op.AddInput(model)
-					} else {
-						op.AddOutput(model)
+						model.AddField(key, keyType, alias, path)
 					}
 				}
 			}
 		}
+
+		return true
+	}
+}
+
+func (m *ModelScanner) ResolveStdType(typeName, pkgPath string) *api.OperatorModel {
+	if typeName == "Time" && pkgPath == "time" {
+		model := api.NewTimeModel()
+		return &model
 	}
 
-	return m
+	return nil
 }
