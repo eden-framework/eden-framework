@@ -42,14 +42,33 @@ func (c *ClientFile) WriteTypeInterface(w io.Writer) (err error) {
 	for groupName, group := range c.a.Operators {
 		for methodName, method := range group.Methods {
 			req, resp := make([]string, 0), make([]string, 0)
-			for i, modelName := range method.Inputs {
-				req = append(req, fmt.Sprintf("req%d *%s", i+1, modelName))
+			var typeName string
+			for _, modelName := range method.Inputs {
+				model, ok := c.a.Models[modelName]
+				if !ok {
+					logrus.Panic(fmt.Errorf("%s not exist in model definations", modelName))
+				}
+				if model.NeedAlias {
+					typeName = c.Importer.Use(modelName)
+				} else {
+					typeName = model.Name
+				}
+				req = append(req, fmt.Sprintf("%s *%s", str.ToLowerCamelCase(model.Name), typeName))
 			}
-			for i, modelName := range method.Outputs {
-				resp = append(resp, fmt.Sprintf("resp%d *%s", i+1, modelName))
+			for _, modelName := range method.Outputs {
+				model, ok := c.a.Models[modelName]
+				if !ok {
+					logrus.Panic(fmt.Errorf("%s not exist in model definations", modelName))
+				}
+				if model.NeedAlias {
+					typeName = c.Importer.Use(modelName)
+				} else {
+					typeName = model.Name
+				}
+				resp = append(resp, fmt.Sprintf("%s *%s", str.ToLowerCamelCase(model.Name), typeName))
 			}
-
-			methodString := fmt.Sprintf("%s(%s) (%s, err error)\n", str.ToUpperCamelCase(groupName+methodName), strings.Join(req, ", "), strings.Join(resp, ", "))
+			resp = append(resp, "err error")
+			methodString := fmt.Sprintf("%s(%s) (%s)\n", str.ToUpperCamelCase(groupName+methodName), strings.Join(req, ", "), strings.Join(resp, ", "))
 			_, err = io.WriteString(w, methodString)
 			if err != nil {
 				return err
