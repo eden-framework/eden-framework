@@ -1,9 +1,11 @@
 package importer
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/tools/go/packages"
+	"io"
 	str "profzone/eden-framework/pkg/strings"
 	"strings"
 )
@@ -53,4 +55,22 @@ func (i *PackageImporter) Use(importPath string, subs ...string) string {
 	}
 
 	return p.GetSelector()
+}
+
+func (i *PackageImporter) WriteToImports(w io.Writer) {
+	if len(i.pkgs) > 0 {
+		for _, importPkg := range i.pkgs {
+			io.WriteString(w, importPkg.String()+"\n")
+		}
+	}
+}
+
+func (i *PackageImporter) String() string {
+	buf := &bytes.Buffer{}
+	if len(i.pkgs) > 0 {
+		buf.WriteString("import (\n")
+		i.WriteToImports(buf)
+		buf.WriteString(")\n\n")
+	}
+	return buf.String()
 }

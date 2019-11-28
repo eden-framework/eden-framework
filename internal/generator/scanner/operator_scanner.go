@@ -7,6 +7,7 @@ import (
 	"go/ast"
 	"golang.org/x/tools/go/packages"
 	"profzone/eden-framework/internal/generator/api"
+	str "profzone/eden-framework/pkg/strings"
 	"reflect"
 	"strings"
 )
@@ -112,7 +113,7 @@ func (v *OperatorScanner) NewInspector(pkg *packages.Package) func(node ast.Node
 				}
 				groupName := groupNameIdent.Name
 				funcName := funcDecl.Name.Name
-				method := api.NewOperatorMethod(nil, funcName)
+				method := api.NewOperatorMethod(nil, funcName, str.ToLowerSlashCase(funcName))
 				if group := v.Api.GetGroup(groupName); group != nil {
 					method.Group = group
 					group.AddMethod(method)

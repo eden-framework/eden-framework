@@ -1,5 +1,7 @@
 package api
 
+import "profzone/eden-framework/pkg/strings"
+
 type Api struct {
 	ServiceName string                    `json:"name"`
 	Operators   map[string]*OperatorGroup `json:"operators"`
@@ -15,7 +17,7 @@ func NewApi() Api {
 
 func (a *Api) AddGroup(name string) *OperatorGroup {
 	if _, ok := a.Operators[name]; !ok {
-		group := NewOperatorGroup(name)
+		group := NewOperatorGroup(name, strings.ToLowerSlashCase(name))
 		a.Operators[group.Name] = group
 	}
 

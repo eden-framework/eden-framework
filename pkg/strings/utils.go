@@ -1,6 +1,7 @@
 package strings
 
 import (
+	"github.com/sirupsen/logrus"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -158,4 +159,24 @@ func ToLowerSnakeCase(s string) string {
 
 func ToLowerLinkCase(s string) string {
 	return strings.Replace(ToLowerSnakeCase(s), "_", "-", -1)
+}
+
+func ToLowerSlashCase(s string) string {
+	return Rewords(s, func(result string, word string, index int) string {
+		return result + "/" + strings.ToLower(word)
+	})
+}
+
+func RecursiveJoin(strs [][]string, seps ...string) string {
+	if len(seps) == 0 {
+		logrus.Panic("seps need at least 1 elements, current is 0")
+	}
+	if len(seps) == 1 {
+		seps = append(seps, seps[0])
+	}
+	level := make([]string, 0)
+	for _, s1 := range strs {
+		level = append(level, strings.Join(s1, seps[0]))
+	}
+	return strings.Join(level, seps[1])
 }

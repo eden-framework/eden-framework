@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"go/ast"
-	"go/build"
 	"go/format"
 	"go/parser"
 	"go/token"
+	"golang.org/x/tools/go/packages"
 	"os"
 	"runtime"
 	"strconv"
@@ -61,18 +61,18 @@ func Process(filename string, src []byte) ([]byte, error) {
 			for _, spec := range genDecl.Specs {
 				importSpec := spec.(*ast.ImportSpec)
 				importPath, _ := strconv.Unquote(importSpec.Path.Value)
-				pkg, err := build.Import(importPath, "", build.ImportComment)
+				pkgs, err := packages.Load(nil, importPath)
 				if err != nil {
 					panic(fmt.Errorf("errors %s in %s", err.Error(), filename))
 				}
-				if strings.Contains(pkg.Dir, runtime.GOROOT()) {
+				if strings.Contains(pkgs[0].GoFiles[0], runtime.GOROOT()) {
 					// libexec
 					importGroups[0] = append(importGroups[0], getAstString(fileSet, importSpec))
 				} else {
-					if strings.HasPrefix(pkg.Dir, cwd) {
+					if strings.HasPrefix(pkgs[0].GoFiles[0], cwd) {
 						importGroups[3] = append(importGroups[3], getAstString(fileSet, importSpec))
 					} else {
-						if strings.HasPrefix(pkg.ImportPath, "golib") || strings.HasPrefix(pkg.ImportPath, "g7pay") {
+						if strings.HasPrefix(pkgs[0].PkgPath, "profzone") {
 							importGroups[2] = append(importGroups[2], getAstString(fileSet, importSpec))
 						} else {
 							importGroups[1] = append(importGroups[1], getAstString(fileSet, importSpec))
