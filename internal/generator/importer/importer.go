@@ -43,7 +43,7 @@ func (i *PackageImporter) Import(importPath string, useAlias bool) *Package {
 }
 
 func (i *PackageImporter) Use(importPath string, subs ...string) string {
-	importPath, decl := getPackagePathAndDecl(strings.Join(append([]string{importPath}, subs...), "/"))
+	importPath, decl := GetPackagePathAndDecl(strings.Join(append([]string{importPath}, subs...), "/"))
 	p := i.Import(importPath, true)
 
 	if decl != "" {

@@ -17,7 +17,7 @@ func NewApi() Api {
 
 func (a *Api) AddGroup(name string) *OperatorGroup {
 	if _, ok := a.Operators[name]; !ok {
-		group := NewOperatorGroup(name, strings.ToLowerSlashCase(name))
+		group := NewOperatorGroup(name, str.ToLowerSlashCase(name))
 		a.Operators[group.Name] = group
 	}
 

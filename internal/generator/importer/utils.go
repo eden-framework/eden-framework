@@ -2,7 +2,7 @@ package importer
 
 import "strings"
 
-func getPackagePathAndDecl(path string) (importPath, decl string) {
+func GetPackagePathAndDecl(path string) (importPath, decl string) {
 	slash := strings.LastIndex(path, "/")
 	dot := strings.LastIndex(path, ".")
 	if dot > slash {

@@ -1,4 +1,4 @@
-package strings
+package str
 
 import (
 	"github.com/sirupsen/logrus"

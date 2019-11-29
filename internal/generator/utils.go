@@ -3,21 +3,12 @@ package generator
 import (
 	"fmt"
 	"github.com/fatih/color"
-	"go/build"
 	"log"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 )
-
-func GetPackageImportPath(dir string) string {
-	pkg, err := build.ImportDir(dir, build.FindOnly)
-	if err != nil {
-		panic(err)
-	}
-	return pkg.ImportPath
-}
 
 func IsGoFile(filename string) bool {
 	return filepath.Ext(filename) == ".go"
