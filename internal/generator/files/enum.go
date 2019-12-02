@@ -103,6 +103,160 @@ func (e *Enum) WriteParseFromStringFunc(w io.Writer) (err error) {
 	return
 }
 
+func (e *Enum) WriteParseFromLabelStringFunc(w io.Writer) (err error) {
+	funcStr := fmt.Sprintf(`func Parse%sFromLabelString(s string) (%s, error) {
+	switch s {
+	case %s:
+		return %s, nil
+`, e.Name, e.Name, strconv.Quote(""), e.ConstUnknown())
+
+	for _, option := range e.Options {
+		funcStr += fmt.Sprintf(`case %s:
+		return %s, nil
+`, fmt.Sprintf(`"%v"`, option.Label), e.ConstKey(option.Value))
+	}
+
+	funcStr += fmt.Sprintf(`}
+	return %s, %s
+}
+
+`, e.ConstUnknown(), e.InvalidErrorString())
+	_, err = io.WriteString(w, funcStr)
+	return
+}
+
+func (e *Enum) WriteEnumDescriptor(w io.Writer) (err error) {
+	contentStr := fmt.Sprintf(`func (%s) EnumType() string {
+	return %s
+}
+
+`, e.Name, strconv.Quote(e.Name))
+
+	contentStr += fmt.Sprintf(`func (%s) Enums() map[int][]string {
+	return map[int][]string{
+`, e.Name)
+
+	for _, option := range e.Options {
+		contentStr += fmt.Sprintf("int(%s): {%s, %s},\n", e.ConstKey(option.Value), strconv.Quote(fmt.Sprintf("%s", option.Value)), strconv.Quote(option.Label))
+	}
+
+	contentStr += "}\n}\n\n"
+
+	_, err = io.WriteString(w, contentStr)
+	return
+}
+
+func (e *Enum) WriteStringer(w io.Writer) (err error) {
+	contentStr := fmt.Sprintf(`func (v %s) String() string {
+	switch v {
+	case %s:
+		return ""
+`, e.Name, e.ConstUnknown())
+
+	for _, option := range e.Options {
+		contentStr += fmt.Sprintf(`case %s:
+	return %s
+`, e.ConstKey(option.Value), fmt.Sprintf(`"%v"`, option.Value))
+	}
+
+	contentStr += `}
+	return "UNKNOWN"
+}
+
+`
+
+	_, err = io.WriteString(w, contentStr)
+	return
+}
+
+func (e *Enum) WriteLabeler(w io.Writer) (err error) {
+	contentStr := fmt.Sprintf(`func (v %s) Label() string {
+	switch v {
+	case %s:
+		return ""
+`, e.Name, e.ConstUnknown())
+
+	for _, option := range e.Options {
+		contentStr += fmt.Sprintf(`case %s:
+	return %s
+`, e.ConstKey(option.Value), strconv.Quote(option.Label))
+	}
+
+	contentStr += `}
+	return "UNKNOWN"
+}
+
+`
+
+	_, err = io.WriteString(w, contentStr)
+	return
+}
+
+func (e *Enum) WriteTextMarshalerAndUnmarshaler(w io.Writer) (err error) {
+	contentStr := fmt.Sprintf(`var _ interface {
+	%s
+	%s
+} = (*%s)(nil)
+
+func (v %s) MarshalText() ([]byte, error) {
+	str := v.String()
+	if str == "UNKNOWN" {
+		return nil, %s
+	}
+	return []byte(str), nil
+}
+
+func (v *%s) UnmarshalText(data []byte) (err error) {
+	*v, err = Parse%sFromString(string(%s(data)))
+	return
+}
+
+`,
+		e.Importer.Use("encoding.TextMarshaler"),
+		e.Importer.Use("encoding.TextUnmarshaler"),
+		e.Name, e.Name, e.InvalidErrorString(), e.Name, e.Name,
+		e.Importer.Use("bytes.ToUpper"))
+
+	_, err = io.WriteString(w, contentStr)
+	return
+}
+
+func (e *Enum) WriteScannerAndValuer(w io.Writer) (err error) {
+	if !e.HasOffset {
+		return
+	}
+
+	contentStr := fmt.Sprintf(`var _ interface {
+	%s
+	%s
+} = (*%s)(nil)
+
+func (v *%s) Scan(src interface{}) error {
+	integer, err := %s(src, %s)
+	if err != nil {
+		return err
+	}
+	*v = %s(integer - %s)
+	return nil
+}
+
+func (v %s) Value() (%s, error) {
+	return int64(v) + %s, nil
+}
+
+`,
+		e.Importer.Use("database/sql.Scanner"),
+		e.Importer.Use("database/sql/driver.Valuer"),
+		e.Name, e.Name,
+		e.Importer.Use("github.com/profzone/eden-framework/pkg/enumeration.AsInt64"),
+		e.ConstOffset(), e.Name, e.ConstOffset(), e.Name,
+		e.Importer.Use("database/sql/driver.Value"),
+		e.ConstOffset())
+
+	_, err = io.WriteString(w, contentStr)
+	return
+}
+
 func (e *Enum) WriteAll() string {
 	w := bytes.NewBuffer([]byte{})
 
@@ -115,6 +269,30 @@ func (e *Enum) WriteAll() string {
 		logrus.Panic(err)
 	}
 	err = e.WriteParseFromStringFunc(w)
+	if err != nil {
+		logrus.Panic(err)
+	}
+	err = e.WriteParseFromLabelStringFunc(w)
+	if err != nil {
+		logrus.Panic(err)
+	}
+	err = e.WriteEnumDescriptor(w)
+	if err != nil {
+		logrus.Panic(err)
+	}
+	err = e.WriteStringer(w)
+	if err != nil {
+		logrus.Panic(err)
+	}
+	err = e.WriteLabeler(w)
+	if err != nil {
+		logrus.Panic(err)
+	}
+	err = e.WriteTextMarshalerAndUnmarshaler(w)
+	if err != nil {
+		logrus.Panic(err)
+	}
+	err = e.WriteScannerAndValuer(w)
 	if err != nil {
 		logrus.Panic(err)
 	}

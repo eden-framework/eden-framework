@@ -29,7 +29,9 @@ func (s *EnumScanner) HasOffset(typeFullName string) bool {
 	if typeName == "" {
 		logrus.Panic("typeFullName must have path and typeName")
 	}
-	pkgs, err := packages.Load(nil, pkgPath)
+	pkgs, err := packages.Load(&packages.Config{
+		Mode: packages.NeedSyntax,
+	}, pkgPath)
 	if err != nil {
 		logrus.Panic(err)
 	}
