@@ -1,4 +1,4 @@
-module profzone/eden-framework
+module github.com/profzone/eden-framework
 
 go 1.13
 
