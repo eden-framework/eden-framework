@@ -17,9 +17,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/profzone/eden-framework/internal/generator"
+	"github.com/profzone/eden-framework/internal/generator/scanner"
 	"os"
-	"profzone/eden-framework/internal/generator"
-	"profzone/eden-framework/internal/generator/scanner"
 
 	"github.com/spf13/cobra"
 )

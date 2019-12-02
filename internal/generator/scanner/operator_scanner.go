@@ -3,11 +3,11 @@ package scanner
 import (
 	"fmt"
 	"github.com/henrylee2cn/erpc/v6"
+	"github.com/profzone/eden-framework/internal/generator/api"
+	str "github.com/profzone/eden-framework/pkg/strings"
 	"github.com/sirupsen/logrus"
 	"go/ast"
 	"golang.org/x/tools/go/packages"
-	"profzone/eden-framework/internal/generator/api"
-	str "profzone/eden-framework/pkg/strings"
 	"reflect"
 	"strings"
 )

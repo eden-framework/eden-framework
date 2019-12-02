@@ -1,6 +1,10 @@
 package generator
 
 import (
+	"github.com/profzone/eden-framework/internal/generator/files"
+	"github.com/profzone/eden-framework/internal/generator/importer"
+	"github.com/profzone/eden-framework/internal/generator/scanner"
+	str "github.com/profzone/eden-framework/pkg/strings"
 	"github.com/sirupsen/logrus"
 	"go/ast"
 	"go/build"
@@ -8,10 +12,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"profzone/eden-framework/internal/generator/files"
-	"profzone/eden-framework/internal/generator/importer"
-	"profzone/eden-framework/internal/generator/scanner"
-	str "profzone/eden-framework/pkg/strings"
 	"strings"
 )
 

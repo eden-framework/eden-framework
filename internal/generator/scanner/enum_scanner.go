@@ -1,14 +1,14 @@
 package scanner
 
 import (
+	"github.com/profzone/eden-framework/internal/generator/importer"
+	"github.com/profzone/eden-framework/pkg/enumeration"
+	str "github.com/profzone/eden-framework/pkg/strings"
 	"github.com/sirupsen/logrus"
 	"go/ast"
 	"go/constant"
 	"go/types"
 	"golang.org/x/tools/go/packages"
-	"profzone/eden-framework/internal/generator/importer"
-	"profzone/eden-framework/pkg/enumeration"
-	str "profzone/eden-framework/pkg/strings"
 	"sort"
 	"strconv"
 	"strings"

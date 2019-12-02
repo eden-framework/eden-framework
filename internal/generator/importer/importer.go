@@ -3,10 +3,10 @@ package importer
 import (
 	"bytes"
 	"fmt"
+	str "github.com/profzone/eden-framework/pkg/strings"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/tools/go/packages"
 	"io"
-	str "profzone/eden-framework/pkg/strings"
 	"strings"
 )
 

@@ -3,11 +3,11 @@ package files
 import (
 	"bytes"
 	"fmt"
+	"github.com/profzone/eden-framework/internal/generator/api"
+	"github.com/profzone/eden-framework/internal/generator/importer"
+	str "github.com/profzone/eden-framework/pkg/strings"
 	"github.com/sirupsen/logrus"
 	"io"
-	"profzone/eden-framework/internal/generator/api"
-	"profzone/eden-framework/internal/generator/importer"
-	str "profzone/eden-framework/pkg/strings"
 	"strings"
 )
 

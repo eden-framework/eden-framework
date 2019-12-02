@@ -2,13 +2,13 @@ package generator
 
 import (
 	"encoding/json"
+	"github.com/profzone/eden-framework/internal/generator/api"
+	"github.com/profzone/eden-framework/internal/generator/files"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"path"
-	"profzone/eden-framework/internal/generator/api"
-	"profzone/eden-framework/internal/generator/files"
 )
 
 type ClientGenerator struct {

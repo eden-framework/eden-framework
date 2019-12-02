@@ -2,14 +2,14 @@ package generator
 
 import (
 	"encoding/json"
+	"github.com/profzone/eden-framework/internal/generator/api"
+	"github.com/profzone/eden-framework/internal/generator/scanner"
+	"github.com/profzone/eden-framework/internal/project"
 	"github.com/sirupsen/logrus"
 	"go/ast"
 	"golang.org/x/tools/go/packages"
 	"os"
 	"path"
-	"profzone/eden-framework/internal/generator/api"
-	"profzone/eden-framework/internal/generator/scanner"
-	"profzone/eden-framework/internal/project"
 )
 
 type ApiGenerator struct {

@@ -17,8 +17,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/profzone/eden-framework/internal/generator"
 	"github.com/spf13/cobra"
-	"profzone/eden-framework/internal/generator"
 )
 
 var (

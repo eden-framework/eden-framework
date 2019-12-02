@@ -2,9 +2,9 @@ package scanner
 
 import (
 	"fmt"
+	"github.com/profzone/eden-framework/internal/generator/api"
 	"go/ast"
 	"golang.org/x/tools/go/packages"
-	"profzone/eden-framework/internal/generator/api"
 	"strings"
 )
 
