@@ -16,3 +16,9 @@ func ParseVendor(path string) string {
 	paths := strings.Split(path, "/vendor/")
 	return paths[len(paths)-1]
 }
+
+func RetrievePackageName(path string) string {
+	path = strings.Trim(path, "\"")
+	paths := strings.Split(path, "/")
+	return strings.Replace(paths[len(paths)-1], "-", "_", -1)
+}

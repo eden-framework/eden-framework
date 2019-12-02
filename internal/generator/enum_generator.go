@@ -3,9 +3,15 @@ package generator
 import (
 	"github.com/sirupsen/logrus"
 	"go/ast"
+	"go/build"
 	"golang.org/x/tools/go/packages"
 	"os"
+	"path"
+	"path/filepath"
+	"profzone/eden-framework/internal/generator/files"
+	"profzone/eden-framework/internal/generator/importer"
 	"profzone/eden-framework/internal/generator/scanner"
+	str "profzone/eden-framework/pkg/strings"
 	"strings"
 )
 
@@ -76,11 +82,15 @@ func (e *EnumGenerator) Pick() {
 }
 
 func (e *EnumGenerator) Output(outputPath string) Outputs {
-	//outputs := Outputs{}
-	//for typeFullName, enum := range e.EnumScanner.Enums {
-	//	pkgPath, typeName := importer.GetPackagePathAndDecl(typeFullName)
-	//	p, _ := build.Import(pkgPath, "", build.FindOnly)
-	//	dir, _ := filepath.Rel(outputPath, p.Dir)
-	//}
-	return Outputs{}
+	outputs := Outputs{}
+	for typeFullName, enum := range e.EnumScanner.Enums {
+		pkgPath, typeName := importer.GetPackagePathAndDecl(typeFullName)
+
+		p, _ := build.Import(pkgPath, "", build.FindOnly)
+		dir, _ := filepath.Rel(outputPath, p.Dir)
+
+		enum := files.NewEnum(pkgPath, scanner.RetrievePackageName(pkgPath), typeName, enum, e.EnumScanner.HasOffset(typeFullName))
+		outputs.Add(GeneratedSuffix(path.Join(dir, str.ToLowerSnakeCase(typeName)+".go")), enum.String())
+	}
+	return outputs
 }

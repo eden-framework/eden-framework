@@ -20,7 +20,10 @@ func (p *Package) GetSelector() string {
 
 func (p *Package) String() string {
 	if p.Alias != "" {
-		return p.Alias + " " + strconv.Quote(p.PkgPath)
+		pkgName := RetrievePackageName(p.PkgPath)
+		if p.Alias != pkgName {
+			return p.Alias + " " + strconv.Quote(p.PkgPath)
+		}
 	}
 
 	return strconv.Quote(p.PkgPath)

@@ -65,6 +65,10 @@ func Process(filename string, src []byte) ([]byte, error) {
 				if err != nil {
 					panic(fmt.Errorf("errors %s in %s", err.Error(), filename))
 				}
+				errCount := packages.PrintErrors(pkgs)
+				if errCount > 0 {
+					panic(fmt.Errorf("you've got %d errors when packages.Load", errCount))
+				}
 				if strings.Contains(pkgs[0].GoFiles[0], runtime.GOROOT()) {
 					// libexec
 					importGroups[0] = append(importGroups[0], getAstString(fileSet, importSpec))
