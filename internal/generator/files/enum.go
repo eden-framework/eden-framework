@@ -68,7 +68,7 @@ func (e *Enum) WriteVars(w io.Writer) (err error) {
 
 func (e *Enum) WriteInitFunc(w io.Writer) (err error) {
 	_, err = io.WriteString(w, fmt.Sprintf(`func init() {
-	`+e.Importer.Use("profzone/eden-framework/pkg/enumeration.RegisterEnums")+"(\""+e.Name+"\", map[string]string{\n"))
+	`+e.Importer.Use("github.com/profzone/eden-framework/pkg/enumeration.RegisterEnums")+"(\""+e.Name+"\", map[string]string{\n"))
 
 	for _, option := range e.Options {
 		_, err = io.WriteString(w, strconv.Quote(fmt.Sprintf("%v", option.Value))+":"+strconv.Quote(option.Label)+",\n")
