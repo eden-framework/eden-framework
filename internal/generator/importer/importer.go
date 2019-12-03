@@ -22,6 +22,13 @@ func NewPackageImporter(packagePath string) *PackageImporter {
 	}
 }
 
+func (i *PackageImporter) AddImport(importPath string, p *Package) {
+	if _, ok := i.pkgs[importPath]; ok {
+		return
+	}
+	i.pkgs[importPath] = p
+}
+
 func (i *PackageImporter) Import(importPath string, useAlias bool) *Package {
 	importPath = ParseVendor(importPath)
 	p, ok := i.pkgs[importPath]
@@ -73,4 +80,10 @@ func (i *PackageImporter) String() string {
 		buf.WriteString(")\n\n")
 	}
 	return buf.String()
+}
+
+func (i *PackageImporter) Merge(target *PackageImporter) {
+	for importPath, pkg := range target.pkgs {
+		i.AddImport(importPath, pkg)
+	}
 }

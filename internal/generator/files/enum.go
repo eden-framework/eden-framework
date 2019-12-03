@@ -8,6 +8,7 @@ import (
 	str "github.com/profzone/eden-framework/pkg/strings"
 	"github.com/sirupsen/logrus"
 	"io"
+	"sort"
 	"strconv"
 )
 
@@ -321,4 +322,37 @@ func (e *Enum) String() string {
 	}
 
 	return buf.String()
+}
+
+func (e *Enum) WriteEnumDefinition(w io.Writer) (err error) {
+	contentStr := fmt.Sprintf(`// api:enum
+type %s uint
+
+const (
+%s
+`, e.Name, e.ConstPrefix()+"_UNKNOWN "+e.Name+" = iota")
+
+	sort.Slice(e.Options, func(i, j int) bool {
+		return e.Options[i].Val.(float64) < e.Options[j].Val.(float64)
+	})
+
+	var index = 1
+	for _, enum := range e.Options {
+		val := int(enum.Val.(float64))
+		if val > index {
+			contentStr += `(
+
+const (
+`
+			contentStr += fmt.Sprintf("%s__%s %s = iota + %d // %s\n", e.ConstPrefix(), enum.Value.(string), e.Name, val, enum.Label)
+			index = val + 1
+		} else {
+			contentStr += fmt.Sprintf("%s__%s // %s\n", e.ConstPrefix(), enum.Value.(string), enum.Label)
+			index++
+		}
+	}
+	contentStr += ")\n\n"
+
+	_, err = io.WriteString(w, contentStr)
+	return
 }

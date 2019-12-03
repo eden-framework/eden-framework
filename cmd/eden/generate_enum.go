@@ -23,7 +23,7 @@ import (
 	"os"
 )
 
-var enumCmdCWD, enumCmdTypeName string
+var enumCmdInputPath, enumCmdOutputPath, enumCmdTypeName string
 
 // enumCmd represents the enum command
 var enumCmd = &cobra.Command{
@@ -31,18 +31,22 @@ var enumCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  fmt.Sprintf("%s\ngenerate enum", CommandHelpHeader),
 	Run: func(cmd *cobra.Command, args []string) {
-		if enumCmdCWD == "" {
-			enumCmdCWD, _ = os.Getwd()
+		if enumCmdInputPath == "" {
+			enumCmdInputPath, _ = os.Getwd()
+		}
+		if enumCmdOutputPath == "" {
+			enumCmdOutputPath, _ = os.Getwd()
 		}
 		enumScanner := scanner.NewEnumScanner()
 		gen := generator.NewEnumGenerator(enumScanner, enumCmdTypeName)
 
-		generator.Generate(gen, enumCmdCWD)
+		generator.Generate(gen, enumCmdInputPath, enumCmdOutputPath)
 	},
 }
 
 func init() {
 	generateCmd.AddCommand(enumCmd)
-	enumCmd.Flags().StringVarP(&enumCmdCWD, "input-path", "i", "", "eden generate enum --input-path=/go/src/eden-server")
+	enumCmd.Flags().StringVarP(&enumCmdInputPath, "input-path", "i", "", "eden generate enum --input-path=/go/src/eden-server")
+	enumCmd.Flags().StringVarP(&enumCmdOutputPath, "output-path", "o", "", "eden generate enum --output-path=/go/src/eden-server")
 	enumCmd.Flags().StringVarP(&enumCmdTypeName, "type-name", "t", "", "eden generate enum --type-name=Status")
 }

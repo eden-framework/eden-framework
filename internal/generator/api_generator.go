@@ -99,7 +99,7 @@ func (a *ApiGenerator) Output(outputPath string) Outputs {
 		logrus.Panic(err)
 	}
 	return Outputs{
-		"api.json": string(data),
+		path.Join(outputPath, "api.json"): string(data),
 	}
 }
 

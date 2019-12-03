@@ -53,14 +53,14 @@ func (outputs Outputs) WriteFiles() {
 	}
 }
 
-func Generate(generator Generator, path string) {
+func Generate(generator Generator, inputPath, outputPath string) {
 	cost := duration.NewDuration()
 	defer func() {
 		cost.ToLogger().Infof("generate by %s done", reflect.TypeOf(generator).String())
 	}()
 
-	generator.Load(path)
+	generator.Load(inputPath)
 	generator.Pick()
-	outputs := generator.Output(path)
+	outputs := generator.Output(outputPath)
 	outputs.WriteFiles()
 }

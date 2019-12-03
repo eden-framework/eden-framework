@@ -24,7 +24,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var apiCmdCWD string
+var apiCmdInputPath, apiCmdOutputPath string
 
 // apiCmd represents the api command
 var apiCmd = &cobra.Command{
@@ -32,8 +32,11 @@ var apiCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  fmt.Sprintf("%s\ngenerate api doc", CommandHelpHeader),
 	Run: func(cmd *cobra.Command, args []string) {
-		if apiCmdCWD == "" {
-			apiCmdCWD, _ = os.Getwd()
+		if apiCmdInputPath == "" {
+			apiCmdInputPath, _ = os.Getwd()
+		}
+		if apiCmdOutputPath == "" {
+			apiCmdOutputPath, _ = os.Getwd()
 		}
 		enumScanner := scanner.NewEnumScanner()
 		modelScanner := scanner.NewModelScanner(enumScanner)
@@ -43,11 +46,12 @@ var apiCmd = &cobra.Command{
 		modelScanner.Api = &gen.Api
 		operatorScanner.Api = &gen.Api
 
-		generator.Generate(gen, apiCmdCWD)
+		generator.Generate(gen, apiCmdInputPath, apiCmdOutputPath)
 	},
 }
 
 func init() {
 	generateCmd.AddCommand(apiCmd)
-	apiCmd.Flags().StringVarP(&apiCmdCWD, "input-path", "i", "", "eden generate api --input-path=/go/src/eden-server")
+	apiCmd.Flags().StringVarP(&apiCmdInputPath, "input-path", "i", "", "eden generate api --input-path=/go/src/eden-server")
+	apiCmd.Flags().StringVarP(&apiCmdOutputPath, "output-path", "o", "", "eden generate api --output-path=/go/src/eden-server")
 }
