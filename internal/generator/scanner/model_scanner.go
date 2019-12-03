@@ -106,22 +106,13 @@ func (m *ModelScanner) NewInspector(pkg *packages.Package) func(node ast.Node) b
 						if field.Names != nil {
 							key = field.Names[0].Name
 						}
-						switch field.Type.(type) {
-						case *ast.Ident:
-							keyType = field.Type.(*ast.Ident).Name
-						case *ast.SelectorExpr:
-							selectorExpr := field.Type.(*ast.SelectorExpr)
-							switch selectorExpr.X.(type) {
-							case *ast.Ident:
-								keyType = selectorExpr.X.(*ast.Ident).Name
-								if _, ok := importPath[keyType]; ok {
-									path = importPath[keyType]
-									alias = keyType
-								}
+						keyType, pkgName := ParseType(field.Type)
+						if pkgName != "" {
+							if _, ok := importPath[pkgName]; ok {
+								path = importPath[pkgName]
+								alias = pkgName
 							}
-							keyType = selectorExpr.Sel.Name
 						}
-
 						model.AddField(key, keyType, alias, path)
 					}
 				}

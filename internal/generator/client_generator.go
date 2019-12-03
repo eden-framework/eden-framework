@@ -72,9 +72,10 @@ func (c *ClientGenerator) Output(outputPath string) Outputs {
 
 	clientFile := files.NewClientFile(c.ServiceName, &c.Api)
 	clientEnumsFile := files.NewClientEnumsFile(outputPath, c.ServiceName, &c.Api)
+	typesFile := files.NewTypesFile(c.ServiceName, &c.Api)
 
 	outputs.Add(GeneratedSuffix(path.Join(outputPath, clientFile.PackageName, "client.go")), clientFile.String())
-	outputs.Add(GeneratedSuffix(path.Join(outputPath, clientFile.PackageName, "types.go")), "package "+clientFile.PackageName)
+	outputs.Add(GeneratedSuffix(path.Join(outputPath, clientFile.PackageName, "types.go")), typesFile.String())
 	outputs.Add(GeneratedSuffix(path.Join(outputPath, clientFile.PackageName, "enums.go")), clientEnumsFile.String())
 
 	return outputs

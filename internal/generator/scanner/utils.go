@@ -1,6 +1,7 @@
 package scanner
 
 import (
+	"go/ast"
 	"regexp"
 	"strings"
 )
@@ -15,6 +16,26 @@ func ParseEnum(doc string) (string, bool) {
 		return strings.TrimSpace(strings.Replace(doc, "api:enum", "", -1)), true
 	}
 	return doc, false
+}
+
+func ParseType(typeExpr ast.Expr) (keyType, pkgName string) {
+	switch typeExpr.(type) {
+	case *ast.Ident:
+		keyType = typeExpr.(*ast.Ident).Name
+	case *ast.StarExpr:
+		starExpr := typeExpr.(*ast.StarExpr)
+		keyType, pkgName = ParseType(starExpr.X)
+	case *ast.SelectorExpr:
+		selectorExpr := typeExpr.(*ast.SelectorExpr)
+		pkgName, _ = ParseType(selectorExpr.X)
+		keyType = selectorExpr.Sel.Name
+	case *ast.ArrayType:
+		arrayType := typeExpr.(*ast.ArrayType)
+		keyType, pkgName = ParseType(arrayType.Elt)
+		keyType = "[]" + keyType
+	}
+
+	return
 }
 
 func ParseStringFormat(doc string) (string, string) {
