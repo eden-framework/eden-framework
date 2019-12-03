@@ -9,13 +9,15 @@ import (
 )
 
 type ModelScanner struct {
-	Api    *api.Api
+	Api *api.Api
+	*EnumScanner
 	models map[string]*api.OperatorModel
 }
 
-func NewModelScanner() *ModelScanner {
+func NewModelScanner(enum *EnumScanner) *ModelScanner {
 	return &ModelScanner{
-		models: make(map[string]*api.OperatorModel),
+		models:      make(map[string]*api.OperatorModel),
+		EnumScanner: enum,
 	}
 }
 
@@ -85,11 +87,20 @@ func (m *ModelScanner) NewInspector(pkg *packages.Package) func(node ast.Node) b
 						m.RegisterModel(model)
 						continue
 					}
-					model = m.NewModel(typeSpec.Name.Name, pkg.ID)
+					commentScanner := NewCommentScanner(pkg.Fset, file)
+					doc := commentScanner.CommentsOf(typeSpec)
+					doc, hasEnum := ParseEnum(doc)
+					if hasEnum {
+						enumFullPath := strings.Join([]string{pkg.PkgPath, typeSpec.Name.Name}, ".")
+						enum := m.Enum(enumFullPath)
+						m.Api.AddEnum(enumFullPath, enum)
+						continue
+					}
 					structType, ok := typeSpec.Type.(*ast.StructType)
 					if !ok {
 						continue
 					}
+					model = m.NewModel(typeSpec.Name.Name, pkg.ID)
 					for _, field := range structType.Fields.List {
 						var key, keyType, alias, path string
 						if field.Names != nil {

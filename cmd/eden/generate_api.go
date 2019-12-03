@@ -35,9 +35,10 @@ var apiCmd = &cobra.Command{
 		if apiCmdCWD == "" {
 			apiCmdCWD, _ = os.Getwd()
 		}
-		modelScanner := scanner.NewModelScanner()
+		enumScanner := scanner.NewEnumScanner()
+		modelScanner := scanner.NewModelScanner(enumScanner)
 		operatorScanner := scanner.NewOperatorScanner(modelScanner)
-		gen := generator.NewApiGenerator(operatorScanner, modelScanner)
+		gen := generator.NewApiGenerator(operatorScanner, modelScanner, enumScanner)
 
 		modelScanner.Api = &gen.Api
 		operatorScanner.Api = &gen.Api

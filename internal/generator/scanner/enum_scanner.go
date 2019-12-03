@@ -1,6 +1,7 @@
 package scanner
 
 import (
+	"github.com/profzone/eden-framework/internal/generator/api"
 	"github.com/profzone/eden-framework/internal/generator/importer"
 	"github.com/profzone/eden-framework/pkg/enumeration"
 	str "github.com/profzone/eden-framework/pkg/strings"
@@ -9,18 +10,17 @@ import (
 	"go/constant"
 	"go/types"
 	"golang.org/x/tools/go/packages"
-	"sort"
 	"strconv"
 	"strings"
 )
 
 type EnumScanner struct {
-	Enums map[string]Enum
+	Enums map[string]api.Enum
 }
 
 func NewEnumScanner() *EnumScanner {
 	return &EnumScanner{
-		Enums: make(map[string]Enum),
+		Enums: make(map[string]api.Enum),
 	}
 }
 
@@ -59,7 +59,7 @@ func (s *EnumScanner) HasOffset(typeFullName string) bool {
 	return false
 }
 
-func (s *EnumScanner) Enum(typeFullName string) Enum {
+func (s *EnumScanner) Enum(typeFullName string) api.Enum {
 	if enumOptions, ok := s.Enums[typeFullName]; ok {
 		return enumOptions.Sort()
 	}
@@ -113,44 +113,6 @@ func (s *EnumScanner) addEnum(typeFullName string, value interface{}, val interf
 		Value: value,
 		Label: label,
 	})
-}
-
-type Enum enumeration.Enum
-
-func (enum Enum) Sort() Enum {
-	sort.Slice(enum, func(i, j int) bool {
-		switch enum[i].Value.(type) {
-		case string:
-			return enum[i].Value.(string) < enum[j].Value.(string)
-		case int64:
-			return enum[i].Value.(int64) < enum[j].Value.(int64)
-		case float64:
-			return enum[i].Value.(float64) < enum[j].Value.(float64)
-		}
-		return true
-	})
-	return enum
-}
-
-func (enum Enum) Labels() (labels []string) {
-	for _, e := range enum {
-		labels = append(labels, e.Label)
-	}
-	return
-}
-
-func (enum Enum) Vals() (vals []interface{}) {
-	for _, e := range enum {
-		vals = append(vals, e.Val)
-	}
-	return
-}
-
-func (enum Enum) Values() (values []interface{}) {
-	for _, e := range enum {
-		values = append(values, e.Value)
-	}
-	return
 }
 
 func getConstVal(constVal constant.Value) interface{} {

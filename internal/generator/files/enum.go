@@ -3,8 +3,8 @@ package files
 import (
 	"bytes"
 	"fmt"
+	"github.com/profzone/eden-framework/internal/generator/api"
 	"github.com/profzone/eden-framework/internal/generator/importer"
-	"github.com/profzone/eden-framework/internal/generator/scanner"
 	str "github.com/profzone/eden-framework/pkg/strings"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -15,12 +15,12 @@ type Enum struct {
 	PackagePath string
 	PackageName string
 	Name        string
-	Options     scanner.Enum
+	Options     api.Enum
 	Importer    *importer.PackageImporter
 	HasOffset   bool
 }
 
-func NewEnum(packagePath, packageName, name string, options scanner.Enum, hasOffset bool) *Enum {
+func NewEnum(packagePath, packageName, name string, options api.Enum, hasOffset bool) *Enum {
 	return &Enum{
 		PackagePath: packagePath,
 		PackageName: packageName,

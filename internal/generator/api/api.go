@@ -6,12 +6,14 @@ type Api struct {
 	ServiceName string                    `json:"name"`
 	Operators   map[string]*OperatorGroup `json:"operators"`
 	Models      map[string]*OperatorModel `json:"models"`
+	Enums       map[string]Enum           `json:"enums"`
 }
 
 func NewApi() Api {
 	return Api{
 		Operators: make(map[string]*OperatorGroup),
 		Models:    make(map[string]*OperatorModel),
+		Enums:     make(map[string]Enum),
 	}
 }
 
@@ -37,5 +39,11 @@ func (a *Api) WalkOperators(walker func(g *OperatorGroup)) {
 func (a *Api) AddModel(model *OperatorModel) {
 	if _, ok := a.Models[model.ID]; !ok {
 		a.Models[model.ID] = model
+	}
+}
+
+func (a *Api) AddEnum(id string, e Enum) {
+	if _, ok := a.Enums[id]; !ok {
+		a.Enums[id] = e
 	}
 }

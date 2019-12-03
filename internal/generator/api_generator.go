@@ -16,14 +16,16 @@ type ApiGenerator struct {
 	Api             api.Api
 	OperatorScanner *scanner.OperatorScanner
 	ModelScanner    *scanner.ModelScanner
+	EnumScanner     *scanner.EnumScanner
 	pkgs            []*packages.Package
 }
 
-func NewApiGenerator(op *scanner.OperatorScanner, model *scanner.ModelScanner) *ApiGenerator {
+func NewApiGenerator(op *scanner.OperatorScanner, model *scanner.ModelScanner, enum *scanner.EnumScanner) *ApiGenerator {
 	return &ApiGenerator{
 		Api:             api.NewApi(),
 		OperatorScanner: op,
 		ModelScanner:    model,
+		EnumScanner:     enum,
 	}
 }
 
