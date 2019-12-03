@@ -40,8 +40,7 @@ func (f *TypesFile) WriteDefinition(w io.Writer) (err error) {
 		if model.NeedAlias {
 			contentStr += fmt.Sprintf("type %s = %s\n\n", model.Name, f.Importer.Use(model.ID))
 		} else {
-			contentStr += fmt.Sprintf(`type %s struct {
-`, model.Name)
+			contentStr += fmt.Sprintf("type %s struct {\n", model.Name)
 			model.WalkFields(func(field api.OperatorField) {
 				contentStr += fmt.Sprintf("%s %s %s\n", field.Key, field.Type, field.Tag)
 			})
