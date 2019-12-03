@@ -102,18 +102,24 @@ func (m *ModelScanner) NewInspector(pkg *packages.Package) func(node ast.Node) b
 					}
 					model = m.NewModel(typeSpec.Name.Name, pkg.ID)
 					for _, field := range structType.Fields.List {
-						var key, keyType, alias, path string
+						var key, keyType, tag, alias, path string
 						if field.Names != nil {
 							key = field.Names[0].Name
 						}
-						keyType, pkgName := ParseType(field.Type)
+						if key == "Secret" {
+							fmt.Println()
+						}
+						keyType, pkgName, pointer := ParseType(field.Type)
 						if pkgName != "" {
 							if _, ok := importPath[pkgName]; ok {
 								path = importPath[pkgName]
 								alias = pkgName
 							}
 						}
-						model.AddField(key, keyType, alias, path)
+						if field.Tag != nil {
+							tag = field.Tag.Value
+						}
+						model.AddField(key, keyType, tag, alias, path, pointer)
 					}
 				}
 			}

@@ -34,8 +34,32 @@ func (f *TypesFile) WriteImports(w io.Writer) (err error) {
 	return
 }
 
+func (f *TypesFile) WriteDefinition(w io.Writer) (err error) {
+	var contentStr string
+	for _, model := range f.a.Models {
+		if model.NeedAlias {
+			contentStr += fmt.Sprintf("type %s = %s\n\n", model.Name, f.Importer.Use(model.ID))
+		} else {
+			contentStr += fmt.Sprintf(`type %s struct {
+`, model.Name)
+			model.WalkFields(func(field api.OperatorField) {
+				contentStr += fmt.Sprintf("%s %s %s\n", field.Key, field.Type, field.Tag)
+			})
+			contentStr += "}\n\n"
+		}
+	}
+
+	_, err = io.WriteString(w, contentStr)
+	return
+}
+
 func (f *TypesFile) WriteAll() string {
 	buf := bytes.NewBuffer([]byte{})
+
+	err := f.WriteDefinition(buf)
+	if err != nil {
+		logrus.Panic(err)
+	}
 
 	return buf.String()
 }

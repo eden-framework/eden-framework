@@ -19,12 +19,14 @@ func NewOperatorModel(name string, pkgID string) OperatorModel {
 	}
 }
 
-func (m *OperatorModel) AddField(key, keyType, alias, ipt string) {
+func (m *OperatorModel) AddField(key, keyType, tag, alias, ipt string, pointer bool) {
 	m.Fields = append(m.Fields, OperatorField{
 		Key:     key,
 		Type:    keyType,
+		Tag:     tag,
 		Alias:   alias,
 		Imports: ipt,
+		Pointer: pointer,
 	})
 }
 
@@ -37,6 +39,8 @@ func (m *OperatorModel) WalkFields(walker func(f OperatorField)) {
 type OperatorField struct {
 	Key     string `json:"key"`
 	Type    string `json:"type"`
+	Tag     string `json:"tag"`
 	Alias   string `json:"alias"`
 	Imports string `json:"imports"`
+	Pointer bool   `json:"pointer"`
 }

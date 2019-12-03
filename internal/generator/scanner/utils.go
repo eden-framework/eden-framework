@@ -18,20 +18,22 @@ func ParseEnum(doc string) (string, bool) {
 	return doc, false
 }
 
-func ParseType(typeExpr ast.Expr) (keyType, pkgName string) {
+func ParseType(typeExpr ast.Expr) (keyType, pkgName string, pointer bool) {
 	switch typeExpr.(type) {
 	case *ast.Ident:
 		keyType = typeExpr.(*ast.Ident).Name
 	case *ast.StarExpr:
 		starExpr := typeExpr.(*ast.StarExpr)
-		keyType, pkgName = ParseType(starExpr.X)
+		keyType, pkgName, _ = ParseType(starExpr.X)
+		keyType = "*" + keyType
+		pointer = true
 	case *ast.SelectorExpr:
 		selectorExpr := typeExpr.(*ast.SelectorExpr)
-		pkgName, _ = ParseType(selectorExpr.X)
+		pkgName, _, pointer = ParseType(selectorExpr.X)
 		keyType = selectorExpr.Sel.Name
 	case *ast.ArrayType:
 		arrayType := typeExpr.(*ast.ArrayType)
-		keyType, pkgName = ParseType(arrayType.Elt)
+		keyType, pkgName, pointer = ParseType(arrayType.Elt)
 		keyType = "[]" + keyType
 	}
 
