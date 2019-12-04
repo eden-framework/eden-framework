@@ -4,6 +4,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/profzone/eden-framework/internal"
 	"github.com/profzone/eden-framework/internal/project"
+	str "github.com/profzone/eden-framework/pkg/strings"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
@@ -16,11 +17,11 @@ type Application struct {
 	envConfigPrefix    string
 	outputDockerConfig bool
 	autoMigration      bool
-	Runner             func() error
+	Runner             func(app *Application) error
 	Config             interface{}
 }
 
-func NewApplication(runner func() error, config interface{}) *Application {
+func NewApplication(runner func(app *Application) error, config interface{}) *Application {
 	p := &project.Project{}
 	err := p.UnmarshalFromFile("", "")
 	if err != nil {
@@ -53,6 +54,7 @@ func (app *Application) Start() {
 	command.PersistentFlags().StringVarP(&app.envConfigPrefix, "env-prefix", "e", app.p.Name, "prefix for env var")
 	command.PersistentFlags().BoolVarP(&app.outputDockerConfig, "docker", "d", true, "whether or not output configuration of docker")
 	command.PersistentFlags().BoolVarP(&app.autoMigration, "db-migration", "m", os.Getenv("GOENV") == "DEV" || os.Getenv("GOENV") == "TEST", "auto migrate database if needed")
+	app.envConfigPrefix = str.ToUpperSnakeCase(app.envConfigPrefix)
 
 	if err := command.Execute(); err != nil {
 		logrus.Error(err)
@@ -64,7 +66,7 @@ func (app *Application) Start() {
 		logrus.Panic(err)
 	}
 
-	if err := app.Runner(); err != nil {
+	if err := app.Runner(app); err != nil {
 		logrus.Error(err)
 		os.Exit(1)
 	}
