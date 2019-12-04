@@ -8,6 +8,7 @@ require (
 	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/henrylee2cn/erpc/v6 v6.3.1
+	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/marten-seemann/chacha20 v0.2.0 // indirect
 	github.com/marten-seemann/qpack v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect

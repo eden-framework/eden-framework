@@ -92,7 +92,7 @@ func (s *EnumScanner) Enum(typeFullName string) api.Enum {
 		if strings.HasSuffix(name, "_OFFSET") {
 			continue
 		}
-		if strings.HasPrefix(name, strings.ToUpper(typeName)+"_") {
+		if strings.HasPrefix(name, str.ToUpperSnakeCase(typeName)+"_") {
 			val := typeConst.Val()
 			label := strings.TrimSpace(ident.Obj.Decl.(*ast.ValueSpec).Comment.Text())
 			values := strings.SplitN(name, "__", 2)
