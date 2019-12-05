@@ -1,10 +1,11 @@
 package application
 
 import (
-	"github.com/kelseyhightower/envconfig"
 	"github.com/profzone/eden-framework/internal"
+	"github.com/profzone/eden-framework/internal/generator"
 	"github.com/profzone/eden-framework/internal/project"
 	str "github.com/profzone/eden-framework/pkg/strings"
+	"github.com/profzone/envconfig"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
@@ -69,6 +70,9 @@ func (app *Application) Start() {
 	if err != nil {
 		logrus.Panic(err)
 	}
+
+	generate := generator.NewDockerGenerator(app.p.Name)
+	generator.Generate(generate, "", "./build")
 
 	if err := app.Runner(app); err != nil {
 		logrus.Error(err)
