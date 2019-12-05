@@ -1,0 +1,5 @@
+package runtime
+
+func GoID() int64 {
+    return getg().goid
+}

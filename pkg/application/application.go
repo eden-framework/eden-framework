@@ -61,7 +61,11 @@ func (app *Application) Start() {
 		os.Exit(1)
 	}
 
-	err := envconfig.Process(app.envConfigPrefix, app.Config)
+	err := envconfig.Usage(app.envConfigPrefix, app.Config)
+	if err != nil {
+		logrus.Panic(err)
+	}
+	err = envconfig.Process(app.envConfigPrefix, app.Config)
 	if err != nil {
 		logrus.Panic(err)
 	}
