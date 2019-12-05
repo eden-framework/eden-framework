@@ -11,7 +11,7 @@ require (
 	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pelletier/go-toml v1.6.0 // indirect
-	github.com/profzone/envconfig v1.4.1
+	github.com/profzone/envconfig v1.4.2-0.20191205104149-8f48718894dc
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/afero v1.2.2 // indirect
 	github.com/spf13/cobra v0.0.5

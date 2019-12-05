@@ -2,6 +2,7 @@ package generator
 
 import (
 	"github.com/profzone/eden-framework/internal/generator/files"
+	"github.com/profzone/envconfig"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 	"path"
@@ -14,11 +15,13 @@ const (
 
 type DockerGenerator struct {
 	ServiceName string
+	EnvVars     []envconfig.EnvVar
 }
 
-func NewDockerGenerator(serviceName string) *DockerGenerator {
+func NewDockerGenerator(serviceName string, envVars []envconfig.EnvVar) *DockerGenerator {
 	return &DockerGenerator{
 		ServiceName: serviceName,
+		EnvVars:     envVars,
 	}
 }
 
@@ -36,6 +39,11 @@ func (d *DockerGenerator) Output(outputPath string) Outputs {
 		Image: Image,
 	}
 	dockerFile = dockerFile.AddEnv("GOENV", "DEV")
+
+	for _, envVar := range d.EnvVars {
+		strValue := envVar.GetValue(false)
+		dockerFile = dockerFile.AddEnv(envVar.Key, strValue)
+	}
 
 	dockerFile = dockerFile.WithWorkDir("/go/bin")
 	dockerFile = dockerFile.WithCmd("./"+d.ServiceName, "-d=false", "-m=false")

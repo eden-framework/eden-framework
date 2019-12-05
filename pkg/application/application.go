@@ -62,16 +62,16 @@ func (app *Application) Start() {
 		os.Exit(1)
 	}
 
-	err := envconfig.Usage(app.envConfigPrefix, app.Config)
+	err := envconfig.Process(app.envConfigPrefix, app.Config)
 	if err != nil {
 		logrus.Panic(err)
 	}
-	err = envconfig.Process(app.envConfigPrefix, app.Config)
+	envconfig.Usage(app.envConfigPrefix, app.Config)
+	envVars, err := envconfig.GatherInfo(app.envConfigPrefix, app.Config)
 	if err != nil {
 		logrus.Panic(err)
 	}
-
-	generate := generator.NewDockerGenerator(app.p.Name)
+	generate := generator.NewDockerGenerator(app.p.Name, envVars)
 	generator.Generate(generate, "", "./build")
 
 	if err := app.Runner(app); err != nil {
