@@ -59,6 +59,9 @@ func (d *DockerGenerator) Output(outputPath string) Outputs {
 		logrus.Panic(err)
 	}
 
-	outputs.Add(path.Join(outputPath, "dockerfile.default.yml"), string(content))
+	configDefaultFile := files.NewConfigDefaultFile(d.EnvVars)
+
+	outputs.Add(path.Join(outputPath, "build/dockerfile.default.yml"), string(content))
+	outputs.Add(path.Join(outputPath, "configs/default.yml"), configDefaultFile.String())
 	return outputs
 }

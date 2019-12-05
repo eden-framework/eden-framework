@@ -72,7 +72,7 @@ func (app *Application) Start() {
 		logrus.Panic(err)
 	}
 	generate := generator.NewDockerGenerator(app.p.Name, envVars)
-	generator.Generate(generate, "", "./build")
+	generator.Generate(generate, "", "")
 
 	if err := app.Runner(app); err != nil {
 		logrus.Error(err)
