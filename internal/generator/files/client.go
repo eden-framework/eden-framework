@@ -153,9 +153,15 @@ func (c *ClientFile) WriteMethods(w io.Writer) (err error) {
 			})
 			resp = append(resp, []string{"err", "error"})
 
+			var requestStr string
+			if len(req) == 0 {
+				requestStr = "nil"
+			} else {
+				requestStr = req[0][0]
+			}
 			if !g.IsPush {
 				methodsDef += `func (c *` + c.ClientName + `) ` + strings.Join([]string{g.Name, m.Name}, "") + `(` + str.RecursiveJoin(req, " ", ", ") + `) (` + str.RecursiveJoin(resp, " ", ", ") + `) {
-	stat := c.session.Call("` + strings.Join([]string{g.Path, m.Path}, "") + `", ` + req[0][0] + `, &` + resp[0][0] + `).Status()
+	stat := c.session.Call("` + strings.Join([]string{g.Path, m.Path}, "") + `", ` + requestStr + `, &` + resp[0][0] + `).Status()
 	if !stat.OK() {
 		err = stat.Cause()
 	}
@@ -165,7 +171,7 @@ func (c *ClientFile) WriteMethods(w io.Writer) (err error) {
 `
 			} else {
 				methodsDef += `func (c *` + c.ClientName + `) ` + strings.Join([]string{g.Name, m.Name}, "") + `(` + str.RecursiveJoin(req, " ", ", ") + `) (err error) {
-	stat := c.session.Push("` + strings.Join([]string{g.Path, m.Path}, "") + `", ` + req[0][0] + `)
+	stat := c.session.Push("` + strings.Join([]string{g.Path, m.Path}, "") + `", ` + requestStr + `)
 	if !stat.OK() {
 		err = stat.Cause()
 	}
