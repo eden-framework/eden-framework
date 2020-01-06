@@ -29,23 +29,46 @@ replace (
 )
 
 require (
+	github.com/coreos/prometheus-operator v0.34.0 // indirect
+	github.com/emicklei/go-restful v2.11.1+incompatible // indirect
 	github.com/fatih/color v1.7.0
+	github.com/go-openapi/jsonreference v0.19.3 // indirect
+	github.com/go-openapi/spec v0.19.5 // indirect
+	github.com/go-openapi/swag v0.19.6 // indirect
 	github.com/gogo/protobuf v1.3.1 // indirect
-	github.com/golang/protobuf v1.3.2 // indirect
+	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/henrylee2cn/erpc/v6 v6.3.1
+	github.com/json-iterator/go v1.1.9 // indirect
+	github.com/knative/pkg v0.0.0-20200102192742-169ef0797c1f // indirect
+	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
+	github.com/mailru/easyjson v0.7.0 // indirect
+	github.com/matryer/moq v0.0.0-20191223155252-4203548722f8 // indirect
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pelletier/go-toml v1.6.0 // indirect
 	github.com/profzone/envconfig v1.4.2-0.20191205104149-8f48718894dc
-	github.com/rancher/types v0.0.0-20191213000433-bfc3105d2b29 // indirect
+	github.com/prometheus/client_golang v1.3.0 // indirect
+	github.com/rancher/norman v0.0.0-20191209163739-5b9227fe3222
+	github.com/rancher/types v0.0.0-20191226173020-2acfcad7d968
+	github.com/rancher/wrangler v0.4.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.5.0
 	github.com/stretchr/testify v1.4.0
-	golang.org/x/crypto v0.0.0-20191117063200-497ca9f6d64f // indirect
-	golang.org/x/sys v0.0.0-20191118013547-6254a7c3cac6 // indirect
-	golang.org/x/tools v0.0.0-20191118051429-5a76f03bc7c3
-	gopkg.in/yaml.v2 v2.2.5
+	golang.org/x/crypto v0.0.0-20191227163750-53104e6ec876 // indirect
+	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect
+	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6 // indirect
+	golang.org/x/sys v0.0.0-20200103143344-a1369afcdac7 // indirect
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
+	golang.org/x/tools v0.0.0-20200103221440-774c71fcf114
+	google.golang.org/appengine v1.6.5 // indirect
+	gopkg.in/yaml.v2 v2.2.7
+	k8s.io/apiserver v0.17.0 // indirect
+	k8s.io/klog v1.0.0 // indirect
+	k8s.io/kube-aggregator v0.17.0 // indirect
+	k8s.io/kube-openapi v0.0.0-20191107075043-30be4d16710a // indirect
+	k8s.io/kubernetes v1.17.0 // indirect
+	k8s.io/utils v0.0.0-20191218082557-f07c713de883 // indirect
 )
