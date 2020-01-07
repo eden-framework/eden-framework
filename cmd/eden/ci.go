@@ -17,9 +17,12 @@ package main
 
 import (
 	"fmt"
-
+	"github.com/profzone/eden-framework/internal/project"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
+
+var ciCmdInputPath string
 
 // ciCmd represents the ci command
 var ciCmd = &cobra.Command{
@@ -28,6 +31,18 @@ var ciCmd = &cobra.Command{
 	Long:  fmt.Sprintf("%s\nci/cd workflow", CommandHelpHeader),
 }
 
+var currentProject = &project.Project{}
+
 func init() {
 	rootCmd.AddCommand(ciCmd)
+	ciCmd.PersistentFlags().StringVarP(&ciCmdInputPath, "input-path", "i", "", "eden ci --input-path=/go/src/eden-server")
+
+	cobra.OnInitialize(initCIConfig)
+}
+
+func initCIConfig() {
+	err := currentProject.UnmarshalFromFile(ciCmdInputPath, "")
+	if err != nil {
+		logrus.Panicf("currentProject.UnmarshalFromFile err: %v", err)
+	}
 }
