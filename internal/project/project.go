@@ -10,6 +10,7 @@ import (
 	"path"
 	"reflect"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -155,6 +156,34 @@ func (p *Project) Run(commands ...*exec.Cmd) {
 			executil.StdRun(cmd)
 		}
 	}
+}
+
+func (p *Project) RunScript(key string, inDocker bool) error {
+	if _, ok := p.Scripts[key]; !ok {
+		return fmt.Errorf("script %s not defined", key)
+	}
+
+	s := p.Scripts[key]
+
+	if inDocker {
+		builder := RegisteredBuilders.GetBuilderBy(p.ProgramLanguage)
+		if builder == nil {
+			return fmt.Errorf("no builder for %s", p.ProgramLanguage)
+		}
+		p.Run(
+			p.Command(fmt.Sprintf(
+				"docker run --rm -v ${PWD}:%s -w %s %s sh -c %s",
+				builder.WorkingDir,
+				builder.WorkingDir,
+				FullImage(builder.Image),
+				strconv.Quote(s.String()),
+			)),
+		)
+		return nil
+	}
+
+	p.Run(p.Command(s.String()))
+	return nil
 }
 
 func (p *Project) Execute(args ...string) {

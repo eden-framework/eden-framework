@@ -22,8 +22,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var ciCmdInputPath string
-
 // ciCmd represents the ci command
 var ciCmd = &cobra.Command{
 	Use:   "ci",
@@ -35,13 +33,7 @@ var currentProject = &project.Project{}
 
 func init() {
 	rootCmd.AddCommand(ciCmd)
-	ciCmd.PersistentFlags().StringVarP(&ciCmdInputPath, "input-path", "i", "", "eden ci --input-path=/go/src/eden-server")
-
-	cobra.OnInitialize(initCIConfig)
-}
-
-func initCIConfig() {
-	err := currentProject.UnmarshalFromFile(ciCmdInputPath, "")
+	err := currentProject.UnmarshalFromFile("", "")
 	if err != nil {
 		logrus.Panicf("currentProject.UnmarshalFromFile err: %v", err)
 	}

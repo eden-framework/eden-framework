@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/johnnyeven/libtools/ptr"
+	"github.com/profzone/eden-framework/pkg/ptr"
 )
 
 func NewService(image string) *Service {
