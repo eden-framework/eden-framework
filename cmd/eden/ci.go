@@ -1,5 +1,5 @@
 /*
-Copyright © 2019 NAME HERE <EMAIL ADDRESS>
+Copyright © 2020 NAME HERE <EMAIL ADDRESS>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,16 +17,17 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
-// generateCmd represents the generate command
-var generateCmd = &cobra.Command{
-	Use:   "generate",
-	Short: "generate anything",
-	Long:  fmt.Sprintf("%s\ngenerate anything", CommandHelpHeader),
+// ciCmd represents the ci command
+var ciCmd = &cobra.Command{
+	Use:   "ci",
+	Short: "ci/cd workflow",
+	Long:  fmt.Sprintf("%s\nci/cd workflow", CommandHelpHeader),
 }
 
 func init() {
-	rootCmd.AddCommand(generateCmd)
+	rootCmd.AddCommand(ciCmd)
 }
