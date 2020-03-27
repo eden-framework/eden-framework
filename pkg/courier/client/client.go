@@ -9,13 +9,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 
-	"github.com/profzone/eden-framework/pkg/conf"
+	"github.com/profzone/eden-framework/pkg/context"
 	"github.com/profzone/eden-framework/pkg/courier"
 	"github.com/profzone/eden-framework/pkg/courier/httpx"
 	"github.com/profzone/eden-framework/pkg/courier/transport_grpc"
 	"github.com/profzone/eden-framework/pkg/courier/transport_http"
 	"github.com/profzone/eden-framework/pkg/env"
-	"github.com/profzone/eden-framework/pkg/log/context"
 )
 
 type Client struct {
@@ -28,15 +27,6 @@ type Client struct {
 	Port          int16
 	Timeout       time.Duration
 	WrapTransport transport_http.TransportWrapper `json:"-"`
-}
-
-func (c Client) DockerDefaults() conf.DockerDefaults {
-	return conf.DockerDefaults{
-		// todo make switch in docker or expose
-		"Host":    conf.RancherInternal("service-"+c.Name, "service-"+c.Name),
-		"Timeout": 5 * time.Second,
-		"Port":    80,
-	}
 }
 
 func (Client) MarshalDefaults(v interface{}) {
