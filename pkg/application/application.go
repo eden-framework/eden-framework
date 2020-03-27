@@ -9,8 +9,10 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
+	"os/signal"
 	"reflect"
 	"strings"
+	"syscall"
 )
 
 type Application struct {
@@ -81,4 +83,16 @@ func (app *Application) Start() {
 		logrus.Error(err)
 		os.Exit(1)
 	}
+}
+
+func (app *Application) WaitStop() {
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig,
+		syscall.SIGHUP,
+		syscall.SIGINT,
+		syscall.SIGTERM,
+		syscall.SIGQUIT)
+
+	s := <-sig
+	logrus.Infof("Exit with signal: %s", s.String())
 }
