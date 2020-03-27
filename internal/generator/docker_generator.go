@@ -49,7 +49,7 @@ func (d *DockerGenerator) Output(outputPath string) Outputs {
 	dockerFile = dockerFile.WithCmd("./"+d.ServiceName, "-d=false", "-m=false")
 	dockerFile = dockerFile.WithExpose("80")
 
-	dockerFile = dockerFile.AddContent("./configs", "./configs")
+	dockerFile = dockerFile.AddContent("./build/configs", "./configs")
 	dockerFile = dockerFile.AddContent("./build/"+d.ServiceName, "./")
 	dockerFile = dockerFile.AddContent("./profzone.yml", "./")
 	dockerFile = dockerFile.AddContent("./api/api.json", "./")
@@ -62,6 +62,6 @@ func (d *DockerGenerator) Output(outputPath string) Outputs {
 	configDefaultFile := files.NewConfigDefaultFile(d.EnvVars)
 
 	outputs.Add(path.Join(outputPath, "build/dockerfile.default.yml"), string(content))
-	outputs.Add(path.Join(outputPath, "configs/default.yml"), configDefaultFile.String())
+	outputs.Add(path.Join(outputPath, "build/configs/default.yml"), configDefaultFile.String())
 	return outputs
 }
