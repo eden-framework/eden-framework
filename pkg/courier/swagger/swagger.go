@@ -13,7 +13,7 @@ import (
 )
 
 func getSwaggerJSON() []byte {
-	data, err := ioutil.ReadFile("./swagger.json")
+	data, err := ioutil.ReadFile("./api/swagger.json")
 	if err != nil {
 		return data
 	}

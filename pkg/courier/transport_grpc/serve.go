@@ -8,7 +8,6 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/profzone/eden-framework/pkg/conf"
 	"github.com/profzone/eden-framework/pkg/courier"
 )
 
@@ -18,12 +17,6 @@ type ServeGRPC struct {
 	WriteTimeout time.Duration
 	ReadTimeout  time.Duration
 	Name         string
-}
-
-func (s ServeGRPC) DockerDefaults() conf.DockerDefaults {
-	return conf.DockerDefaults{
-		"Port": 999,
-	}
 }
 
 func (s ServeGRPC) MarshalDefaults(v interface{}) {
