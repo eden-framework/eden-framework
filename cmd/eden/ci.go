@@ -18,7 +18,6 @@ package main
 import (
 	"fmt"
 	"github.com/profzone/eden-framework/internal/project"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -33,8 +32,8 @@ var currentProject = &project.Project{}
 
 func init() {
 	rootCmd.AddCommand(ciCmd)
-	err := currentProject.UnmarshalFromFile("", "")
-	if err != nil {
-		logrus.Panicf("currentProject.UnmarshalFromFile err: %v", err)
-	}
+	_ = currentProject.UnmarshalFromFile("", "")
+	//if err != nil {
+	//	logrus.Panicf("currentProject.UnmarshalFromFile err: %v", err)
+	//}
 }
