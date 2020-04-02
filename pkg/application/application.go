@@ -85,7 +85,7 @@ func (app *Application) Start() {
 	}
 }
 
-func (app *Application) WaitStop() {
+func (app *Application) WaitStop(clearFunc func() error) {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig,
 		syscall.SIGHUP,
@@ -94,5 +94,10 @@ func (app *Application) WaitStop() {
 		syscall.SIGQUIT)
 
 	s := <-sig
-	logrus.Infof("Exit with signal: %s", s.String())
+	err := clearFunc()
+	if err != nil {
+		logrus.Errorf("Exit with error: %v", err)
+	} else {
+		logrus.Infof("Exit with signal: %s", s.String())
+	}
 }
