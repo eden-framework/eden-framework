@@ -1,5 +1,7 @@
 package str
 
+import "strings"
+
 type StringMapper func(item string, i int) string
 type StringChecker func(item string, i int) bool
 
@@ -92,4 +94,15 @@ func BytesToStrings(source [][]byte) []string {
 	}
 
 	return target
+}
+
+func StringIndexInSlice(s string, substrSlice []string) (index, indexInSlice int) {
+	for i, substr := range substrSlice {
+		index = strings.Index(s, substr)
+		if index >= 0 {
+			indexInSlice = i
+			return
+		}
+	}
+	return
 }
