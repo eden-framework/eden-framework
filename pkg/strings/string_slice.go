@@ -81,3 +81,15 @@ func StringFind(list []string, checker StringChecker) string {
 	}
 	return ""
 }
+
+func BytesToStrings(source [][]byte) []string {
+	if source == nil {
+		return []string{}
+	}
+	target := make([]string, len(source))
+	for _, b := range source {
+		target = append(target, string(b))
+	}
+
+	return target
+}

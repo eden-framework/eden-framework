@@ -41,7 +41,7 @@ var openApiCmd = &cobra.Command{
 		enumScanner := scanner.NewEnumScanner()
 		modelScanner := scanner.NewModelScanner(enumScanner)
 		operatorScanner := scanner.NewOperatorScanner(modelScanner)
-		gen := generator.NewApiGenerator(operatorScanner, modelScanner, enumScanner)
+		gen := generator.NewOpenApiGenerator(operatorScanner, modelScanner, enumScanner)
 
 		modelScanner.Api = &gen.Api
 		operatorScanner.Api = &gen.Api
