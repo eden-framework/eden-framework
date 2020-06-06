@@ -30,6 +30,7 @@ replace (
 
 require (
 	github.com/fatih/color v1.7.0
+	github.com/go-courier/oas v1.2.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/golang/protobuf v1.3.2 // indirect

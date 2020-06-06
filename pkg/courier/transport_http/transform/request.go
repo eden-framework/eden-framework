@@ -190,7 +190,7 @@ func NewHttpRequestFromParameterGroup(method string, uri string, m *ParameterGro
 		if multipartWriter != nil {
 			req.Header.Add(httpx.HeaderContentType, multipartWriter.FormDataContentType())
 		} else {
-			req.Header.Add(httpx.HeaderContentType, httpx.MIMEPOSTForm+"; param=value")
+			req.Header.Add(httpx.HeaderContentType, httpx.MIME_POST_URLENCODED+"; param=value")
 		}
 	}
 

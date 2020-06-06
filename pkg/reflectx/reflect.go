@@ -37,3 +37,12 @@ func Indirect(v reflect.Value) reflect.Value {
 	}
 	return v
 }
+
+func New(tpe reflect.Type) reflect.Value {
+	rv := reflect.New(tpe).Elem()
+	if tpe.Kind() == reflect.Ptr {
+		rv.Set(New(tpe.Elem()).Addr())
+		return rv
+	}
+	return rv
+}

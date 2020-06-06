@@ -71,7 +71,7 @@ func encodeHttpResponse(_ context.Context, w http.ResponseWriter, r *http.Reques
 	}
 
 	if contentType == "" {
-		contentType = httpx.MIMEJSON
+		contentType = httpx.MIME_JSON
 		setContextType(w, contentType)
 	}
 

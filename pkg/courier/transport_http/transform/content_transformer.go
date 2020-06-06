@@ -12,7 +12,7 @@ import (
 func init() {
 	RegisterContentTransformer(&ContentTransformer{
 		Key:         "json",
-		ContentType: httpx.MIMEJSON,
+		ContentType: httpx.MIME_JSON,
 		Marshal:     json.Marshal,
 		Unmarshal: func(data []byte, v interface{}) error {
 			d := json.NewDecoder(bytes.NewBuffer(data))
@@ -38,7 +38,7 @@ func init() {
 	})
 	RegisterContentTransformer(&ContentTransformer{
 		Key:         "xml",
-		ContentType: httpx.MIMEXML,
+		ContentType: httpx.MIME_XML,
 		Marshal:     xml.Marshal,
 		Unmarshal:   xml.Unmarshal,
 	})

@@ -75,7 +75,7 @@ func (httpRequest *HttpRequest) Do() (result courier.Result) {
 
 	contentType := resp.Header.Get(httpx.HeaderContentType)
 
-	if strings.Contains(contentType, httpx.MIMEJSON) {
+	if strings.Contains(contentType, httpx.MIME_JSON) {
 		result.Unmarshal = json.Unmarshal
 		// todo add more structUnmarshal
 	}

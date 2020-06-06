@@ -44,7 +44,7 @@ type JSONBytes struct {
 }
 
 func (JSONBytes) ContentType() string {
-	return httpx.MIMEJSON
+	return httpx.MIME_JSON
 }
 
 type SwaggerDoc struct {

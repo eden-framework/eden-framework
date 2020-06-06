@@ -18,7 +18,6 @@ package main
 import (
 	"fmt"
 	"github.com/profzone/eden-framework/internal/generator"
-	"github.com/profzone/eden-framework/internal/generator/scanner"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -28,7 +27,7 @@ var openApiCmdInputPath, openApiCmdOutputPath string
 
 // apiCmd represents the api command
 var openApiCmd = &cobra.Command{
-	Use:   "api",
+	Use:   "openapi",
 	Short: "A brief description of your command",
 	Long:  fmt.Sprintf("%s\ngenerate api doc", CommandHelpHeader),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -38,13 +37,13 @@ var openApiCmd = &cobra.Command{
 		if openApiCmdOutputPath == "" {
 			openApiCmdOutputPath, _ = os.Getwd()
 		}
-		enumScanner := scanner.NewEnumScanner()
-		modelScanner := scanner.NewModelScanner(enumScanner)
-		operatorScanner := scanner.NewOperatorScanner(modelScanner)
-		gen := generator.NewOpenApiGenerator(operatorScanner, modelScanner, enumScanner)
+		//enumScanner := scanner.NewEnumScanner()
+		//modelScanner := scanner.NewModelScanner(enumScanner)
+		//operatorScanner := scanner.NewOperatorScanner(modelScanner)
+		gen := generator.NewOpenApiGenerator()
 
-		modelScanner.Api = &gen.Api
-		operatorScanner.Api = &gen.Api
+		//modelScanner.Api = &gen.Api
+		//operatorScanner.Api = &gen.Api
 
 		generator.Generate(gen, openApiCmdInputPath, openApiCmdOutputPath)
 	},

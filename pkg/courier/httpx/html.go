@@ -16,5 +16,5 @@ type HTML struct {
 }
 
 func (h HTML) ContentType() string {
-	return MIMEHTML
+	return MIME_HTML
 }

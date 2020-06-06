@@ -2,30 +2,26 @@ package generator
 
 import (
 	"encoding/json"
-	"github.com/profzone/eden-framework/internal/generator/api"
-	"github.com/profzone/eden-framework/internal/generator/scanner"
+	"github.com/go-courier/oas"
+	"github.com/profzone/eden-framework/internal/generator/openapi_scanner"
 	"github.com/profzone/eden-framework/internal/project"
+	"github.com/profzone/eden-framework/pkg/packagex"
 	"github.com/sirupsen/logrus"
 	"go/ast"
-	"golang.org/x/tools/go/packages"
+	"go/types"
 	"os"
 	"path"
 )
 
 type OpenApiGenerator struct {
-	Api             api.Api
-	OperatorScanner *scanner.OperatorScanner
-	ModelScanner    *scanner.ModelScanner
-	EnumScanner     *scanner.EnumScanner
-	pkgs            []*packages.Package
+	api           *oas.OpenAPI
+	pkg           *packagex.Package
+	routerScanner *openapi_scanner.RouterScanner
 }
 
-func NewOpenApiGenerator(op *scanner.OperatorScanner, model *scanner.ModelScanner, enum *scanner.EnumScanner) *ApiGenerator {
-	return &ApiGenerator{
-		Api:             api.NewApi(),
-		OperatorScanner: op,
-		ModelScanner:    model,
-		EnumScanner:     enum,
+func NewOpenApiGenerator() *OpenApiGenerator {
+	return &OpenApiGenerator{
+		api: oas.NewOpenAPI(),
 	}
 }
 
@@ -37,22 +33,12 @@ func (a *OpenApiGenerator) Load(cwd string) {
 			logrus.Panicf("entry path does not exist: %s", entryPath)
 		}
 	}
-	cfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedSyntax | packages.NeedDeps | packages.NeedFiles | packages.NeedImports | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedTypesSizes,
-		Dir:  entryPath,
-	}
-
-	pkgs, err := packages.Load(cfg)
+	pkg, err := packagex.Load(entryPath)
 	if err != nil {
 		logrus.Panic(err)
 	}
 
-	errs := packages.PrintErrors(pkgs)
-	if errs > 0 {
-		logrus.Panicf("packages.PrintErrors(a.pkgs) = %d", errs)
-	}
-
-	a.pkgs = pkgs
+	a.pkg = pkg
 
 	proj := project.Project{}
 	err = proj.UnmarshalFromFile(cwd, "")
@@ -60,59 +46,107 @@ func (a *OpenApiGenerator) Load(cwd string) {
 		logrus.Panic(err)
 	}
 
-	a.Api.ServiceName = proj.Name
+	a.routerScanner = openapi_scanner.NewRouterScanner(pkg)
 }
 
 func (a *OpenApiGenerator) Pick() {
-	packages.Visit(a.pkgs, nil, func(i *packages.Package) {
-		for _, f := range i.Syntax {
-			ast.Inspect(f, a.ModelScanner.NewInspector(i))
-		}
-	})
-	packages.Visit(a.pkgs, nil, func(i *packages.Package) {
-		for _, f := range i.Syntax {
-			ast.Inspect(f, a.OperatorScanner.NewInspector(i))
-		}
-	})
+	var router = findRootRouter(a.pkg)
 
-	a.Api.WalkOperators(func(g *api.OperatorGroup) {
-		g.WalkMethods(func(m *api.OperatorMethod) {
-			m.WalkInputs(func(i string) {
-				model := a.ModelScanner.GetModelByID(i)
-				if model != nil {
-					a.RecursiveAddModel(model)
-				}
-			})
-			m.WalkOutputs(func(i string) {
-				model := a.ModelScanner.GetModelByID(i)
-				if model != nil {
-					a.RecursiveAddModel(model)
-				}
-			})
-		})
-	})
+	if router == nil {
+		return
+	}
+
 }
 
 func (a *OpenApiGenerator) Output(outputPath string) Outputs {
-	data, err := json.MarshalIndent(a.Api, "", "    ")
+	data, err := json.MarshalIndent(a.api, "", "    ")
 	if err != nil {
 		logrus.Panic(err)
 	}
 	return Outputs{
-		path.Join(outputPath, "api.json"): string(data),
+		path.Join(outputPath, "openapi.json"): string(data),
 	}
 }
 
-func (a *OpenApiGenerator) RecursiveAddModel(model *api.OperatorModel) {
-	a.Api.AddModel(model)
-	model.WalkFields(func(f api.OperatorField) {
-		importPath := f.Imports
-		if importPath == "" {
-			importPath = model.Package
+func runnerFunc(node ast.Node) (runner *ast.FuncDecl) {
+	switch n := node.(type) {
+	case *ast.CallExpr:
+		if len(n.Args) > 0 {
+			if selectorExpr, ok := n.Fun.(*ast.SelectorExpr); ok {
+				if selectorExpr.Sel.Name == "NewApplication" {
+					switch node := n.Args[0].(type) {
+					case *ast.SelectorExpr:
+						runner = node.Sel.Obj.Decl.(*ast.FuncDecl)
+					case *ast.Ident:
+						runner = node.Obj.Decl.(*ast.FuncDecl)
+					case *ast.FuncLit:
+						funcDec := &ast.FuncDecl{
+							Doc:  nil,
+							Recv: nil,
+							Name: nil,
+							Type: node.Type,
+							Body: node.Body,
+						}
+						runner = funcDec
+					}
+					return
+				}
+			}
 		}
-		subModel := a.ModelScanner.GetModel(f.Type, importPath)
-		if subModel != nil {
-			a.RecursiveAddModel(subModel)
+	}
+	return nil
+}
+
+func rootRouter(node ast.Node, p *packagex.Package) *types.Var {
+	switch n := node.(type) {
+	case *ast.CallExpr:
+		if len(n.Args) > 0 {
+			if selectorExpr, ok := n.Fun.(*ast.SelectorExpr); ok {
+				if selectorExpr.Sel.Name == "Serve" {
+					switch node := n.Args[0].(type) {
+					case *ast.SelectorExpr:
+						return p.TypesInfo.ObjectOf(node.Sel).(*types.Var)
+					case *ast.Ident:
+						return p.TypesInfo.ObjectOf(node).(*types.Var)
+					}
+				}
+			}
 		}
-	})
+	}
+	return nil
+}
+
+func findRootRouter(p *packagex.Package) (router *types.Var) {
+	for ident, def := range p.TypesInfo.Defs {
+		if typFunc, ok := def.(*types.Func); ok {
+			// 搜寻main函数
+			if typFunc.Name() != "main" {
+				continue
+			}
+
+			// 搜寻runner方法
+			var runner *ast.FuncDecl
+			ast.Inspect(ident.Obj.Decl.(*ast.FuncDecl), func(node ast.Node) bool {
+				runnerDecl := runnerFunc(node)
+				if runnerDecl != nil {
+					runner = runnerDecl
+					return false
+				}
+				return true
+			})
+
+			// 搜寻router入口
+			if runner != nil {
+				ast.Inspect(runner, func(node ast.Node) bool {
+					if routerVar := rootRouter(node, p); routerVar != nil {
+						router = routerVar
+						return false
+					}
+					return true
+				})
+			}
+			return
+		}
+	}
+	return
 }
