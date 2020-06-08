@@ -333,12 +333,12 @@ const (
 `, e.Name, e.ConstPrefix()+"_UNKNOWN "+e.Name+" = iota")
 
 	sort.Slice(e.Options, func(i, j int) bool {
-		return e.Options[i].Val.(float64) < e.Options[j].Val.(float64)
+		return e.Options[i].Val < e.Options[j].Val
 	})
 
 	var index = 1
 	for _, enum := range e.Options {
-		val := int(enum.Val.(float64))
+		val := enum.Val
 		if val > index {
 			contentStr += `(
 

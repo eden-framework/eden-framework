@@ -107,7 +107,7 @@ func (s *EnumScanner) Enum(typeFullName string) api.Enum {
 	return s.Enums[typeFullName].Sort()
 }
 
-func (s *EnumScanner) addEnum(typeFullName string, value interface{}, val interface{}, label string) {
+func (s *EnumScanner) addEnum(typeFullName string, value interface{}, val int, label string) {
 	s.Enums[typeFullName] = append(s.Enums[typeFullName], enumeration.EnumOption{
 		Val:   val,
 		Value: value,
@@ -115,17 +115,11 @@ func (s *EnumScanner) addEnum(typeFullName string, value interface{}, val interf
 	})
 }
 
-func getConstVal(constVal constant.Value) interface{} {
+func getConstVal(constVal constant.Value) int {
 	switch constVal.Kind() {
-	case constant.String:
-		stringVal, _ := strconv.Unquote(constVal.String())
-		return stringVal
 	case constant.Int:
 		intVal, _ := strconv.ParseInt(constVal.String(), 10, 64)
-		return intVal
-	case constant.Float:
-		floatVal, _ := strconv.ParseFloat(constVal.String(), 10)
-		return floatVal
+		return int(intVal)
 	}
-	return nil
+	return 0
 }

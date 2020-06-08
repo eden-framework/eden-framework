@@ -162,14 +162,14 @@ func (scanner *RouterScanner) OperatorTypeNameFromType(typ types.Type) *Operator
 	case *types.Pointer:
 		return scanner.OperatorTypeNameFromType(t.Elem())
 	case *types.Named:
-		typeName := t.Obj()
+		//typeName := t.Obj()
 
-		if operator := scanner.operatorScanner.Operator(typeName); operator != nil {
-			return &OperatorWithTypeName{
-				Operator: operator,
-				TypeName: typeName,
-			}
-		}
+		//if operator := scanner.operatorScanner.Operator(typeName); operator != nil {
+		//	return &OperatorWithTypeName{
+		//		Operator: operator,
+		//		TypeName: typeName,
+		//	}
+		//}
 
 		return nil
 	default:

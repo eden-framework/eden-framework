@@ -6,7 +6,6 @@ import (
 	"github.com/profzone/eden-framework/pkg/courier/httpx"
 	"github.com/profzone/eden-framework/pkg/courier/status_error"
 	"github.com/profzone/eden-framework/pkg/courier/transport_http"
-	"github.com/profzone/eden-framework/pkg/courier/transport_http/transform"
 	"github.com/profzone/eden-framework/pkg/packagex"
 	"github.com/profzone/eden-framework/pkg/reflectx"
 	"github.com/sirupsen/logrus"
@@ -156,10 +155,10 @@ func (scanner *OperatorScanner) scanReturns(op *Operator, typeName *types.TypeNa
 				}
 			}
 
-			if scanner.StatusErrScanner.StatusErrType != nil {
-				op.StatusErrors = scanner.StatusErrScanner.StatusErrorsInFunc(method.(*reflectx.TMethod).Func)
-				op.StatusErrorSchema = scanner.DefinitionScanner.GetSchemaByType(scanner.StatusErrScanner.StatusErrType)
-			}
+			//if scanner.StatusErrScanner.StatusErrType != nil {
+			//	op.StatusErrors = scanner.StatusErrScanner.StatusErrorsInFunc(method.(*reflectx.TMethod).Func)
+			//	op.StatusErrorSchema = scanner.DefinitionScanner.GetSchemaByType(scanner.StatusErrScanner.StatusErrType)
+			//}
 		}
 	}
 }
@@ -216,7 +215,7 @@ func (scanner *OperatorScanner) getResponse(tpe types.Type, expr ast.Expr) (stat
 		contentType = httpx.MIME_JSON
 	}
 
-	response.AddContent(contentType, oas.NewMediaTypeWithSchema(scanner.DefinitionScanner.GetSchemaByType(tpe)))
+	//response.AddContent(contentType, oas.NewMediaTypeWithSchema(scanner.DefinitionScanner.GetSchemaByType(tpe)))
 
 	return
 }
@@ -229,39 +228,39 @@ func (scanner *OperatorScanner) scanParameterOrRequestBody(op *Operator, typeStr
 			panic(fmt.Errorf("missing tag `in` for %s of %s", field.Name(), op.ID))
 		}
 
-		name, flags := tagValueAndFlagsByTagString(field.Tag().Get("name"))
+		//name, flags := tagValueAndFlagsByTagString(field.Tag().Get("name"))
 
-		schema := scanner.DefinitionScanner.propSchemaByField(
-			field.Name(),
-			field.Type().(*reflectx.TType).Type,
-			field.Tag(),
-			name,
-			flags,
-			scanner.pkg.CommentsOf(scanner.pkg.IdentOf(field.(*reflectx.TStructField).Var)),
-		)
+		//schema := scanner.DefinitionScanner.propSchemaByField(
+		//	field.Name(),
+		//	field.Type().(*reflectx.TType).Type,
+		//	field.Tag(),
+		//	name,
+		//	flags,
+		//	scanner.pkg.CommentsOf(scanner.pkg.IdentOf(field.(*reflectx.TStructField).Var)),
+		//)
 
-		transformer, err := transform.TransformerMgrDefault.NewTransformer(nil, field.Type(), transform.TransformerOption{
-			MIME: field.Tag().Get("mime"),
-		})
+		//transformer, err := transform.TransformerMgrDefault.NewTransformer(nil, field.Type(), transform.TransformerOption{
+		//	MIME: field.Tag().Get("mime"),
+		//})
 
-		if err != nil {
-			panic(err)
-		}
+		//if err != nil {
+		//	panic(err)
+		//}
 
-		switch location {
-		case "body":
-			reqBody := oas.NewRequestBody("", true)
-			reqBody.AddContent(transformer.Names()[0], oas.NewMediaTypeWithSchema(schema))
-			op.SetRequestBody(reqBody)
-		case "query":
-			op.AddNonBodyParameter(oas.QueryParameter(fieldDisplayName, schema, !omitempty))
-		case "cookie":
-			op.AddNonBodyParameter(oas.CookieParameter(fieldDisplayName, schema, !omitempty))
-		case "header":
-			op.AddNonBodyParameter(oas.HeaderParameter(fieldDisplayName, schema, !omitempty))
-		case "path":
-			op.AddNonBodyParameter(oas.PathParameter(fieldDisplayName, schema))
-		}
+		//switch location {
+		//case "body":
+		//	reqBody := oas.NewRequestBody("", true)
+		//	reqBody.AddContent(transformer.Names()[0], oas.NewMediaTypeWithSchema(schema))
+		//	op.SetRequestBody(reqBody)
+		//case "query":
+		//	op.AddNonBodyParameter(oas.QueryParameter(fieldDisplayName, schema, !omitempty))
+		//case "cookie":
+		//	op.AddNonBodyParameter(oas.CookieParameter(fieldDisplayName, schema, !omitempty))
+		//case "header":
+		//	op.AddNonBodyParameter(oas.HeaderParameter(fieldDisplayName, schema, !omitempty))
+		//case "path":
+		//	op.AddNonBodyParameter(oas.PathParameter(fieldDisplayName, schema))
+		//}
 
 		return true
 	}, "in")
