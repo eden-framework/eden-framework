@@ -2,7 +2,6 @@ package packagex
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"go/ast"
 	"go/token"
 	"go/types"

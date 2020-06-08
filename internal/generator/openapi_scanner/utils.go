@@ -94,3 +94,7 @@ func tagValueAndFlagsByTagString(tagString string) (string, map[string]bool) {
 	}
 	return v, tagFlags
 }
+
+func dropMarkedLines(lines []string) string {
+	return strings.Join(filterMarkedLines(lines), "\n")
+}

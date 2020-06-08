@@ -6,7 +6,7 @@ import (
 )
 
 type EnumOption struct {
-	Val   interface{} `json:"val"`
+	Val   int         `json:"val"`
 	Value interface{} `json:"value"`
 	Label string      `json:"label"`
 }

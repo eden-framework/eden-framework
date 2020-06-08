@@ -31,6 +31,8 @@ replace (
 require (
 	github.com/fatih/color v1.7.0
 	github.com/go-courier/oas v1.2.0
+	github.com/go-courier/packagesx v1.0.2
+	github.com/go-courier/statuserror v1.1.1
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/golang/protobuf v1.3.2 // indirect
@@ -54,9 +56,8 @@ require (
 	github.com/stretchr/testify v1.4.0
 	github.com/vmihailenco/msgpack v4.0.4+incompatible
 	golang.org/x/crypto v0.0.0-20191227163750-53104e6ec876 // indirect
-	golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 // indirect
 	golang.org/x/sys v0.0.0-20200103143344-a1369afcdac7 // indirect
-	golang.org/x/tools v0.0.0-20200103221440-774c71fcf114
+	golang.org/x/tools v0.0.0-20200330040139-fa3cc9eebcfe
 	google.golang.org/grpc v1.23.0
 	gopkg.in/robfig/cron.v2 v2.0.0-20150107220207-be2e0b0deed5
 	gopkg.in/yaml.v2 v2.2.7
