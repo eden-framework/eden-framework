@@ -2,6 +2,7 @@ package generator
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/go-courier/oas"
 	"github.com/profzone/eden-framework/internal/generator/openapi_scanner"
 	"github.com/profzone/eden-framework/internal/project"
@@ -11,6 +12,8 @@ import (
 	"go/types"
 	"os"
 	"path"
+	"regexp"
+	"strings"
 )
 
 type OpenApiGenerator struct {
@@ -50,12 +53,61 @@ func (a *OpenApiGenerator) Load(cwd string) {
 }
 
 func (a *OpenApiGenerator) Pick() {
-	var router = findRootRouter(a.pkg)
+	defer func() {
+		a.routerScanner.OperatorScanner()
+	}()
 
-	if router == nil {
+	var routerVar = findRootRouter(a.pkg)
+	if routerVar == nil {
 		return
 	}
 
+	router := a.routerScanner.Router(routerVar)
+	routes := router.Routes()
+	operationIDs := map[string]*openapi_scanner.Route{}
+	for _, r := range routes {
+		method := r.Method()
+		operation := a.OperationByOperatorTypes(method, r.Operators...)
+		if _, exists := operationIDs[operation.OperationId]; exists {
+			panic(fmt.Errorf("operationID %s should be unique", operation.OperationId))
+		}
+		operationIDs[operation.OperationId] = r
+		a.api.AddOperation(oas.HttpMethod(strings.ToLower(method)), a.patchPath(r.Path(), operation), operation)
+	}
+}
+
+func (a *OpenApiGenerator) OperationByOperatorTypes(method string, operatorTypes ...*openapi_scanner.OperatorWithTypeName) *oas.Operation {
+	operation := &oas.Operation{}
+
+	length := len(operatorTypes)
+
+	for idx := range operatorTypes {
+		operatorTypes[idx].BindOperation(method, operation, idx == length-1)
+	}
+
+	return operation
+}
+
+var reHttpRouterPath = regexp.MustCompile("/:([^/]+)")
+
+func (a *OpenApiGenerator) patchPath(openapiPath string, operation *oas.Operation) string {
+	return reHttpRouterPath.ReplaceAllStringFunc(openapiPath, func(str string) string {
+		name := reHttpRouterPath.FindAllStringSubmatch(str, -1)[0][1]
+
+		var isParameterDefined = false
+
+		for _, parameter := range operation.Parameters {
+			if parameter.In == "path" && parameter.Name == name {
+				isParameterDefined = true
+			}
+		}
+
+		if isParameterDefined {
+			return "/{" + name + "}"
+		}
+
+		return "/0"
+	})
 }
 
 func (a *OpenApiGenerator) Output(outputPath string) Outputs {

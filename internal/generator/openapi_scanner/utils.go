@@ -98,3 +98,11 @@ func tagValueAndFlagsByTagString(tagString string) (string, map[string]bool) {
 func dropMarkedLines(lines []string) string {
 	return strings.Join(filterMarkedLines(lines), "\n")
 }
+
+func fullTypeName(typeName *types.TypeName) string {
+	pkg := typeName.Pkg()
+	if pkg != nil {
+		return pkg.Path() + "." + typeName.Name()
+	}
+	return typeName.Name()
+}

@@ -13,6 +13,7 @@ import (
 	"go/types"
 	"net/http"
 	"reflect"
+	"runtime/debug"
 	"sort"
 	"strconv"
 	"strings"
@@ -27,6 +28,45 @@ func NewOperatorScanner(pkg *packagex.Package) *OperatorScanner {
 	return &OperatorScanner{
 		pkg: pkg,
 	}
+}
+
+func (scanner *OperatorScanner) Operator(typeName *types.TypeName) *Operator {
+	if typeName == nil {
+		return nil
+	}
+
+	if operator, ok := scanner.operators[typeName]; ok {
+		return operator
+	}
+
+	logrus.Debugf("scanning Operator `%s.%s`", typeName.Pkg().Path(), typeName.Name())
+
+	defer func() {
+		if e := recover(); e != nil {
+			panic(fmt.Errorf("scan Operator `%s` failed, panic: %s; calltrace: %s", fullTypeName(typeName), fmt.Sprint(e), string(debug.Stack())))
+		}
+	}()
+
+	if typeStruct, ok := typeName.Type().Underlying().(*types.Struct); ok {
+		operator := &Operator{}
+
+		operator.Tag = scanner.tagFrom(typeName.Pkg().Path())
+
+		scanner.scanRouteMeta(operator, typeName)
+		scanner.scanParameterOrRequestBody(operator, typeStruct)
+		scanner.scanReturns(operator, typeName)
+
+		// cached scanned
+		if scanner.operators == nil {
+			scanner.operators = map[*types.TypeName]*Operator{}
+		}
+
+		scanner.operators[typeName] = operator
+
+		return operator
+	}
+
+	return nil
 }
 
 func (scanner *OperatorScanner) singleReturnOf(typeName *types.TypeName, name string) (string, bool) {
