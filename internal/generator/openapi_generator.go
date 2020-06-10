@@ -54,7 +54,7 @@ func (a *OpenApiGenerator) Load(cwd string) {
 
 func (a *OpenApiGenerator) Pick() {
 	defer func() {
-		a.routerScanner.OperatorScanner()
+		a.routerScanner.OperatorScanner().BindSchemas(a.api)
 	}()
 
 	var routerVar = findRootRouter(a.pkg)

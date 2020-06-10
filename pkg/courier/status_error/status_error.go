@@ -11,6 +11,14 @@ import (
 // code, key, msg, desc, canBeTalkError
 var RegexpStatusError = regexp.MustCompile(`@httpError\(([0-9]+),(.+),"(.+)?","(.+)?",(false|true)\);`)
 
+func NewStatusError(key string, code int64, msg string) *StatusError {
+	return &StatusError{
+		Key:  key,
+		Code: code,
+		Msg:  msg,
+	}
+}
+
 func ParseString(s string) *StatusError {
 	matched := RegexpStatusError.FindStringSubmatch(s)
 	if len(matched) != 6 {
