@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"encoding"
-	"encoding/json"
 	"fmt"
 	"time"
 )
@@ -75,19 +74,4 @@ func (ds *DurationString) UnmarshalText(data []byte) (err error) {
 
 func (ds DurationString) IsZero() bool {
 	return time.Duration(ds).Nanoseconds() == 0
-}
-
-var _ interface {
-	json.Marshaler
-	json.Unmarshaler
-} = (*DurationString)(nil)
-
-func (ds *DurationString) UnmarshalJSON(data []byte) (err error) {
-	str := string(data)
-	*ds, err = ParseDurationStringFromString(str)
-	return
-}
-
-func (ds DurationString) MarshalJSON() ([]byte, error) {
-	return []byte(ds.String()), nil
 }
