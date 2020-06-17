@@ -81,7 +81,6 @@ func (app *Application) Start() {
 
 	if err := app.Runner(app); err != nil {
 		logrus.Error(err)
-		os.Exit(1)
 	}
 }
 
