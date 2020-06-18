@@ -99,9 +99,9 @@ func (app *Application) WaitStop(clearFunc func(ctx *context.WaitStopContext) er
 	s := <-sig
 	err := clearFunc(app.ctx)
 	if err != nil {
-		logrus.Errorf("Exit with error: %v", err)
+		logrus.Errorf("shutdown with error: %v", err)
 	} else {
-		logrus.Infof("Exit with signal: %s", s.String())
+		logrus.Infof("graceful shutdown with signal: %s", s.String())
 	}
 }
 
