@@ -1,21 +1,37 @@
 package context
 
 import (
-	"github.com/sirupsen/logrus"
+	"context"
+	"sync"
 )
 
-func NewLogIDHook() *LogIDHook {
-	return &LogIDHook{}
+type WaitStopContext struct {
+	ctx        context.Context
+	cancelFunc context.CancelFunc
+	wg         sync.WaitGroup
 }
 
-type LogIDHook struct {
+func NewWaitStopContext() *WaitStopContext {
+	ctx, cancel := context.WithCancel(context.Background())
+	return &WaitStopContext{
+		ctx:        ctx,
+		cancelFunc: cancel,
+	}
 }
 
-func (hook *LogIDHook) Fire(entry *logrus.Entry) error {
-	entry.Data["log_id"] = GetLogID()
-	return nil
+func (c *WaitStopContext) Cancel() {
+	c.cancelFunc()
+	c.wg.Wait()
 }
 
-func (hook *LogIDHook) Levels() []logrus.Level {
-	return logrus.AllLevels
+func (c *WaitStopContext) Add(delta int) {
+	c.wg.Add(delta)
+}
+
+func (c *WaitStopContext) Finish() {
+	c.wg.Done()
+}
+
+func (c *WaitStopContext) Done() <-chan struct{} {
+	return c.ctx.Done()
 }

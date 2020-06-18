@@ -4,6 +4,7 @@ import (
 	"github.com/profzone/eden-framework/internal"
 	"github.com/profzone/eden-framework/internal/generator"
 	"github.com/profzone/eden-framework/internal/project"
+	"github.com/profzone/eden-framework/pkg/context"
 	str "github.com/profzone/eden-framework/pkg/strings"
 	"github.com/profzone/envconfig"
 	"github.com/sirupsen/logrus"
@@ -16,6 +17,7 @@ import (
 )
 
 type Application struct {
+	ctx                *context.WaitStopContext
 	p                  *project.Project
 	envConfigPrefix    string
 	outputDockerConfig bool
@@ -26,6 +28,7 @@ type Application struct {
 
 func NewApplication(runner func(app *Application) error, config interface{}) *Application {
 	p := &project.Project{}
+	ctx := context.NewWaitStopContext()
 	err := p.UnmarshalFromFile("", "")
 	if err != nil {
 		logrus.Panic(err)
@@ -38,6 +41,7 @@ func NewApplication(runner func(app *Application) error, config interface{}) *Ap
 
 	return &Application{
 		p:      p,
+		ctx:    ctx,
 		Runner: runner,
 		Config: config,
 	}
@@ -84,7 +88,7 @@ func (app *Application) Start() {
 	}
 }
 
-func (app *Application) WaitStop(clearFunc func() error) {
+func (app *Application) WaitStop(clearFunc func(ctx *context.WaitStopContext) error) {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig,
 		syscall.SIGHUP,
@@ -93,10 +97,14 @@ func (app *Application) WaitStop(clearFunc func() error) {
 		syscall.SIGQUIT)
 
 	s := <-sig
-	err := clearFunc()
+	err := clearFunc(app.ctx)
 	if err != nil {
 		logrus.Errorf("Exit with error: %v", err)
 	} else {
 		logrus.Infof("Exit with signal: %s", s.String())
 	}
+}
+
+func (app *Application) Context() *context.WaitStopContext {
+	return app.ctx
 }
