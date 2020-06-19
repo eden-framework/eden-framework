@@ -17,7 +17,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/profzone/eden-framework/internal/project"
 	"github.com/spf13/cobra"
 )
 
@@ -28,12 +27,6 @@ var ciCmd = &cobra.Command{
 	Long:  fmt.Sprintf("%s\nci/cd workflow", CommandHelpHeader),
 }
 
-var currentProject = &project.Project{}
-
 func init() {
 	rootCmd.AddCommand(ciCmd)
-	_ = currentProject.UnmarshalFromFile("", "")
-	//if err != nil {
-	//	logrus.Panicf("currentProject.UnmarshalFromFile err: %v", err)
-	//}
 }

@@ -29,6 +29,7 @@ replace (
 )
 
 require (
+	github.com/AlecAivazis/survey/v2 v2.0.7
 	github.com/fatih/color v1.7.0
 	github.com/go-courier/codegen v1.1.2 // indirect
 	github.com/go-courier/oas v1.2.0
