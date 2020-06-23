@@ -24,5 +24,6 @@ type CIDronePipeline struct {
 
 type CIDronePipelineDocker struct {
 	CIDronePipeline
-	Trigger PipelineTrigger `yaml:"trigger"`
+	Trigger  *PipelineTrigger  `yaml:"trigger,omitempty"`
+	Platform *PipelinePlatform `yaml:"platform,omitempty"`
 }
