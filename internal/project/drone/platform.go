@@ -3,9 +3,13 @@ package drone
 import "github.com/profzone/eden-framework/internal/project/drone/enums"
 
 type PipelinePlatform struct {
-	OS           enums.DroneCiPlatformOs   `yaml:"os"`
-	Architecture enums.DroneCiPlatformArch `yaml:"arch"`
-	Version      int                       `yaml:"version,omitempty"`
+	OS           enums.DroneCiPlatformOs   `yaml:"os" json:"os"`
+	Architecture enums.DroneCiPlatformArch `yaml:"arch" json:"arch"`
+	Version      int                       `yaml:"version,omitempty" json:"version,omitempty"`
+}
+
+func NewPipelinePlatform() *PipelinePlatform {
+	return new(PipelinePlatform)
 }
 
 func (p *PipelinePlatform) WithOS(os enums.DroneCiPlatformOs) *PipelinePlatform {

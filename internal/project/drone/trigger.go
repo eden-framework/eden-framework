@@ -3,21 +3,25 @@ package drone
 import "github.com/profzone/eden-framework/internal/project/drone/enums"
 
 type PipelineTriggerIncludeAndExcludeString struct {
-	Include []string `yaml:"include"`
-	Exclude []string `yaml:"exclude"`
+	Include []string `yaml:"include" json:"include"`
+	Exclude []string `yaml:"exclude" json:"exclude"`
 }
 type PipelineTriggerIncludeAndExcludeEvent struct {
-	Include []enums.DroneCiTriggerEvent `yaml:"include"`
-	Exclude []enums.DroneCiTriggerEvent `yaml:"exclude"`
+	Include []enums.DroneCiTriggerEvent `yaml:"include" json:"include"`
+	Exclude []enums.DroneCiTriggerEvent `yaml:"exclude" json:"exclude"`
 }
 
 type PipelineTrigger struct {
-	Branch     *PipelineTriggerIncludeAndExcludeString `yaml:"branch,omitempty"`
-	Event      *PipelineTriggerIncludeAndExcludeEvent  `yaml:"event,omitempty"`
-	Reference  *PipelineTriggerIncludeAndExcludeString `yaml:"ref,omitempty"`
-	Repository *PipelineTriggerIncludeAndExcludeString `yaml:"repo,omitempty"`
-	Status     enums.DroneCiTriggerStatus              `yaml:"status,omitempty"`
-	Target     *PipelineTriggerIncludeAndExcludeString `yaml:"target,omitempty"`
+	Branch     *PipelineTriggerIncludeAndExcludeString `yaml:"branch,omitempty" json:"branch,omitempty"`
+	Event      *PipelineTriggerIncludeAndExcludeEvent  `yaml:"event,omitempty" json:"event,omitempty"`
+	Reference  *PipelineTriggerIncludeAndExcludeString `yaml:"ref,omitempty" json:"ref,omitempty"`
+	Repository *PipelineTriggerIncludeAndExcludeString `yaml:"repo,omitempty" json:"repo,omitempty"`
+	Status     enums.DroneCiTriggerStatus              `yaml:"status,omitempty" json:"status,omitempty"`
+	Target     *PipelineTriggerIncludeAndExcludeString `yaml:"target,omitempty" json:"target,omitempty"`
+}
+
+func NewPipelineTrigger() *PipelineTrigger {
+	return new(PipelineTrigger)
 }
 
 func (t *PipelineTrigger) WithBranchInclude(name string) *PipelineTrigger {

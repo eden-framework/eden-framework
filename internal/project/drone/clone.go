@@ -1,8 +1,12 @@
 package drone
 
 type PipelineClone struct {
-	Depth   int  `yaml:"depth"`
-	Disable bool `yaml:"disable"`
+	Depth   int  `yaml:"depth" json:"depth"`
+	Disable bool `yaml:"disable" json:"disable"`
+}
+
+func NewPipelineClone() *PipelineClone {
+	return new(PipelineClone)
 }
 
 func (c *PipelineClone) WithDepth(d int) *PipelineClone {
