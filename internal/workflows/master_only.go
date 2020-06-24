@@ -11,7 +11,9 @@ func init() {
 var MasterOnly = &project.Workflow{
 	BranchFlows: project.BranchFlows{
 		"master": {
-			Env: "STAGING",
+			Env: map[string]string{
+				"GOENV": "STAGING",
+			},
 			Jobs: project.Jobs{
 				project.STAGE_TEST:   DefaultJobForTest,
 				project.STAGE_BUILD:  DefaultJobForBuild,

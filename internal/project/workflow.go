@@ -1,6 +1,7 @@
 package project
 
 import (
+	"github.com/imdario/mergo"
 	"sort"
 
 	"gopkg.in/yaml.v2"
@@ -34,13 +35,12 @@ type Workflow struct {
 	BranchFlows BranchFlows `yaml:"branch_flows,inline"`
 }
 
-func (w Workflow) GetAvailableEnv() (envs []string) {
+func (w Workflow) GetAvailableEnv() (envs map[string]string) {
 	for _, flow := range w.BranchFlows {
-		if flow.Env != "" {
-			envs = append(envs, flow.Env)
+		if flow.Env != nil && len(flow.Env) > 0 {
+			_ = mergo.Merge(&envs, flow.Env, mergo.WithOverride)
 		}
 	}
-	sort.Strings(envs)
 	return
 }
 
@@ -103,10 +103,10 @@ func (branchFlows BranchFlows) Merge(nextBranches BranchFlows) BranchFlows {
 }
 
 type BranchFlow struct {
-	Skip    bool   `yaml:"skip,omitempty"`
-	Extends string `yaml:"extends,omitempty"`
-	Env     string `yaml:"env,omitempty"`
-	Jobs    Jobs   `yaml:"jobs,inline,omitempty"`
+	Skip    bool              `yaml:"skip,omitempty"`
+	Extends string            `yaml:"extends,omitempty"`
+	Env     map[string]string `yaml:"env,omitempty"`
+	Jobs    Jobs              `yaml:"jobs,inline,omitempty"`
 }
 
 func (branchFlow BranchFlow) MarshalYAML() (interface{}, error) {
@@ -117,7 +117,7 @@ func (branchFlow BranchFlow) MarshalYAML() (interface{}, error) {
 	// sortable config
 	slice := yaml.MapSlice{}
 
-	if branchFlow.Env != "" {
+	if branchFlow.Env != nil && len(branchFlow.Env) > 0 {
 		slice = append(slice, yaml.MapItem{
 			Key:   "env",
 			Value: branchFlow.Env,
@@ -147,8 +147,9 @@ func (branchFlow *BranchFlow) UnmarshalYAML(unmarshal func(interface{}) error) e
 }
 
 func (branchFlow BranchFlow) Merge(nextBranchFlow *BranchFlow) BranchFlow {
-	if nextBranchFlow.Env != "" {
+	if nextBranchFlow.Env != nil && len(nextBranchFlow.Env) > 0 {
 		branchFlow.Env = nextBranchFlow.Env
+		_ = mergo.Merge(&branchFlow.Env, nextBranchFlow.Env, mergo.WithOverride)
 	}
 	if nextBranchFlow.Extends != "" {
 		branchFlow.Extends = nextBranchFlow.Extends

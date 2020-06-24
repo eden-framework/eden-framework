@@ -18,7 +18,7 @@ const DefaultConfigFile = "profzone.yml"
 
 var (
 	DOCKER_REGISTRY_KEY = "PROFZONE_DOCKER_REGISTRY"
-	DOCKER_REGISTRY     = "registry.profzone.net:5000"
+	DOCKER_REGISTRY     = "registry.cn-hangzhou.aliyuncs.com"
 )
 
 type Project struct {

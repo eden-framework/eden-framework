@@ -26,7 +26,7 @@ func (w *Workflow) ToCIConfig(project *Project) *CIConfig {
 
 					ciJob := NewCIJob(stage).
 						WithTags(project.Group).
-						WithEnv(branchFlow.Env).
+						WithEnv(branchFlow.Env["GOENV"]).
 						WithImage(fmt.Sprintf("${%s}/${%s}", DOCKER_REGISTRY_KEY, strings.ToUpper(envVars.Parse(job.Builder)))).
 						WithArtifacts(job.Artifacts).
 						WithScript(job.Run...)

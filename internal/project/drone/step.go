@@ -1,6 +1,7 @@
 package drone
 
 import (
+	"github.com/imdario/mergo"
 	"github.com/profzone/eden-framework/internal/project/drone/enums"
 )
 
@@ -9,7 +10,7 @@ type PipelineStep struct {
 	Image       string                   `yaml:"image" json:"image"`
 	Pull        enums.DroneCiStepPull    `yaml:"pull,omitempty" json:"pull,omitempty"`
 	Commands    []string                 `yaml:"commands,omitempty" json:"commands,omitempty"`
-	Environment map[string]interface{}   `yaml:"environment,omitempty" json:"environment,omitempty"`
+	Environment map[string]string        `yaml:"environment,omitempty" json:"environment,omitempty"`
 	Settings    map[string]interface{}   `yaml:"settings,omitempty" json:"settings,omitempty"`
 	When        *PipelineTrigger         `yaml:"when,omitempty" json:"when,omitempty"`
 	Failure     enums.DroneCiStepFailure `yaml:"failure,omitempty" json:"failure,omitempty"`
@@ -38,7 +39,12 @@ func (s *PipelineStep) WithCommands(cmd ...string) *PipelineStep {
 	return s
 }
 
-func (s *PipelineStep) WithEnv(key string, value interface{}) *PipelineStep {
+func (s *PipelineStep) WithEnvs(envs map[string]string) *PipelineStep {
+	_ = mergo.Merge(&s.Environment, envs)
+	return s
+}
+
+func (s *PipelineStep) WithEnv(key string, value string) *PipelineStep {
 	s.Environment[key] = value
 	return s
 }

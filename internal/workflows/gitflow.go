@@ -12,7 +12,9 @@ func init() {
 var Gitflow = &project.Workflow{
 	BranchFlows: project.BranchFlows{
 		"develop": {
-			Env: "STAGING",
+			Env: map[string]string{
+				"GOENV": "STAGING",
+			},
 			Jobs: project.Jobs{
 				project.STAGE_TEST:  DefaultJobForTest,
 				project.STAGE_BUILD: DefaultJobForBuild,
@@ -24,8 +26,10 @@ var Gitflow = &project.Workflow{
 				}),
 			},
 		},
-		`/^release\/.*$/`: {
-			Env: "TEST",
+		`release/*`: {
+			Env: map[string]string{
+				"GOENV": "TEST",
+			},
 			Jobs: project.Jobs{
 				project.STAGE_TEST:  DefaultJobForTest,
 				project.STAGE_BUILD: DefaultJobForBuild,
@@ -38,7 +42,9 @@ var Gitflow = &project.Workflow{
 			},
 		},
 		"master": {
-			Env: "DEMO",
+			Env: map[string]string{
+				"GOENV": "DEMO",
+			},
 			Jobs: project.Jobs{
 				project.STAGE_TEST:   DefaultJobForTest,
 				project.STAGE_BUILD:  DefaultJobForBuild,

@@ -114,13 +114,14 @@ func CommandsForShipping(p *Project, push bool) (commands []*exec.Cmd) {
 	}
 
 	if dockerfile.Image == "" {
-		dockerfile.Image = "${PROFZONE_DOCKER_REGISTRY}/${PROJECT_GROUP}/${PROJECT_NAME}:${PROJECT_VERSION}"
+		dockerfile.Image = "${PROFZONE_DOCKER_REGISTRY}/${PROJECT_OWNER}/${PROJECT_NAME}:${PROJECT_VERSION}"
 	}
 
 	if hasDockerfileYaml {
 		p.SetEnviron()
 		dockerfile = dockerfile.AddEnv(EnvVarRef, p.Version.String()+"-"+os.Getenv(EnvVarBuildRef))
 
+		dockerfile.AddEnv("PROJECT_OWNER", p.Owner)
 		dockerfile.AddEnv("PROJECT_GROUP", p.Group)
 		dockerfile.AddEnv("PROJECT_NAME", p.Name)
 		dockerfile.AddEnv("PROJECT_FEATURE", p.Feature)

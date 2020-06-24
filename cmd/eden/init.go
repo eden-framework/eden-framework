@@ -152,7 +152,7 @@ var initCmd = &cobra.Command{
 		}
 		newProject.WriteToFile("./", "profzone.yml")
 		newProject.SetEnviron()
-		newProject.Workflow.TryExtendsOrSetDefaults().ToCIConfig(&newProject).WriteToFile()
+		newProject.Workflow.TryExtendsOrSetDefaults().ToDroneConfig(&newProject).WriteToFile()
 	},
 }
 
