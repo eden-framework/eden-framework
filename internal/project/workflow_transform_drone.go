@@ -10,6 +10,10 @@ import (
 
 func (w *Workflow) ToDroneConfig(p *Project) *drone.CIDronePipelineDocker {
 	config := drone.NewCIDronePipelineDocker()
+	vol := drone.NewPipelineVolume().
+		WithName("workspace").
+		WithTemp()
+	config.Volumes = append(config.Volumes, *vol)
 
 	for branch, branchFlow := range w.BranchFlows {
 		if branchFlow.Skip {
@@ -24,10 +28,15 @@ func (w *Workflow) ToDroneConfig(p *Project) *drone.CIDronePipelineDocker {
 			envVars := executil.EnvVars{}
 			envVars.LoadFromEnviron()
 
+			vol := drone.NewPipelineStepVolume().
+				WithName("workspace").
+				WithPath("/go")
+
 			step := drone.NewPipelineStep().
 				WithName(fmt.Sprintf("%s_%s", str.ToLowerCamelCase(branch), stage)).
 				WithEnvs(branchFlow.Env).
 				WithImage(fmt.Sprintf("${%s}/${%s}", DOCKER_REGISTRY_KEY, strings.ToUpper(envVars.Parse(job.Builder)))).
+				WithVolume(*vol).
 				WithCommands(job.Run...)
 
 			if branch != "*" {
