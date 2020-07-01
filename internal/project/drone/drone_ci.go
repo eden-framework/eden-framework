@@ -72,6 +72,7 @@ func (p *CIDronePipeline) WithType(t enums.DroneCiType) *CIDronePipeline {
 
 type CIDronePipelineDocker struct {
 	CIDronePipeline `yaml:",inline"`
+	Volumes         []PipelineVolume   `yaml:"volumes,omitempty" json:"volumes,omitempty"`
 	Trigger         *PipelineTrigger   `yaml:"trigger,omitempty" json:"trigger,omitempty"`
 	Platform        *PipelinePlatform  `yaml:"platform,omitempty" json:"platform,omitempty"`
 	Workspace       *PipelineWorkspace `yaml:"workspace,omitempty" json:"workspace,omitempty"`
@@ -79,7 +80,6 @@ type CIDronePipelineDocker struct {
 	Steps           []PipelineStep     `yaml:"steps,omitempty" json:"steps,omitempty"`
 	Services        []PipelineService  `yaml:"services,omitempty" json:"services,omitempty"`
 	Node            map[string]string  `yaml:"node,omitempty" json:"node,omitempty"`
-	Volumes         []PipelineVolume   `yaml:"volumes,omitempty" json:"volumes,omitempty"`
 }
 
 func NewCIDronePipelineDocker() *CIDronePipelineDocker {

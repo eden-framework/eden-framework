@@ -11,7 +11,7 @@ import (
 func (w *Workflow) ToDroneConfig(p *Project) *drone.CIDronePipelineDocker {
 	config := drone.NewCIDronePipelineDocker()
 	vol := drone.NewPipelineVolume().
-		WithName("workspace").
+		WithName("temp").
 		WithTemp()
 	config.Volumes = append(config.Volumes, *vol)
 
@@ -29,7 +29,7 @@ func (w *Workflow) ToDroneConfig(p *Project) *drone.CIDronePipelineDocker {
 			envVars.LoadFromEnviron()
 
 			vol := drone.NewPipelineStepVolume().
-				WithName("workspace").
+				WithName("temp").
 				WithPath("/go")
 
 			step := drone.NewPipelineStep().
