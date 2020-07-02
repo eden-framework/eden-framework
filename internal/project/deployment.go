@@ -32,8 +32,8 @@ var (
 var tmpDockerfile = "Dockerfile"
 
 var DockerfileYmlOrders = []string{
-	"dockerfile.default.yml",
-	"dockerfile.yml",
+	"build/dockerfile.default.yml",
+	"build/dockerfile.yml",
 }
 
 var (
