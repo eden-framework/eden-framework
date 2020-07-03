@@ -17,7 +17,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -33,19 +32,4 @@ var ciRunCmd = &cobra.Command{
 func init() {
 	ciCmd.AddCommand(ciRunCmd)
 	ciRunCmd.Flags().BoolVarP(&ciRunCmdInDocker, "in-docker", "d", false, "run script in docker")
-
-	if currentProject.Scripts != nil {
-		for scriptCmd, script := range currentProject.Scripts {
-			ciRunCmd.AddCommand(&cobra.Command{
-				Use:   scriptCmd,
-				Short: script.String(),
-				Run: func(cmd *cobra.Command, args []string) {
-					err := currentProject.RunScript(cmd.Use, ciRunCmdInDocker)
-					if err != nil {
-						logrus.Error(err)
-					}
-				},
-			})
-		}
-	}
 }

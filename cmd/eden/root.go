@@ -3,6 +3,8 @@ package main
 import (
 	"github.com/profzone/eden-framework/internal/project"
 	_ "github.com/profzone/eden-framework/internal/workflows"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 	"os"
 )
 
@@ -34,6 +36,21 @@ func init() {
 		Image:           getEnvOrDefault("BUILDER_GITBOOK", "g7pay/env-node:gitbook-builder"),
 		WorkingDir:      "/go/src/github.com/${PROJECT_GROUP}/${PROJECT_NAME}",
 	})
+
+	if currentProject.Scripts != nil {
+		for scriptCmd, script := range currentProject.Scripts {
+			ciRunCmd.AddCommand(&cobra.Command{
+				Use:   scriptCmd,
+				Short: script.String(),
+				Run: func(cmd *cobra.Command, args []string) {
+					err := currentProject.RunScript(cmd.Use, ciRunCmdInDocker)
+					if err != nil {
+						logrus.Error(err)
+					}
+				},
+			})
+		}
+	}
 }
 
 func getEnvOrDefault(key string, value string) string {
