@@ -15,10 +15,10 @@ var FeaturePR = &project.Workflow{
 				"GOENV": "PROD",
 			},
 			Jobs: project.Jobs{
-				project.STAGE_TEST:  DefaultJobForTest,
-				project.STAGE_BUILD: DefaultJobForBuild,
-				project.STAGE_SHIP:  DefaultJobForShip,
-				project.STAGE_DEPLOY: DefaultJobForDeploy.Merge(&project.Job{
+				DefaultJobForTest,
+				DefaultJobForBuild,
+				DefaultJobForShip,
+				DefaultJobForDeploy.Merge(&project.Job{
 					Run: project.Script{
 						"eden ci deploy --env=STAGING",
 						"eden ci deploy --env=TEST",
@@ -32,10 +32,10 @@ var FeaturePR = &project.Workflow{
 				"GOENV": "STAGING",
 			},
 			Jobs: project.Jobs{
-				project.STAGE_TEST:  DefaultJobForTest,
-				project.STAGE_BUILD: DefaultJobForBuild,
-				project.STAGE_SHIP:  DefaultJobForShip,
-				project.STAGE_DEPLOY: DefaultJobForDeploy.Merge(&project.Job{
+				DefaultJobForTest,
+				DefaultJobForBuild,
+				DefaultJobForShip,
+				DefaultJobForDeploy.Merge(&project.Job{
 					Run: project.Script{
 						"eden ci deploy",
 					},

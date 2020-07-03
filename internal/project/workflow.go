@@ -1,10 +1,9 @@
 package project
 
 import (
+	"fmt"
 	"github.com/imdario/mergo"
 	"sort"
-
-	"gopkg.in/yaml.v2"
 )
 
 var PresetWorkflows = Workflows{}
@@ -53,8 +52,8 @@ func (w Workflow) TryExtendsOrSetDefaults() *Workflow {
 	}
 
 	for _, branchFlow := range w.BranchFlows {
-		for stage, job := range branchFlow.Jobs {
-			switch stage {
+		for _, job := range branchFlow.Jobs {
+			switch job.Stage {
 			case STAGE_TEST, STAGE_BUILD:
 				if job.Builder == "" {
 					job.Builder = "BUILDER_${PROJECT_PROGRAM_LANGUAGE}"
@@ -109,26 +108,6 @@ type BranchFlow struct {
 	Jobs    Jobs              `yaml:"jobs,inline,omitempty"`
 }
 
-func (branchFlow BranchFlow) MarshalYAML() (interface{}, error) {
-	if branchFlow.Skip {
-		return "skip", nil
-	}
-
-	// sortable config
-	slice := yaml.MapSlice{}
-
-	if branchFlow.Env != nil && len(branchFlow.Env) > 0 {
-		slice = append(slice, yaml.MapItem{
-			Key:   "env",
-			Value: branchFlow.Env,
-		})
-	}
-
-	slice = append(slice, branchFlow.Jobs.ToYAMLMapSlice()...)
-
-	return slice, nil
-}
-
 func (branchFlow *BranchFlow) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	var v string
 	err := unmarshal(&v)
@@ -160,39 +139,17 @@ func (branchFlow BranchFlow) Merge(nextBranchFlow *BranchFlow) BranchFlow {
 	return branchFlow
 }
 
-type Jobs map[string]Job
-
-func (jobs Jobs) ToYAMLMapSlice() yaml.MapSlice {
-	slice := yaml.MapSlice{}
-	keys := []string{
-		STAGE_TEST,
-		STAGE_BUILD,
-		STAGE_SHIP,
-		STAGE_DEPLOY,
-	}
-	for _, key := range keys {
-		if j, ok := jobs[key]; ok {
-			slice = append(slice, yaml.MapItem{
-				Key:   key,
-				Value: j,
-			})
-		}
-	}
-	return slice
-}
-
-func (jobs Jobs) MarshalYAML() (interface{}, error) {
-	return jobs.ToYAMLMapSlice(), nil
-}
+type Jobs []Job
 
 func (jobs Jobs) Merge(nextJobs Jobs) Jobs {
 	finalJobs := Jobs{}
-	for name, job := range jobs {
-		if nextJob, ok := nextJobs[name]; ok {
-			finalJobs[name] = job.Merge(&nextJob)
-			delete(nextJobs, name)
+	for _, job := range jobs {
+		index, nextJob := nextJobs.Find(job.Stage)
+		if nextJob != nil {
+			finalJobs = append(finalJobs, nextJob.Merge(&job))
+			nextJobs, _ = nextJobs.Remove(index)
 		} else {
-			finalJobs[name] = job
+			finalJobs = append(finalJobs, job)
 		}
 	}
 	for name, job := range nextJobs {
@@ -201,7 +158,32 @@ func (jobs Jobs) Merge(nextJobs Jobs) Jobs {
 	return finalJobs
 }
 
+func (jobs Jobs) Find(stage string) (int, *Job) {
+	for i, j := range jobs {
+		if j.Stage == stage {
+			return i, &j
+		}
+	}
+	return -1, nil
+}
+
+func (jobs Jobs) Remove(index int) (Jobs, error) {
+	if index == 0 {
+		return jobs[1:], nil
+	} else if index == len(jobs)-1 {
+		return jobs[:len(jobs)-2], nil
+	} else if index > len(jobs)-1 {
+		return jobs, fmt.Errorf("index out of range: %d, length: %d", index, len(jobs)-1)
+	} else {
+		finalJobs := Jobs{}
+		finalJobs = append(finalJobs, jobs[:index-1]...)
+		finalJobs = append(finalJobs, jobs[index+1:]...)
+		return finalJobs, nil
+	}
+}
+
 type Job struct {
+	Stage     string      `yaml:"stage,omitempty"`
 	Skip      bool        `yaml:"skip,omitempty"`
 	Builder   string      `yaml:"builder,omitempty"`
 	Run       Script      `yaml:"run,omitempty"`

@@ -20,7 +20,7 @@ func (w *Workflow) ToDroneConfig(p *Project) *drone.CIDronePipelineDocker {
 			continue
 		}
 
-		for stage, job := range branchFlow.Jobs {
+		for _, job := range branchFlow.Jobs {
 			if job.Skip {
 				continue
 			}
@@ -35,7 +35,7 @@ func (w *Workflow) ToDroneConfig(p *Project) *drone.CIDronePipelineDocker {
 			image := fmt.Sprintf("${%s}/${%s}", DOCKER_REGISTRY_KEY, strings.ToUpper(envVars.Parse(job.Builder)))
 			image = envVars.Parse(image)
 			step := drone.NewPipelineStep().
-				WithName(fmt.Sprintf("%s_%s", str.ToLowerCamelCase(branch), stage)).
+				WithName(fmt.Sprintf("%s_%s", str.ToLowerCamelCase(branch), job.Stage)).
 				WithEnvs(branchFlow.Env).
 				WithImage(image).
 				WithVolume(*vol).

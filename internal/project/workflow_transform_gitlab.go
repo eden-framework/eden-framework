@@ -19,12 +19,12 @@ func (w *Workflow) ToCIConfig(project *Project) *CIConfig {
 
 	for branch, branchFlow := range w.BranchFlows {
 		if !branchFlow.Skip {
-			for stage, job := range branchFlow.Jobs {
+			for _, job := range branchFlow.Jobs {
 				if !job.Skip {
 					envVars := executil.EnvVars{}
 					envVars.LoadFromEnviron()
 
-					ciJob := NewCIJob(stage).
+					ciJob := NewCIJob(job.Stage).
 						WithTags(project.Group).
 						WithEnv(branchFlow.Env["GOENV"]).
 						WithImage(fmt.Sprintf("${%s}/${%s}", DOCKER_REGISTRY_KEY, strings.ToUpper(envVars.Parse(job.Builder)))).
@@ -36,7 +36,7 @@ func (w *Workflow) ToCIConfig(project *Project) *CIConfig {
 					}
 
 					ciConfig = ciConfig.AddJob(
-						fmt.Sprintf("%s_%s", str.ToLowerCamelCase(branch), stage),
+						fmt.Sprintf("%s_%s", str.ToLowerCamelCase(branch), job.Stage),
 						ciJob,
 					)
 				}
