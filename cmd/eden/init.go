@@ -147,7 +147,7 @@ var initCmd = &cobra.Command{
 		if newProject.Scripts == nil {
 			newProject.Scripts = map[string]project.Script{
 				"build": []string{"go build -v -o ./build/$PROJECT_NAME ./cmd && eden generate openapi"},
-				"test":  []string{"go test"},
+				"test":  []string{"go test ./cmd"},
 			}
 		}
 		newProject.WriteToFile("./", "profzone.yml")
