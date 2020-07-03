@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-const DefaultConfigFile = "profzone.yml"
+const DefaultConfigFile = "project.yml"
 
 var (
 	DOCKER_REGISTRY_KEY = "PROFZONE_DOCKER_REGISTRY"

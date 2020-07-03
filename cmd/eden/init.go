@@ -150,7 +150,7 @@ var initCmd = &cobra.Command{
 				"test":  []string{"go test ./cmd"},
 			}
 		}
-		newProject.WriteToFile("./", "profzone.yml")
+		newProject.WriteToFile("./", "project.yml")
 		newProject.SetEnviron()
 		newProject.Workflow.TryExtendsOrSetDefaults().ToDroneConfig(&newProject).WriteToFile()
 	},
