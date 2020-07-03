@@ -32,10 +32,12 @@ func (w *Workflow) ToDroneConfig(p *Project) *drone.CIDronePipelineDocker {
 				WithName("temp").
 				WithPath("/go")
 
+			image := fmt.Sprintf("${%s}/${%s}", DOCKER_REGISTRY_KEY, strings.ToUpper(envVars.Parse(job.Builder)))
+			image = envVars.Parse(image)
 			step := drone.NewPipelineStep().
 				WithName(fmt.Sprintf("%s_%s", str.ToLowerCamelCase(branch), stage)).
 				WithEnvs(branchFlow.Env).
-				WithImage(fmt.Sprintf("${%s}/${%s}", DOCKER_REGISTRY_KEY, strings.ToUpper(envVars.Parse(job.Builder)))).
+				WithImage(image).
 				WithVolume(*vol).
 				WithCommands(job.Run...)
 

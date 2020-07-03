@@ -10,6 +10,7 @@ var RegisteredBuilders = Builders{}
 func RegisterBuilder(name string, builder *Builder) {
 	builder.name = name
 	RegisteredBuilders[name] = builder
+	SetEnv(name, builder.Image)
 }
 
 type FullImage string
