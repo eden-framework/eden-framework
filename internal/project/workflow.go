@@ -171,13 +171,12 @@ func (jobs Jobs) Remove(index int) (Jobs, error) {
 	if index == 0 {
 		return jobs[1:], nil
 	} else if index == len(jobs)-1 {
-		return jobs[:len(jobs)-2], nil
+		return jobs[:len(jobs)-1], nil
 	} else if index > len(jobs)-1 {
 		return jobs, fmt.Errorf("index out of range: %d, length: %d", index, len(jobs)-1)
 	} else {
 		finalJobs := Jobs{}
-		finalJobs = append(finalJobs, jobs[:index-1]...)
-		finalJobs = append(finalJobs, jobs[index+1:]...)
+		finalJobs = append(jobs[:index], jobs[index+1:]...)
 		return finalJobs, nil
 	}
 }
