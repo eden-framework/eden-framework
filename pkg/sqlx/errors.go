@@ -1,6 +1,8 @@
 package sqlx
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func NewSqlError(tpe sqlErrType, msg string) *SqlError {
 	return &SqlError{
@@ -21,7 +23,6 @@ func (e *SqlError) Error() string {
 type sqlErrType string
 
 var (
-	sqlErrTypeInvalidSql        sqlErrType = "InvalidSql"
 	sqlErrTypeInvalidScanTarget sqlErrType = "InvalidScanTarget"
 	sqlErrTypeNotFound          sqlErrType = "NotFound"
 	sqlErrTypeSelectShouldOne   sqlErrType = "SelectShouldOne"

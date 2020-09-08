@@ -1,41 +1,134 @@
 package sqlx
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"time"
 
 	"github.com/profzone/eden-framework/pkg/sqlx/builder"
-	_ "github.com/profzone/eden-framework/pkg/sqlx/mysql_logger_driver"
 )
 
 var ErrNotTx = errors.New("db is not *sql.Tx")
 var ErrNotDB = errors.New("db is not *sql.DB")
 
-func Open(driverName string, dataSourceName string, openFunc func(string, string) (*sql.DB, error)) (*DB, error) {
-	db, err := openFunc(driverName, dataSourceName)
-	if err != nil {
-		return nil, err
-	}
-	return &DB{
-		SqlExecutor: db,
-	}, nil
+type SqlExecutor interface {
+	ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error)
+	QueryContext(ctx context.Context, query string, args ...interface{}) (*sql.Rows, error)
 }
 
-func MustOpen(driverName string, dataSourceName string, openFunc func(string, string) (*sql.DB, error)) *DB {
-	db, err := Open(driverName, dataSourceName, openFunc)
-	if err != nil {
-		panic(err)
-	}
-	return db
+type SqlxExecutor interface {
+	SqlExecutor
+	ExecExpr(expr builder.SqlExpr) (sql.Result, error)
+	QueryExpr(expr builder.SqlExpr) (*sql.Rows, error)
+
+	QueryExprAndScan(expr builder.SqlExpr, v interface{}) error
+}
+
+type Migrator interface {
+	Migrate(ctx context.Context, db DBExecutor) error
+}
+
+type DBExecutor interface {
+	SqlxExecutor
+
+	// dialect of databases
+	Dialect() builder.Dialect
+	// return database which is connecting
+	D() *Database
+	// switch database schema
+	WithSchema(schema string) DBExecutor
+	// return table of the connecting database
+	T(model builder.Model) *builder.Table
+
+	Context() context.Context
+	WithContext(ctx context.Context) DBExecutor
+}
+
+type MaybeTxExecutor interface {
+	IsTx() bool
+	BeginTx(*sql.TxOptions) (DBExecutor, error)
+	Begin() (DBExecutor, error)
+	Commit() error
+	Rollback() error
 }
 
 type DB struct {
+	dialect builder.Dialect
+	*Database
 	SqlExecutor
+	ctx context.Context
 }
 
-func (d *DB) Do(stmt builder.Statement) (result *Result) {
-	return Do(d, stmt)
+func (d *DB) WithContext(ctx context.Context) DBExecutor {
+	dd := new(DB)
+	*dd = *d
+	dd.ctx = ctx
+	return dd
+}
+
+func (d *DB) Context() context.Context {
+	if d.ctx != nil {
+		return d.ctx
+	}
+	return context.Background()
+}
+
+func (d DB) WithSchema(schema string) DBExecutor {
+	d.Database = d.Database.WithSchema(schema)
+	return &d
+}
+
+func (d *DB) Dialect() builder.Dialect {
+	return d.dialect
+}
+
+func (d *DB) Migrate(ctx context.Context, db DBExecutor) error {
+	if migrator, ok := d.dialect.(Migrator); ok {
+		return migrator.Migrate(ctx, db)
+	}
+	return nil
+}
+
+func (d *DB) D() *Database {
+	return d.Database
+}
+
+func (d *DB) ExecExpr(expr builder.SqlExpr) (sql.Result, error) {
+	e := builder.ResolveExprContext(d.Context(), expr)
+	if builder.IsNilExpr(e) {
+		return nil, nil
+	}
+	if err := e.Err(); err != nil {
+		return nil, err
+	}
+	result, err := d.ExecContext(d.Context(), e.Query(), e.Args()...)
+	if err != nil {
+		if d.dialect.IsErrorConflict(err) {
+			return nil, NewSqlError(sqlErrTypeConflict, err.Error())
+		}
+		return nil, err
+	}
+	return result, nil
+}
+
+func (d *DB) QueryExpr(expr builder.SqlExpr) (*sql.Rows, error) {
+	e := builder.ResolveExprContext(d.Context(), expr)
+	if builder.IsNilExpr(e) {
+		return nil, nil
+	}
+	if err := e.Err(); err != nil {
+		return nil, err
+	}
+	return d.QueryContext(d.Context(), e.Query(), e.Args()...)
+}
+
+func (d *DB) QueryExprAndScan(expr builder.SqlExpr, v interface{}) error {
+	rows, err := d.QueryExpr(expr)
+	if err != nil {
+		return err
+	}
+	return Scan(rows, v)
 }
 
 func (d *DB) IsTx() bool {
@@ -43,26 +136,23 @@ func (d *DB) IsTx() bool {
 	return ok
 }
 
-func (d *DB) Query(query string, args ...interface{}) (*sql.Rows, error) {
-	query, args = flattenArgs(query, args...)
-	return d.SqlExecutor.Query(query, args...)
+func (d *DB) Begin() (DBExecutor, error) {
+	return d.BeginTx(nil)
 }
 
-func (d *DB) Exec(query string, args ...interface{}) (sql.Result, error) {
-	query, args = flattenArgs(query, args...)
-	return d.SqlExecutor.Exec(query, args...)
-}
-
-func (d *DB) Begin() (*DB, error) {
+func (d *DB) BeginTx(opt *sql.TxOptions) (DBExecutor, error) {
 	if d.IsTx() {
 		return nil, ErrNotDB
 	}
-	db, err := d.SqlExecutor.(*sql.DB).Begin()
+	db, err := d.SqlExecutor.(*sql.DB).BeginTx(d.Context(), opt)
 	if err != nil {
 		return nil, err
 	}
 	return &DB{
+		Database:    d.Database,
+		dialect:     d.dialect,
 		SqlExecutor: db,
+		ctx:         d.Context(),
 	}, nil
 }
 
@@ -70,12 +160,18 @@ func (d *DB) Commit() error {
 	if !d.IsTx() {
 		return ErrNotTx
 	}
+	if d.Context().Err() == context.Canceled {
+		return context.Canceled
+	}
 	return d.SqlExecutor.(*sql.Tx).Commit()
 }
 
 func (d *DB) Rollback() error {
 	if !d.IsTx() {
 		return ErrNotTx
+	}
+	if d.Context().Err() == context.Canceled {
+		return context.Canceled
 	}
 	return d.SqlExecutor.(*sql.Tx).Rollback()
 }

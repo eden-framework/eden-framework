@@ -1,228 +1,208 @@
-package builder
+package builder_test
 
 import (
 	"testing"
+
+	"github.com/onsi/gomega"
+	. "github.com/profzone/eden-framework/pkg/sqlx/builder"
+	. "github.com/profzone/eden-framework/pkg/sqlx/builder/buidertestingutils"
 )
 
-func TestBuilderCond(t *testing.T) {
-	table := T(DB("db"), "t")
-
-	exprCases{
-		Case("CondRules",
-			NewCondRules().
-				When(true, Col(table, "a").Eq(1)).
-				When(true, Col(table, "b").Like(`g`)).
-				When(false, Col(table, "b").Like(`g`)).
-				ToCond(),
-			Expr(
-				"(`a` = ?) AND (`b` LIKE ?)",
-				1, "%g%",
-			),
-		),
-		Case(
-			"Chain Condition",
-			Col(table, "a").Eq(1).
-				And(Col(table, "b").LeftLike("c")).
-				Or(Col(table, "a").Eq(2)).
-				Xor(Col(table, "b").RightLike("g")).Expr(),
-			Expr(
-				"(((`a` = ?) AND (`b` LIKE ?)) OR (`a` = ?)) XOR (`b` LIKE ?)",
-				1, "%c", 2, "g%",
-			),
-		),
-		Case(
-			"Compose Condition",
+func TestConditions(t *testing.T) {
+	t.Run("Chain Condition", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("a").Eq(1).
+				And(nil).
+				And(Col("b").LeftLike("text")).
+				Or(Col("a").Eq(2)).
+				Xor(Col("b").RightLike("g")),
+		).To(BeExpr(
+			"(((a = ?) AND (b LIKE ?)) OR (a = ?)) XOR (b LIKE ?)",
+			1, "%text", 2, "g%",
+		))
+	})
+	t.Run("Compose Condition", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
 			Xor(
 				Or(
 					And(
-						Col(table, "a").Eq(1),
-						Col(table, "b").Like("c"),
+						(*Condition)(nil),
+						(*Condition)(nil),
+						(*Condition)(nil),
+						(*Condition)(nil),
+						Col("c").In(1, 2),
+						Col("c").In([]int{3, 4}),
+						Col("a").Eq(1),
+						Col("b").Like("text"),
 					),
-					Col(table, "a").Eq(2),
+					Col("a").Eq(2),
 				),
-				Col(table, "b").Like("g"),
-			).Expr(),
-			Expr(
-				"(((`a` = ?) AND (`b` LIKE ?)) OR (`a` = ?)) XOR (`b` LIKE ?)",
-				1, "%c%", 2, "%g%",
+				Col("b").Like("g"),
 			),
-		),
-		Case(
-			"Skip nil",
+		).To(BeExpr(
+			"(((c IN (?,?)) AND (c IN (?,?)) AND (a = ?) AND (b LIKE ?)) OR (a = ?)) XOR (b LIKE ?)",
+			1, 2, 3, 4, 1, "%text%", 2, "%g%",
+		))
+	})
+	t.Run("skip nil", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
 			Xor(
-				Col(table, "a").In(),
+				Col("a").In(),
 				Or(
-					Col(table, "a").NotIn(),
+					Col("a").NotIn(),
 					And(
 						nil,
-						Col(table, "a").Eq(1),
-						Col(table, "b").Like("c"),
+						Col("a").Eq(1),
+						Col("b").Like("text"),
 					),
-					Col(table, "a").Eq(2),
+					Col("a").Eq(2),
 				),
-				Col(table, "b").Like("g"),
-			).Expr(),
-			Expr(
-				"(((`a` = ?) AND (`b` LIKE ?)) OR (`a` = ?)) XOR (`b` LIKE ?)",
-				1, "%c%", 2, "%g%",
+				Col("b").Like("g"),
 			),
-		),
-		Case(
-			"XOR",
+		).To(BeExpr(
+			"(((a = ?) AND (b LIKE ?)) OR (a = ?)) XOR (b LIKE ?)",
+			1, "%text%", 2, "%g%",
+		))
+	})
+	t.Run("XOR and OR", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
 			Xor(
-				Col(table, "a").In(),
+				Col("a").In(),
 				Or(
-					Col(table, "a").NotIn(),
+					Col("a").NotIn(),
 					And(
 						nil,
-						Col(table, "a").Eq(1),
-						Col(table, "b").Like("c"),
+						Col("a").Eq(1),
+						Col("b").Like("text"),
 					),
-					Col(table, "a").Eq(2),
+					Col("a").Eq(2),
 				),
-				Col(table, "b").Like("g"),
-			).Expr(),
-			Expr(
-				"(((`a` = ?) AND (`b` LIKE ?)) OR (`a` = ?)) XOR (`b` LIKE ?)",
-				1, "%c%", 2, "%g%",
+				Col("b").Like("g"),
 			),
-		),
-		Case(
-			"XOR",
+		).To(BeExpr(
+			"(((a = ?) AND (b LIKE ?)) OR (a = ?)) XOR (b LIKE ?)",
+			1, "%text%", 2, "%g%",
+		))
+	})
+	t.Run("XOR", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
 			Xor(
-				Col(table, "a").Eq(1),
-				Col(table, "b").Like("g"),
-			).Expr(),
-			Expr(
-				"(`a` = ?) XOR (`b` LIKE ?)",
-				1, "%g%",
+				Col("a").Eq(1),
+				Col("b").Like("g"),
 			),
-		),
-		Case(
-			"Like",
-			Col(table, "d").Like("e").Expr(),
-			Expr(
-				"`d` LIKE ?",
-				"%e%",
-			),
-		),
-		Case(
-			"Not like",
-			Col(table, "d").NotLike("e").Expr(),
-			Expr(
-				"`d` NOT LIKE ?",
-				"%e%",
-			),
-		),
-		Case(
-			"Equal",
-			Col(table, "d").Eq("e").Expr(),
-			Expr(
-				"`d` = ?",
-				"e",
-			),
-		),
-		Case(
-			"Not Equal",
-			Col(table, "d").Neq("e").Expr(),
-			Expr(
-				"`d` <> ?",
-				"e",
-			),
-		),
-		Case(
-			"In",
-			Col(table, "d").In("e", "f").Expr(),
-			Expr(
-				"`d` IN (?,?)",
-				"e", "f",
-			),
-		),
-		Case(
-			"In With Select",
-			Col(table, "d").In(SelectFrom(table).Where(Col(table, "d").Eq(1))).Expr(),
-			Expr(
-				"`d` IN (SELECT * FROM `db`.`t` WHERE `d` = ?)",
-				1,
-			),
-		),
-		Case(
-			"NotIn",
-			Col(table, "d").NotIn("e", "f").Expr(),
-			Expr(
-				"`d` NOT IN (?,?)",
-				"e", "f",
-			),
-		),
-		Case(
-			"Not In With Select",
-			Col(table, "d").NotIn(SelectFrom(table).Where(Col(table, "d").Eq(1))).Expr(),
-			Expr(
-				"`d` NOT IN (SELECT * FROM `db`.`t` WHERE `d` = ?)",
-				1,
-			),
-		),
-		Case(
-			"Less than",
-			Col(table, "d").Lt(3).Expr(),
-			Expr(
-				"`d` < ?",
-				3,
-			),
-		),
-		Case(
-			"Less or equal than",
-			Col(table, "d").Lte(3).Expr(),
-			Expr(
-				"`d` <= ?",
-				3,
-			),
-		),
-		Case(
-			"Greater than",
-			Col(table, "d").Gt(3).Expr(),
-			Expr(
-				"`d` > ?",
-				3,
-			),
-		),
-		Case(
-			"Greater or equal than",
-			Col(table, "d").Gte(3).Expr(),
-			Expr(
-				"`d` >= ?",
-				3,
-			),
-		),
-		Case(
-			"Between",
-			Col(table, "d").Between(0, 2).Expr(),
-			Expr(
-				"`d` BETWEEN ? AND ?",
-				0, 2,
-			),
-		),
-		Case(
-			"Not between",
-			Col(table, "d").NotBetween(0, 2).Expr(),
-			Expr(
-				"`d` NOT BETWEEN ? AND ?",
-				0, 2,
-			),
-		),
-		Case(
-			"Is null",
-			Col(table, "d").IsNull().Expr(),
-			Expr(
-				"`d` IS NULL",
-			),
-		),
-		Case(
-			"Is not null",
-			Col(table, "d").IsNotNull().Expr(),
-			Expr(
-				"`d` IS NOT NULL",
-			),
-		),
-	}.Run(t, "Condition")
+		).To(BeExpr(
+			"(a = ?) XOR (b LIKE ?)",
+			1, "%g%",
+		))
+	})
+	t.Run("Like", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("d").Like("e"),
+		).To(BeExpr(
+			"d LIKE ?",
+			"%e%",
+		))
+	})
+	t.Run("Not like", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("d").NotLike("e"),
+		).To(BeExpr(
+			"d NOT LIKE ?",
+			"%e%",
+		))
+	})
+	t.Run("Equal", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("d").Eq("e"),
+		).To(BeExpr(
+			"d = ?",
+			"e",
+		))
+	})
+	t.Run("Not Equal", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("d").Neq("e"),
+		).To(BeExpr(
+			"d <> ?",
+			"e",
+		))
+	})
+	t.Run("In", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("d").In("e", "f"),
+		).To(BeExpr(
+			"d IN (?,?)",
+			"e", "f",
+		))
+	})
+	t.Run("NotIn", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("d").NotIn("e", "f"),
+		).To(BeExpr(
+			"d NOT IN (?,?)",
+			"e", "f",
+		))
+	})
+	t.Run("Less than", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("d").Lt(3),
+		).To(BeExpr(
+			"d < ?",
+			3,
+		))
+	})
+	t.Run("Less or equal than", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("d").Lte(3),
+		).To(BeExpr(
+			"d <= ?",
+			3,
+		))
+	})
+	t.Run("Greater than", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("d").Gt(3),
+		).To(BeExpr(
+			"d > ?",
+			3,
+		))
+	})
+	t.Run("Greater or equal than", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("d").Gte(3),
+		).To(BeExpr(
+			"d >= ?",
+			3,
+		))
+	})
+	t.Run("Between", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("d").Between(0, 2),
+		).To(BeExpr(
+			"d BETWEEN ? AND ?",
+			0, 2,
+		))
+	})
+	t.Run("Not between", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("d").NotBetween(0, 2),
+		).To(BeExpr(
+			"d NOT BETWEEN ? AND ?",
+			0, 2,
+		))
+	})
+	t.Run("Is null", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("d").IsNull(),
+		).To(BeExpr(
+			"d IS NULL",
+		))
+	})
+	t.Run("Is not null", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Col("d").IsNotNull(),
+		).To(BeExpr(
+			"d IS NOT NULL",
+		))
+	})
 }

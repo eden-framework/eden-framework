@@ -3,38 +3,40 @@ package builder
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/onsi/gomega"
 )
 
-type exprCases []*exprCase
-
-func (e exprCases) Run(t *testing.T, group string) {
-	for _, c := range e {
-		t.Log(group + ": " + c.desc)
-		assert.Equal(t, ExprFrom(c.expectExpr), ExprFrom(c.expr), c.desc)
+func TestValueMap(t *testing.T) {
+	type User struct {
+		ID       uint64 `db:"F_id"`
+		Name     string `db:"F_name"`
+		Username string `db:"F_username"`
 	}
-}
 
-type exprCase struct {
-	desc       string
-	expectExpr CanExpr
-	expr       CanExpr
-}
-
-func Case(desc string, expr CanExpr, expectExpr CanExpr) *exprCase {
-	return &exprCase{
-		desc:       desc,
-		expectExpr: expectExpr,
-		expr:       expr,
+	user := User{
+		ID: 123123213,
 	}
-}
 
-func TestHolderRepeat(t *testing.T) {
-	tt := assert.New(t)
-	tt.Equal("?,?,?,?,?", HolderRepeat(5))
-}
+	t.Run("#FieldValuesFromStructBy", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(FieldValuesFromStructBy(user, []string{})).To(gomega.HaveLen(0))
 
-func TestQuote(t *testing.T) {
-	tt := assert.New(t)
-	tt.Equal("`name`", quote("name"))
+		values := FieldValuesFromStructBy(user, []string{"ID"})
+
+		gomega.NewWithT(t).Expect(values).To(gomega.Equal(FieldValues{
+			"ID": user.ID,
+		}))
+	})
+
+	t.Run("#FieldValuesFromStructBy", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(FieldValuesFromStructByNonZero(user)).
+			To(gomega.Equal(FieldValues{
+				"ID": user.ID,
+			}))
+
+		gomega.NewWithT(t).Expect(FieldValuesFromStructByNonZero(user, "Username")).
+			To(gomega.Equal(FieldValues{
+				"ID":       user.ID,
+				"Username": user.Username,
+			}))
+	})
 }

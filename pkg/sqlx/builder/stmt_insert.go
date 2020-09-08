@@ -1,86 +1,93 @@
 package builder
 
 import (
-	"fmt"
+	"context"
 )
 
-var (
-	InsertValuesLengthNotMatch = fmt.Errorf("value length is not equal Col length")
-)
-
-func Insert(table *Table) *StmtInsert {
+func Insert(modifiers ...string) *StmtInsert {
 	return &StmtInsert{
-		table: table,
+		modifiers: modifiers,
 	}
 }
 
+// https://dev.mysql.com/doc/refman/5.6/en/insert.html
 type StmtInsert struct {
-	table     *Table
-	modifiers []string
-	columns   Columns
-	Assignments
-	values  [][]interface{}
-	comment string
+	table       *Table
+	modifiers   []string
+	assignments []*Assignment
+	additions   Additions
 }
 
-func (s StmtInsert) Comment(comment string) *StmtInsert {
-	s.comment = comment
+func (s StmtInsert) Into(table *Table, additions ...Addition) *StmtInsert {
+	s.table = table
+	s.additions = additions
 	return &s
 }
 
-func (s *StmtInsert) Type() StmtType {
-	return STMT_INSERT
-}
-
-func (s StmtInsert) Modifier(modifiers ...string) *StmtInsert {
-	s.modifiers = append(s.modifiers, modifiers...)
+func (s StmtInsert) Values(cols *Columns, values ...interface{}) *StmtInsert {
+	s.assignments = Assignments{ColumnsAndValues(cols, values...)}
 	return &s
 }
 
-func (s StmtInsert) Columns(cols Columns) *StmtInsert {
-	s.columns = cols
-	return &s
+func (s *StmtInsert) IsNil() bool {
+	return s == nil || s.table == nil || len(s.assignments) == 0
 }
 
-func (s StmtInsert) Values(values ...interface{}) *StmtInsert {
-	if s.values == nil {
-		s.values = [][]interface{}{}
-	}
-	s.values = append(s.values, values)
-	return &s
-}
+func (s *StmtInsert) Ex(ctx context.Context) *Ex {
+	e := Expr("INSERT")
 
-func (s StmtInsert) OnDuplicateKeyUpdate(assigns ...*Assignment) *StmtInsert {
-	s.Assignments = assigns
-	return &s
-}
-
-func (s *StmtInsert) Expr() *Expression {
-	expr := Expr(fmt.Sprintf(
-		`%s INTO %s`,
-		statement(s.comment, "INSERT", s.modifiers...),
-		s.table.FullName(),
-	))
-
-	expr = expr.ConcatBy(" ", s.columns.Wrap())
-
-	for idx, vals := range s.values {
-		if s.columns.Len() != len(vals) {
-			return ExprErr(InsertValuesLengthNotMatch)
+	if len(s.modifiers) > 0 {
+		for i := range s.modifiers {
+			e.WriteByte(' ')
+			e.WriteString(s.modifiers[i])
 		}
-		joiner := " VALUES "
-		if idx > 0 {
-			joiner = ","
+	}
+
+	e.WriteString(" INTO ")
+	e.WriteExpr(s.table)
+	e.WriteByte(' ')
+
+	e.WriteExpr(ExprBy(func(ctx context.Context) *Ex {
+		e := Expr("")
+
+		ctx = ContextWithToggles(ctx, Toggles{
+			ToggleUseValues: true,
+		})
+
+		WriteAssignments(e, s.assignments...)
+
+		return e.Ex(ctx)
+	}))
+
+	WriteAdditions(e, s.additions...)
+
+	return e.Ex(ctx)
+}
+
+func OnDuplicateKeyUpdate(assignments ...*Assignment) *OtherAddition {
+	assigns := assignments
+	if len(assignments) == 0 {
+		return nil
+	}
+
+	e := Expr("ON DUPLICATE KEY UPDATE ")
+
+	for i := range assigns {
+		if i > 0 {
+			e.WriteString(", ")
 		}
-		expr = expr.ConcatBy(joiner, Expr(
-			"("+HolderRepeat(len(vals))+")",
-			vals...,
-		))
+		e.WriteExpr(assigns[i])
 	}
 
-	if len(s.Assignments) > 0 {
-		expr = expr.ConcatBy(" ON DUPLICATE KEY UPDATE ", s.Assignments)
-	}
+	return AsAddition(e)
+}
 
-	return expr
+func Returning(expr SqlExpr) *OtherAddition {
+	e := Expr("RETURNING ")
+	if expr == nil || expr.IsNil() {
+		e.WriteByte('*')
+	} else {
+		e.WriteExpr(expr)
+	}
+	return AsAddition(e)
 }

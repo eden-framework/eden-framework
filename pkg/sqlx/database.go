@@ -1,13 +1,12 @@
 package sqlx
 
 import (
+	"database/sql"
+	"database/sql/driver"
 	"fmt"
 	"os"
-	"reflect"
 
 	"github.com/profzone/eden-framework/pkg/sqlx/builder"
-
-	"github.com/sirupsen/logrus"
 )
 
 func NewFeatureDatabase(name string) *Database {
@@ -19,141 +18,73 @@ func NewFeatureDatabase(name string) *Database {
 
 func NewDatabase(name string) *Database {
 	return &Database{
-		Database: builder.DB(name),
+		Name:   name,
+		Tables: builder.Tables{},
 	}
 }
 
 type Database struct {
-	*builder.Database
+	Name   string
+	Schema string
+	Tables builder.Tables
 }
 
-func (database *Database) Register(model Model) *builder.Table {
-	database.mustStructType(model)
-	rv := reflect.Indirect(reflect.ValueOf(model))
-	table := builder.T(database.Database, model.TableName())
-	ScanDefToTable(rv, table)
-	database.Database.Register(table)
+func (database Database) WithSchema(schema string) *Database {
+	database.Schema = schema
+
+	tables := builder.Tables{}
+
+	database.Tables.Range(func(tab *builder.Table, idx int) {
+		tables.Add(tab.WithSchema(database.Schema))
+	})
+
+	database.Tables = tables
+
+	return &database
+}
+
+type DBNameBinder interface {
+	WithDBName(dbName string) driver.Connector
+}
+
+func (database *Database) OpenDB(connector driver.Connector) *DB {
+	if dbNameBinder, ok := connector.(DBNameBinder); ok {
+		connector = dbNameBinder.WithDBName(database.Name)
+	}
+	dialect, ok := connector.(builder.Dialect)
+	if !ok {
+		panic(fmt.Errorf("connector should implement builder.Dialect"))
+	}
+	return &DB{
+		Database:    database,
+		dialect:     dialect,
+		SqlExecutor: sql.OpenDB(connector),
+	}
+}
+
+func (database *Database) AddTable(table *builder.Table) {
+	database.Tables.Add(table)
+}
+
+func (database *Database) Register(model builder.Model) *builder.Table {
+	table := builder.TableFromModel(model)
+	table.Schema = database.Schema
+	database.AddTable(table)
 	return table
 }
 
-func (database Database) T(model Model) *builder.Table {
-	database.mustStructType(model)
-	return database.Database.Table(model.TableName())
+func (database *Database) Table(tableName string) *builder.Table {
+	return database.Tables.Table(tableName)
 }
 
-func (database Database) mustStructType(model Model) {
-	tpe := reflect.TypeOf(model)
-	if tpe.Kind() != reflect.Ptr {
-		panic(fmt.Errorf("model %s must be a pointer", tpe.Name()))
-	}
-	tpe = tpe.Elem()
-	if tpe.Kind() != reflect.Struct {
-		panic(fmt.Errorf("model %s must be a struct", tpe.Name()))
-	}
-}
-
-func (database *Database) Insert(model Model) *builder.StmtInsert {
-	table := database.T(model)
-
-	fieldValues := FieldValuesFromStructByNonZero(model)
-
-	if autoIncrementCol := table.AutoIncrement(); autoIncrementCol != nil {
-		delete(fieldValues, autoIncrementCol.FieldName)
+func (database *Database) T(model builder.Model) *builder.Table {
+	if td, ok := model.(builder.TableDefinition); ok {
+		return td.T()
 	}
 
-	cols, vals := table.ColumnsAndValuesByFieldValues(fieldValues)
-
-	return table.Insert().Columns(cols).Values(vals...)
-}
-
-func (database *Database) Update(model Model, zeroFields ...string) *builder.StmtUpdate {
-	table := database.T(model)
-
-	fieldValues := FieldValuesFromStructByNonZero(model, zeroFields...)
-
-	if autoIncrementCol := table.AutoIncrement(); autoIncrementCol != nil {
-		delete(fieldValues, autoIncrementCol.FieldName)
+	if t, ok := model.(*builder.Table); ok {
+		return t
 	}
 
-	return table.Update().Set(table.AssignsByFieldValues(fieldValues)...)
-}
-
-func (database *Database) MustMigrateTo(db *DB, dryRun bool) {
-	if err := database.MigrateTo(db, dryRun); err != nil {
-		logrus.Panic(err)
-	}
-}
-
-func (database *Database) MigrateTo(db *DB, dryRun bool) error {
-	database.Register(&SqlMetaEnum{})
-
-	currentDatabase := DBFromInformationSchema(db, database.Name, database.Tables.TableNames()...)
-
-	if !dryRun {
-		logrus.Debugf("=================== migrating database `%s` ====================", database.Name)
-		defer logrus.Debugf("=================== migrated database `%s` ====================", database.Name)
-
-		if currentDatabase == nil {
-			currentDatabase = &Database{
-				Database: builder.DB(database.Name),
-			}
-			if err := db.Do(currentDatabase.Create(true)).Err(); err != nil {
-				return err
-			}
-		}
-
-		for name, table := range database.Tables {
-			currentTable := currentDatabase.Table(name)
-			if currentTable == nil {
-				if err := db.Do(table.Create(true)).Err(); err != nil {
-					return err
-				}
-				continue
-			}
-
-			stmt := currentTable.Diff(table)
-			if stmt != nil {
-				if err := db.Do(stmt).Err(); err != nil {
-					return err
-				}
-				continue
-			}
-		}
-
-		if err := database.SyncEnum(db); err != nil {
-			return err
-		}
-
-		return nil
-	}
-
-	if currentDatabase == nil {
-		currentDatabase = &Database{
-			Database: builder.DB(database.Name),
-		}
-
-		fmt.Printf("=================== need to migrate database `%s` ====================\n", database.Name)
-		fmt.Println(currentDatabase.Create(true).Query)
-		fmt.Printf("=================== need to migrate database `%s` ====================\n", database.Name)
-	}
-
-	for name, table := range database.Tables {
-		currentTable := currentDatabase.Table(name)
-		if currentTable == nil {
-			fmt.Println(table.Create(true).Query)
-			continue
-		}
-
-		stmt := currentTable.Diff(table)
-		if stmt != nil {
-			fmt.Println(stmt.Query)
-			continue
-		}
-	}
-
-	if err := database.SyncEnum(db); err != nil {
-		return err
-	}
-
-	return nil
+	return database.Table(model.TableName())
 }

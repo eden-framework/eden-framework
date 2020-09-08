@@ -1,55 +1,78 @@
 package builder
 
-func Count(canExpr CanExpr) *Function {
-	return Func("COUNT", canExpr)
+import (
+	"context"
+)
+
+func Count(sqlExprs ...SqlExpr) *Function {
+	if len(sqlExprs) == 0 {
+		return Func("COUNT", Expr("1"))
+	}
+	return Func("COUNT", sqlExprs...)
 }
 
-func Avg(canExpr CanExpr) *Function {
-	return Func("AVG", canExpr)
+func Avg(sqlExprs ...SqlExpr) *Function {
+	return Func("AVG", sqlExprs...)
 }
 
-func Distinct(canExpr CanExpr) *Function {
-	return Func("DISTINCT", canExpr)
+func Distinct(sqlExprs ...SqlExpr) *Function {
+	return Func("DISTINCT", sqlExprs...)
 }
 
-func Min(canExpr CanExpr) *Function {
-	return Func("MIN", canExpr)
+func Min(sqlExprs ...SqlExpr) *Function {
+	return Func("MIN", sqlExprs...)
 }
 
-func Max(canExpr CanExpr) *Function {
-	return Func("MAX", canExpr)
+func Max(sqlExprs ...SqlExpr) *Function {
+	return Func("MAX", sqlExprs...)
 }
 
-func First(canExpr CanExpr) *Function {
-	return Func("FIRST", canExpr)
+func First(sqlExprs ...SqlExpr) *Function {
+	return Func("FIRST", sqlExprs...)
 }
 
-func Last(canExpr CanExpr) *Function {
-	return Func("LAST", canExpr)
+func Last(sqlExprs ...SqlExpr) *Function {
+	return Func("LAST", sqlExprs...)
 }
 
-func Sum(canExpr CanExpr) *Function {
-	return Func("SUM", canExpr)
+func Sum(sqlExprs ...SqlExpr) *Function {
+	return Func("SUM", sqlExprs...)
 }
 
-func Func(name string, canExpr CanExpr) *Function {
+func Func(name string, sqlExprs ...SqlExpr) *Function {
+	if name == "" {
+		return nil
+	}
 	return &Function{
-		Name:    name,
-		canExpr: canExpr,
+		name:  name,
+		exprs: sqlExprs,
 	}
 }
 
 type Function struct {
-	Name    string
-	canExpr CanExpr
+	name  string
+	exprs []SqlExpr
 }
 
-func (f *Function) Expr() *Expression {
-	if f.canExpr != nil {
-		e := f.canExpr.Expr()
-		if e != nil {
-			return Expr(f.Name+"("+e.Query+")", e.Args...)
+func (f *Function) IsNil() bool {
+	return f == nil || f.name == ""
+}
+
+func (f *Function) Ex(ctx context.Context) *Ex {
+	e := Expr(f.name)
+
+	e.WriteGroup(func(e *Ex) {
+		if len(f.exprs) == 0 {
+			e.WriteByte('*')
 		}
-	}
-	return nil
+
+		for i := range f.exprs {
+			if i > 0 {
+				e.WriteByte(',')
+			}
+			e.WriteExpr(f.exprs[i])
+		}
+	})
+
+	return e.Ex(ctx)
 }

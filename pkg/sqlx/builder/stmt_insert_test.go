@@ -1,76 +1,52 @@
-package builder
+package builder_test
 
 import (
 	"testing"
+
+	"github.com/onsi/gomega"
+	. "github.com/profzone/eden-framework/pkg/sqlx/builder"
+	. "github.com/profzone/eden-framework/pkg/sqlx/builder/buidertestingutils"
 )
 
 func TestStmtInsert(t *testing.T) {
-	table := T(DB("db"), "t")
+	table := T("T", Col("f_a"), Col("f_b"))
 
-	if table.Insert().Type() != STMT_INSERT {
-		panic("Insert type should be STMT_INSERT")
-	}
+	t.Run("insert with modifier", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Insert("IGNORE").
+				Into(table).
+				Values(Cols("f_a", "f_b"), 1, 2),
+		).To(BeExpr("INSERT IGNORE INTO T (f_a,f_b) VALUES (?,?)",
+			1, 2))
+	})
 
-	exprCases{
-		Case(
-			"Insert sql failed",
-			table.
-				Insert().
-				Columns(Cols(table, "F_a", "F_b")).
-				Values(1).
-				Expr(),
-			ExprErr(InsertValuesLengthNotMatch),
-		),
-		Case(
-			"Insert simple",
-			table.
-				Insert().
-				Comment("Comment").
-				Columns(Cols(table, "F_a", "F_b")).
-				Values(1, 2).
-				Expr(),
-			Expr(
-				"/* Comment */ INSERT INTO `db`.`t` (`F_a`,`F_b`) VALUES (?,?)",
-				1, 2,
-			),
-		),
-		Case(
-			"Insert with modifier",
-			table.
-				Insert().
-				Modifier("IGNORE").
-				Columns(Cols(table, "F_a", "F_b")).
-				Values(1, 2).
-				Expr(),
-			Expr(
-				"INSERT IGNORE INTO `db`.`t` (`F_a`,`F_b`) VALUES (?,?)",
-				1, 2,
-			),
-		),
-		Case(
-			"Insert on on duplicate key update",
-			Insert(table).
-				Columns(Cols(table, "F_a", "F_b")).
-				Values(1, 2).
-				OnDuplicateKeyUpdate(Col(table, "F_b").By(2)).
-				Expr(),
-			Expr(
-				"INSERT INTO `db`.`t` (`F_a`,`F_b`) VALUES (?,?) ON DUPLICATE KEY UPDATE `F_b` = ?",
-				1, 2, 2,
-			),
-		),
-		Case(
-			"Insert multiple",
-			Insert(table).
-				Columns(Cols(table, "F_a", "F_b")).
-				Values(1, 2).
-				Values(1, 2).
-				Values(1, 2).
-				Expr(),
-			Expr(
-				"INSERT INTO `db`.`t` (`F_a`,`F_b`) VALUES (?,?),(?,?),(?,?)",
-				1, 2, 1, 2, 1, 2,
-			),
-		),
-	}.Run(t, "Stmt insert")
+	t.Run("insert simple", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Insert().
+				Into(table, Comment("Comment")).
+				Values(Cols("f_a", "f_b"), 1, 2),
+		).To(BeExpr(`
+INSERT INTO T (f_a,f_b) VALUES (?,?)
+/* Comment */
+`, 1, 2))
+	})
+
+	t.Run("multiple insert", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Insert().
+				Into(table).
+				Values(Cols("f_a", "f_b"), 1, 2, 1, 2, 1, 2),
+		).To(BeExpr("INSERT INTO T (f_a,f_b) VALUES (?,?),(?,?),(?,?)", 1, 2, 1, 2, 1, 2))
+	})
+
+	t.Run("insert from select", func(t *testing.T) {
+		gomega.NewWithT(t).Expect(
+			Insert().
+				Into(table).
+				Values(Cols("f_a", "f_b"), Select(Cols("f_a", "f_b")).From(table, Where(table.Col("f_a").Eq(1)))),
+		).To(BeExpr(`
+INSERT INTO T (f_a,f_b) SELECT f_a,f_b FROM T
+WHERE f_a = ?
+`, 1))
+	})
 }

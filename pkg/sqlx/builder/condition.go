@@ -1,119 +1,143 @@
 package builder
 
 import (
-	"container/list"
-	"fmt"
+	"context"
 )
 
-type Condition Expression
-
-func NewCondRules() *CondRules {
-	return &CondRules{}
+func EmptyCond() SqlCondition {
+	return (*Condition)(nil)
 }
 
-type CondRules struct {
-	l *list.List
+type SqlCondition interface {
+	SqlExpr
+	SqlConditionMarker
+
+	And(cond SqlCondition) SqlCondition
+	Or(cond SqlCondition) SqlCondition
+	Xor(cond SqlCondition) SqlCondition
 }
 
-type CondRule struct {
-	When       bool
-	Conditions []*Condition
+type SqlConditionMarker interface {
+	asCondition()
 }
 
-func (rules *CondRules) When(rule bool, conds ...*Condition) *CondRules {
-	if rules.l == nil {
-		rules.l = list.New()
+func AsCond(ex SqlExpr) *Condition {
+	return &Condition{expr: ex}
+}
+
+type Condition struct {
+	expr SqlExpr
+	SqlConditionMarker
+}
+
+func (c *Condition) Ex(ctx context.Context) *Ex {
+	if IsNilExpr(c.expr) {
+		return nil
 	}
-	rules.l.PushBack(&CondRule{
-		When:       rule,
-		Conditions: conds,
-	})
-	return rules
+	return c.expr.Ex(ctx)
 }
 
-func (rules *CondRules) ToCond() *Condition {
-	if rules.l == nil {
+func (c *Condition) IsNil() bool {
+	return c == nil || IsNilExpr(c.expr)
+}
+
+func (c *Condition) And(cond SqlCondition) SqlCondition {
+	return And(c, cond)
+}
+
+func (c *Condition) Or(cond SqlCondition) SqlCondition {
+	return Or(c, cond)
+}
+
+func (c *Condition) Xor(cond SqlCondition) SqlCondition {
+	return Xor(c, cond)
+}
+
+func And(conditions ...SqlCondition) SqlCondition {
+	return composedCondition("AND", conditions...)
+}
+
+func Or(conditions ...SqlCondition) SqlCondition {
+	return composedCondition("OR", conditions...)
+}
+
+func Xor(conditions ...SqlCondition) SqlCondition {
+	return composedCondition("XOR", conditions...)
+}
+
+func composedCondition(op string, conditions ...SqlCondition) SqlCondition {
+	final := filterNilCondition(conditions...)
+
+	if len(final) == 0 {
 		return nil
 	}
 
-	list := make([]*Condition, 0)
-	i := 0
-	for e := rules.l.Front(); e != nil; e = e.Next() {
-		r := e.Value.(*CondRule)
-		if r.When {
-			list = append(list, r.Conditions...)
-		}
-		i++
+	if len(final) == 1 {
+		return final[0]
 	}
-	if len(list) == 0 {
-		return nil
+
+	return &ComposedCondition{op: op, conditions: final}
+}
+
+func filterNilCondition(conditions ...SqlCondition) []SqlCondition {
+	finalConditions := make([]SqlCondition, 0)
+
+	for i := range conditions {
+		condition := conditions[i]
+		if IsNilExpr(condition) {
+			continue
+		}
+		finalConditions = append(finalConditions, condition)
 	}
-	return And(list...)
+
+	return finalConditions
 }
 
-func (c *Condition) Expr() *Expression {
-	return (*Expression)(c)
+type ComposedCondition struct {
+	op         string
+	conditions []SqlCondition
+	SqlConditionMarker
 }
 
-func (c Condition) And(cond *Condition) *Condition {
-	return (*Condition)(Expr(
-		fmt.Sprintf("(%s) AND (%s)", c.Query, cond.Query),
-		append(c.Args, cond.Args...)...,
-	))
+func (c *ComposedCondition) And(cond SqlCondition) SqlCondition {
+	return And(c, cond)
 }
 
-func (c Condition) Or(cond *Condition) *Condition {
-	return (*Condition)(Expr(
-		fmt.Sprintf("(%s) OR (%s)", c.Query, cond.Query),
-		append(c.Args, cond.Args...)...,
-	))
+func (c *ComposedCondition) Or(cond SqlCondition) SqlCondition {
+	return Or(c, cond)
 }
 
-func (c Condition) Xor(cond *Condition) *Condition {
-	return (*Condition)(Expr(
-		fmt.Sprintf("(%s) XOR (%s)", c.Query, cond.Query),
-		append(c.Args, cond.Args...)...,
-	))
+func (c *ComposedCondition) Xor(cond SqlCondition) SqlCondition {
+	return Xor(c, cond)
 }
 
-func And(condList ...*Condition) (cond *Condition) {
-	for _, c := range condList {
-		if c == nil {
+func (c *ComposedCondition) IsNil() bool {
+	return c == nil || c.op == "" || len(c.conditions) == 0
+}
+
+func (c *ComposedCondition) Ex(ctx context.Context) *Ex {
+	e := Expr("")
+
+	count := 0
+
+	for i := range c.conditions {
+		condition := c.conditions[i]
+		if condition == nil || condition.IsNil() {
 			continue
 		}
-		if cond == nil {
-			cond = c
-			continue
+
+		if count > 0 {
+			e.WriteByte(' ')
+			e.WriteString(c.op)
+			e.WriteByte(' ')
 		}
-		cond = cond.And(c)
+
+		e.WriteGroup(func(e *Ex) {
+			e.WriteExpr(condition)
+		})
+
+		count++
 	}
-	return
-}
 
-func Or(condList ...*Condition) (cond *Condition) {
-	for _, c := range condList {
-		if c == nil {
-			continue
-		}
-		if cond == nil {
-			cond = c
-			continue
-		}
-		cond = cond.Or(c)
-	}
-	return
-}
-
-func Xor(condList ...*Condition) (cond *Condition) {
-	for _, c := range condList {
-		if c == nil {
-			continue
-		}
-		if cond == nil {
-			cond = c
-			continue
-		}
-		cond = cond.Xor(c)
-	}
-	return
+	return e.Ex(ctx)
 }

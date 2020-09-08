@@ -1,144 +1,87 @@
 package builder
 
 import (
-	"fmt"
+	"context"
 )
 
-func SelectFrom(table *Table) *StmtSelect {
+type SelectStatement interface {
+	SqlExpr
+	selectStatement()
+}
+
+func Select(sqlExpr SqlExpr, modifiers ...string) *StmtSelect {
 	return &StmtSelect{
-		table: table,
+		sqlExpr:   sqlExpr,
+		modifiers: modifiers,
 	}
 }
 
 type StmtSelect struct {
+	SelectStatement
+	sqlExpr   SqlExpr
 	table     *Table
-	expr      CanExpr
 	modifiers []string
-	*where
-	*groupBy
-	*orderBy
-	*limit
-	forUpdate bool
-	comment   string
+	additions []Addition
 }
 
-func (s StmtSelect) Comment(comment string) *StmtSelect {
-	s.comment = comment
+func (s *StmtSelect) IsNil() bool {
+	return s == nil
+}
+
+func (s StmtSelect) From(table *Table, additions ...Addition) *StmtSelect {
+	s.table = table
+	s.additions = additions
 	return &s
 }
 
-func (s *StmtSelect) Type() StmtType {
-	return STMT_SELECT
-}
+func (s *StmtSelect) Ex(ctx context.Context) *Ex {
+	multiTable := false
 
-func (s StmtSelect) For(expr CanExpr) *StmtSelect {
-	s.expr = expr
-	return &s
-}
+	for i := range s.additions {
+		addition := s.additions[i]
+		if IsNilExpr(addition) {
+			continue
+		}
 
-func (s StmtSelect) Modifier(modifiers ...string) *StmtSelect {
-	s.modifiers = append(s.modifiers, modifiers...)
-	return &s
-}
-
-func (s StmtSelect) ForUpdate() *StmtSelect {
-	s.forUpdate = true
-	return &s
-}
-
-func (s StmtSelect) Where(cond *Condition) *StmtSelect {
-	s.where = (*where)(cond)
-	return &s
-}
-
-func (s StmtSelect) GroupBy(canExpr CanExpr) *StmtSelect {
-	if s.groupBy == nil {
-		s.groupBy = &groupBy{}
-	}
-	s.groupBy = s.groupBy.addBy(canExpr, "")
-	return &s
-}
-
-func (s StmtSelect) GroupAscBy(canExpr CanExpr) *StmtSelect {
-	if s.groupBy == nil {
-		s.groupBy = &groupBy{}
-	}
-	s.groupBy = s.groupBy.addBy(canExpr, ORDER_ASC)
-	return &s
-}
-
-func (s StmtSelect) GroupDescBy(canExpr CanExpr) *StmtSelect {
-	if s.groupBy == nil {
-		s.groupBy = &groupBy{}
-	}
-	s.groupBy = s.groupBy.addBy(canExpr, ORDER_DESC)
-	return &s
-}
-
-func (s StmtSelect) WithRollup() *StmtSelect {
-	s.groupBy = s.groupBy.rollup()
-	return &s
-}
-
-func (s StmtSelect) Having(cond *Condition) *StmtSelect {
-	if s.groupBy == nil {
-		s.groupBy = &groupBy{}
-	}
-	s.groupBy = s.groupBy.having(cond)
-	return &s
-}
-
-func (s StmtSelect) OrderBy(canExpr CanExpr, orderType OrderType) *StmtSelect {
-	if s.orderBy == nil {
-		s.orderBy = &orderBy{}
-	}
-	s.orderBy = s.orderBy.addBy(canExpr, orderType)
-	return &s
-}
-
-func (s StmtSelect) OrderAscBy(canExpr CanExpr) *StmtSelect {
-	return s.OrderBy(canExpr, ORDER_ASC)
-}
-
-func (s StmtSelect) OrderDescBy(canExpr CanExpr) *StmtSelect {
-	return s.OrderBy(canExpr, ORDER_DESC)
-}
-
-func (s StmtSelect) Limit(size int32) *StmtSelect {
-	if s.limit == nil {
-		s.limit = &limit{}
-	}
-	s.limit = s.limit.limit(size)
-	return &s
-}
-
-func (s StmtSelect) Offset(offset int32) *StmtSelect {
-	if s.limit == nil {
-		s.limit = &limit{}
-	}
-	s.limit = s.limit.offset(offset)
-	return &s
-}
-
-func (s *StmtSelect) Expr() *Expression {
-	selectExpr := Expr("*")
-	if s.expr != nil {
-		selectExpr = s.expr.Expr()
+		if addition.AdditionType() == AdditionJoin {
+			multiTable = true
+		}
 	}
 
-	expr := Expr(
-		fmt.Sprintf("%s %s FROM %s", statement(s.comment, "SELECT", s.modifiers...), selectExpr.Query, s.table.FullName()),
-		selectExpr.Args...,
-	)
-
-	expr = expr.ConcatBy(" ", s.where)
-	expr = expr.ConcatBy(" ", s.groupBy)
-	expr = expr.ConcatBy(" ", s.orderBy)
-	expr = expr.ConcatBy(" ", s.limit)
-
-	if s.forUpdate {
-		expr = expr.ConcatBy(" ", Expr("FOR UPDATE"))
+	if multiTable {
+		ctx = ContextWithToggles(ctx, Toggles{
+			ToggleMultiTable: multiTable,
+		})
 	}
 
-	return expr
+	e := Expr("SELECT")
+
+	if len(s.modifiers) > 0 {
+		for i := range s.modifiers {
+			e.WriteByte(' ')
+			e.WriteString(s.modifiers[i])
+		}
+	}
+
+	sqlExpr := s.sqlExpr
+
+	if IsNilExpr(sqlExpr) {
+		sqlExpr = Expr("*")
+	}
+
+	e.WriteByte(' ')
+	e.WriteExpr(sqlExpr)
+
+	if !IsNilExpr(s.table) {
+		e.WriteString(" FROM ")
+		e.WriteExpr(s.table)
+	}
+
+	WriteAdditions(e, s.additions...)
+
+	return e.Ex(ctx)
+}
+
+func ForUpdate() *OtherAddition {
+	return AsAddition(Expr("FOR UPDATE"))
 }
