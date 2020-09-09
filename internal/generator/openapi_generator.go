@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-courier/oas"
-	"github.com/profzone/eden-framework/internal/generator/openapi_scanner"
+	"github.com/profzone/eden-framework/internal/generator/scanner"
 	"github.com/profzone/eden-framework/internal/project"
 	"github.com/profzone/eden-framework/pkg/packagex"
 	"github.com/sirupsen/logrus"
@@ -19,7 +19,7 @@ import (
 type OpenApiGenerator struct {
 	api           *oas.OpenAPI
 	pkg           *packagex.Package
-	routerScanner *openapi_scanner.RouterScanner
+	routerScanner *scanner.RouterScanner
 }
 
 func NewOpenApiGenerator() *OpenApiGenerator {
@@ -49,7 +49,7 @@ func (a *OpenApiGenerator) Load(cwd string) {
 		logrus.Panic(err)
 	}
 
-	a.routerScanner = openapi_scanner.NewRouterScanner(pkg)
+	a.routerScanner = scanner.NewRouterScanner(pkg)
 }
 
 func (a *OpenApiGenerator) Pick() {
@@ -64,7 +64,7 @@ func (a *OpenApiGenerator) Pick() {
 
 	router := a.routerScanner.Router(routerVar)
 	routes := router.Routes()
-	operationIDs := map[string]*openapi_scanner.Route{}
+	operationIDs := map[string]*scanner.Route{}
 	for _, r := range routes {
 		method := r.Method()
 		operation := a.OperationByOperatorTypes(method, r.Operators...)
@@ -76,7 +76,7 @@ func (a *OpenApiGenerator) Pick() {
 	}
 }
 
-func (a *OpenApiGenerator) OperationByOperatorTypes(method string, operatorTypes ...*openapi_scanner.OperatorWithTypeName) *oas.Operation {
+func (a *OpenApiGenerator) OperationByOperatorTypes(method string, operatorTypes ...*scanner.OperatorWithTypeName) *oas.Operation {
 	operation := &oas.Operation{}
 
 	length := len(operatorTypes)

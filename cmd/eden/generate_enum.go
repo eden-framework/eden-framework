@@ -18,7 +18,6 @@ package main
 import (
 	"fmt"
 	"github.com/profzone/eden-framework/internal/generator"
-	"github.com/profzone/eden-framework/internal/generator/scanner"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -37,8 +36,7 @@ var enumCmd = &cobra.Command{
 		if enumCmdOutputPath == "" {
 			enumCmdOutputPath, _ = os.Getwd()
 		}
-		enumScanner := scanner.NewEnumScanner()
-		gen := generator.NewEnumGenerator(enumScanner, enumCmdTypeName)
+		gen := generator.NewEnumGenerator(enumCmdTypeName)
 
 		generator.Generate(gen, enumCmdInputPath, enumCmdOutputPath)
 	},

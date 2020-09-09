@@ -1,4 +1,4 @@
-package openapi_scanner
+package scanner
 
 import (
 	"bytes"

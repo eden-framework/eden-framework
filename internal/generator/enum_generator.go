@@ -2,8 +2,8 @@ package generator
 
 import (
 	"github.com/profzone/eden-framework/internal/generator/files"
-	"github.com/profzone/eden-framework/internal/generator/importer"
 	"github.com/profzone/eden-framework/internal/generator/scanner"
+	"github.com/profzone/eden-framework/pkg/packagex"
 	str "github.com/profzone/eden-framework/pkg/strings"
 	"github.com/sirupsen/logrus"
 	"go/ast"
@@ -12,49 +12,38 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 )
 
 type EnumGenerator struct {
-	pkgs        []*packages.Package
-	EnumScanner *scanner.EnumScanner
-	TypeName    string
+	pkg      *packagex.Package
+	scanner  *scanner.EnumScanner
+	TypeName string
 }
 
-func NewEnumGenerator(scanner *scanner.EnumScanner, typeName string) *EnumGenerator {
+func NewEnumGenerator(typeName string) *EnumGenerator {
 	return &EnumGenerator{
-		EnumScanner: scanner,
-		TypeName:    typeName,
+		TypeName: typeName,
 	}
 }
 
-func (e *EnumGenerator) Load(path string) {
-	_, err := os.Stat(path)
+func (e *EnumGenerator) Load(cwd string) {
+	_, err := os.Stat(cwd)
 	if err != nil {
 		if !os.IsExist(err) {
-			logrus.Panicf("entry path does not exist: %s", path)
+			logrus.Panicf("entry path does not exist: %s", cwd)
 		}
 	}
-	cfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedSyntax | packages.NeedDeps | packages.NeedFiles | packages.NeedImports | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedTypesSizes,
-		Dir:  path,
-	}
-
-	pkgs, err := packages.Load(cfg)
+	pkg, err := packagex.Load(cwd)
 	if err != nil {
 		logrus.Panic(err)
 	}
 
-	errs := packages.PrintErrors(pkgs)
-	if errs > 0 {
-		logrus.Panicf("packages.PrintErrors(a.pkgs) = %d", errs)
-	}
-
-	e.pkgs = pkgs
+	e.pkg = pkg
+	e.scanner = scanner.NewEnumScanner(pkg)
 }
 
 func (e *EnumGenerator) Pick() {
-	packages.Visit(e.pkgs, nil, func(i *packages.Package) {
+	packages.Visit(e.pkg.AllPackages, nil, func(i *packages.Package) {
 		for _, f := range i.Syntax {
 			commentScanner := scanner.NewCommentScanner(i.Fset, f)
 			ast.Inspect(f, func(node ast.Node) bool {
@@ -68,10 +57,10 @@ func (e *EnumGenerator) Pick() {
 				if hasEnum {
 					if e.TypeName != "" {
 						if e.TypeName == typeSpec.Name.Name {
-							e.EnumScanner.Enum(strings.Join([]string{i.PkgPath, typeSpec.Name.Name}, "."))
+							e.scanner.Enum(e.pkg.TypeName(typeSpec.Name.Name))
 						}
 					} else {
-						e.EnumScanner.Enum(strings.Join([]string{i.PkgPath, typeSpec.Name.Name}, "."))
+						e.scanner.Enum(e.pkg.TypeName(typeSpec.Name.Name))
 					}
 				}
 
@@ -83,14 +72,12 @@ func (e *EnumGenerator) Pick() {
 
 func (e *EnumGenerator) Output(outputPath string) Outputs {
 	outputs := Outputs{}
-	for typeFullName, enum := range e.EnumScanner.Enums {
-		pkgPath, typeName := importer.GetPackagePathAndDecl(typeFullName)
-
-		p, _ := build.Import(pkgPath, "", build.FindOnly)
+	for typeName, enum := range e.scanner.EnumSet {
+		p, _ := build.Import(typeName.Pkg().Path(), "", build.FindOnly)
 		dir, _ := filepath.Rel(outputPath, p.Dir)
 
-		enum := files.NewEnum(pkgPath, scanner.RetrievePackageName(pkgPath), typeName, enum, e.EnumScanner.HasOffset(typeFullName))
-		outputs.Add(GeneratedSuffix(path.Join(dir, str.ToLowerSnakeCase(typeName)+".go")), enum.String())
+		enum := files.NewEnum(typeName.Pkg().Path(), typeName.Pkg().Name(), typeName.Name(), enum, e.scanner.HasOffset(typeName))
+		outputs.Add(GeneratedSuffix(path.Join(dir, str.ToLowerSnakeCase(typeName.Name())+".go")), enum.String())
 	}
 	return outputs
 }
