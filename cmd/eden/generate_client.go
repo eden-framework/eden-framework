@@ -35,9 +35,7 @@ var clientCmd = &cobra.Command{
 		if clientCmdOutputPath == "" {
 			clientCmdOutputPath, _ = os.Getwd()
 		}
-		gen := &generator.ClientGenerator{
-			ServiceName: clientCmdPackageName,
-		}
+		gen := generator.NewClientGenerator(clientCmdPackageName)
 		generator.Generate(gen, clientCmdApiPath, clientCmdOutputPath)
 	},
 }

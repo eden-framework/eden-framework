@@ -13,29 +13,35 @@ import (
 
 type ClientGenerator struct {
 	Api         api.Api
-	ServiceName string
+	serviceName string
+}
+
+func NewClientGenerator(pkgName string) *ClientGenerator {
+	return &ClientGenerator{
+		serviceName: pkgName,
+	}
 }
 
 func (c *ClientGenerator) Load(path string) {
-	url, err := url.Parse(path)
+	urlPattern, err := url.Parse(path)
 	if err != nil {
 		logrus.Panic(err)
 	}
-	if url.Scheme == "" {
+	if urlPattern.Scheme == "" {
 		// 本地文件
-		err = c.loadLocalFile(url.Path)
-	} else if url.Scheme == "http" || url.Scheme == "https" {
+		err = c.loadLocalFile(urlPattern.Path)
+	} else if urlPattern.Scheme == "http" || urlPattern.Scheme == "https" {
 		// 远程文件
-		err = c.loadRemoteFile(url.Path)
+		err = c.loadRemoteFile(urlPattern.Path)
 	} else {
-		logrus.Panicf("unsupported scheme %s", url.Scheme)
+		logrus.Panicf("unsupported scheme %s", urlPattern.Scheme)
 	}
 	if err != nil {
 		logrus.Panic(err)
 	}
 
-	if c.ServiceName == "" {
-		c.ServiceName = c.Api.ServiceName
+	if c.serviceName == "" {
+		c.serviceName = c.Api.ServiceName
 	}
 }
 
@@ -70,9 +76,9 @@ func (c *ClientGenerator) Pick() {
 func (c *ClientGenerator) Output(outputPath string) Outputs {
 	outputs := Outputs{}
 
-	clientFile := files.NewClientFile(c.ServiceName, &c.Api)
-	clientEnumsFile := files.NewClientEnumsFile(outputPath, c.ServiceName, &c.Api)
-	typesFile := files.NewTypesFile(c.ServiceName, &c.Api)
+	clientFile := files.NewClientFile(c.serviceName, &c.Api)
+	clientEnumsFile := files.NewClientEnumsFile(outputPath, c.serviceName, &c.Api)
+	typesFile := files.NewTypesFile(c.serviceName, &c.Api)
 
 	outputs.Add(GeneratedSuffix(path.Join(outputPath, clientFile.PackageName, "client.go")), clientFile.String())
 	outputs.Add(GeneratedSuffix(path.Join(outputPath, clientFile.PackageName, "types.go")), typesFile.String())
