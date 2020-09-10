@@ -4,21 +4,20 @@ import (
 	"fmt"
 	"github.com/profzone/eden-framework/pkg/sqlx"
 	"github.com/profzone/eden-framework/pkg/sqlx/mysqlconnector"
+	"github.com/profzone/envconfig"
 	"net/url"
 	"time"
-
-	"github.com/go-courier/envconf"
 )
 
 type MySQL struct {
 	Name            string
-	Host            string           `env:",upstream"`
-	Port            int              `env:""`
-	User            string           `env:""`
-	Password        envconf.Password `env:""`
+	Host            string             `env:",upstream"`
+	Port            int                `env:""`
+	User            string             `env:""`
+	Password        envconfig.Password `env:""`
 	Extra           string
 	PoolSize        int
-	ConnMaxLifetime envconf.Duration
+	ConnMaxLifetime envconfig.Duration
 	Retry
 	Database *sqlx.Database `env:"-"`
 	*sqlx.DB `env:"-"`
@@ -34,7 +33,7 @@ func (m *MySQL) SetDefaults() {
 	}
 
 	if m.ConnMaxLifetime == 0 {
-		m.ConnMaxLifetime = envconf.Duration(1 * time.Hour)
+		m.ConnMaxLifetime = envconfig.Duration(1 * time.Hour)
 	}
 
 	if m.Extra == "" {

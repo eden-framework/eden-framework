@@ -24,7 +24,7 @@ require (
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.9.0
 	github.com/pelletier/go-toml v1.6.0 // indirect
-	github.com/profzone/envconfig v1.4.2-0.20191205104149-8f48718894dc
+	github.com/profzone/envconfig v1.4.2
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.5 // indirect

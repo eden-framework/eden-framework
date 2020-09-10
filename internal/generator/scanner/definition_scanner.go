@@ -71,7 +71,7 @@ func (scanner *DefinitionScanner) BindSchemas(openapi *oas.OpenAPI) {
 
 func (scanner *DefinitionScanner) isEnum(typeName *types.TypeName) bool {
 	if scanner.enumInterfaceType == nil {
-		pkgInfo := scanner.pkg.Pkg("github.com/go-courier/enumeration")
+		pkgInfo := scanner.pkg.Pkg("github.com/profzone/eden-framework/pkg/enumeration")
 		if pkgInfo != nil {
 			p := packagex.NewPackage(pkgInfo)
 			scanner.enumInterfaceType = p.TypeName("Enum").Type().Underlying().(*types.Interface)
