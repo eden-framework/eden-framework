@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"github.com/profzone/eden-framework/internal/generator"
 	"os"
+	"path"
 
 	"github.com/spf13/cobra"
 )
@@ -36,6 +37,7 @@ var openApiCmd = &cobra.Command{
 		}
 		if openApiCmdOutputPath == "" {
 			openApiCmdOutputPath, _ = os.Getwd()
+			path.Join(openApiCmdOutputPath, "api")
 		}
 		//enumScanner := scanner.NewEnumScanner()
 		//modelScanner := scanner.NewModelScanner(enumScanner)
