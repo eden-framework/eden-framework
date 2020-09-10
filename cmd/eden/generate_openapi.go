@@ -37,7 +37,7 @@ var openApiCmd = &cobra.Command{
 		}
 		if openApiCmdOutputPath == "" {
 			openApiCmdOutputPath, _ = os.Getwd()
-			path.Join(openApiCmdOutputPath, "api")
+			openApiCmdOutputPath = path.Join(openApiCmdOutputPath, "api")
 		}
 		//enumScanner := scanner.NewEnumScanner()
 		//modelScanner := scanner.NewModelScanner(enumScanner)
