@@ -6,22 +6,22 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.0.7
 	github.com/fatih/color v1.7.0
 	github.com/go-courier/enumeration v1.0.1
+	github.com/go-courier/envconf v1.3.0
 	github.com/go-courier/metax v1.2.1
 	github.com/go-courier/oas v1.2.0
 	github.com/go-courier/ptr v1.0.1
 	github.com/go-courier/reflectx v1.3.4
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/gogo/protobuf v1.3.1 // indirect
 	github.com/golang/protobuf v1.3.2 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/websocket v1.4.0
-	github.com/henrylee2cn/erpc/v6 v6.3.1
 	github.com/imdario/mergo v0.3.9
 	github.com/julienschmidt/httprouter v1.2.0
 	github.com/lib/pq v1.2.0
 	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
+	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.9.0
 	github.com/pelletier/go-toml v1.6.0 // indirect
 	github.com/profzone/envconfig v1.4.2-0.20191205104149-8f48718894dc
