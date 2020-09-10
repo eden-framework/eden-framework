@@ -65,6 +65,7 @@ func (m *MySQL) Connect() error {
 	db.SetMaxIdleConns(m.PoolSize / 2)
 	db.SetConnMaxLifetime(time.Duration(m.ConnMaxLifetime))
 	m.DB = db
+
 	return nil
 }
 

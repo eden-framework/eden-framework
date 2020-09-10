@@ -4,6 +4,7 @@ import (
 	"github.com/profzone/eden-framework/internal"
 	"github.com/profzone/eden-framework/internal/generator"
 	"github.com/profzone/eden-framework/internal/project"
+	"github.com/profzone/eden-framework/pkg/conf"
 	"github.com/profzone/eden-framework/pkg/context"
 	str "github.com/profzone/eden-framework/pkg/strings"
 	"github.com/profzone/envconfig"
@@ -19,10 +20,10 @@ import (
 type Application struct {
 	ctx                *context.WaitStopContext
 	p                  *project.Project
+	cmd                *cobra.Command
 	envConfigPrefix    string
 	outputDockerConfig bool
 	autoMigration      bool
-	Runner             func(app *Application) error
 	Config             interface{}
 }
 
@@ -39,12 +40,33 @@ func NewApplication(runner func(app *Application) error, config interface{}) *Ap
 		logrus.Panic("config must be a ptr value")
 	}
 
-	return &Application{
+	app := &Application{
 		p:      p,
 		ctx:    ctx,
-		Runner: runner,
 		Config: config,
 	}
+
+	app.cmd = &cobra.Command{
+		Use:   app.p.Name,
+		Short: app.p.Desc,
+		Run: func(cmd *cobra.Command, args []string) {
+			go runner(app)
+			app.WaitStop(func(ctx *context.WaitStopContext) error {
+				ctx.Cancel()
+				return nil
+			})
+		},
+	}
+
+	app.cmd.PersistentFlags().StringVarP(&app.envConfigPrefix, "env-prefix", "e", app.p.Name, "prefix for env var")
+	app.cmd.PersistentFlags().BoolVarP(&app.outputDockerConfig, "docker", "d", true, "whether or not output configuration of docker")
+	app.cmd.PersistentFlags().BoolVarP(&app.autoMigration, "db-migration", "m", os.Getenv("GOENV") == "DEV" || os.Getenv("GOENV") == "TEST", "auto migrate database if needed")
+
+	return app
+}
+
+func (app *Application) AddCommand(cmd ...*cobra.Command) {
+	app.cmd.AddCommand(cmd...)
 }
 
 func (app *Application) Start() {
@@ -52,22 +74,7 @@ func (app *Application) Start() {
 	os.Setenv(internal.EnvVarKeyServiceName, strings.Replace(app.p.Name, "service-", "", 1))
 	os.Setenv(internal.EnvVarKeyProjectGroup, app.p.Group)
 
-	command := &cobra.Command{
-		Use:   app.p.Name,
-		Short: app.p.Desc,
-		Run:   func(cmd *cobra.Command, args []string) {},
-	}
-
-	command.PersistentFlags().StringVarP(&app.envConfigPrefix, "env-prefix", "e", app.p.Name, "prefix for env var")
-	command.PersistentFlags().BoolVarP(&app.outputDockerConfig, "docker", "d", true, "whether or not output configuration of docker")
-	command.PersistentFlags().BoolVarP(&app.autoMigration, "db-migration", "m", os.Getenv("GOENV") == "DEV" || os.Getenv("GOENV") == "TEST", "auto migrate database if needed")
 	app.envConfigPrefix = str.ToUpperSnakeCase(app.envConfigPrefix)
-
-	if err := command.Execute(); err != nil {
-		logrus.Error(err)
-		os.Exit(1)
-	}
-
 	err := envconfig.Process(app.envConfigPrefix, app.Config)
 	if err != nil {
 		logrus.Panic(err)
@@ -83,8 +90,12 @@ func (app *Application) Start() {
 		generator.Generate(generate, "", "")
 	}
 
-	if err := app.Runner(app); err != nil {
+	// initialize global object
+	conf.Initialize(app.Config)
+
+	if err := app.cmd.Execute(); err != nil {
 		logrus.Error(err)
+		os.Exit(1)
 	}
 }
 
