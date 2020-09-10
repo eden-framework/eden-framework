@@ -1,15 +1,15 @@
-package confmysql
+package confpostgres
 
 import (
+	"github.com/profzone/envconfig"
 	"time"
 
-	"github.com/go-courier/envconf"
 	"github.com/sirupsen/logrus"
 )
 
 type Retry struct {
 	Repeats  int
-	Interval envconf.Duration
+	Interval envconfig.Duration
 }
 
 func (r *Retry) SetDefaults() {
@@ -17,7 +17,7 @@ func (r *Retry) SetDefaults() {
 		r.Repeats = 3
 	}
 	if r.Interval == 0 {
-		r.Interval = envconf.Duration(10 * time.Second)
+		r.Interval = envconfig.Duration(10 * time.Second)
 	}
 }
 
@@ -31,9 +31,7 @@ func (r Retry) Do(exec func() error) (err error) {
 		if err != nil {
 			logrus.Warningf("retry in seconds [%d]", r.Interval)
 			time.Sleep(time.Duration(r.Interval))
-			continue
 		}
-		break
 	}
 	return
 }
