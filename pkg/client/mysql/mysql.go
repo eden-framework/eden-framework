@@ -11,16 +11,16 @@ import (
 
 type MySQL struct {
 	Name            string
-	Host            string             `env:",upstream"`
-	Port            int                `env:""`
-	User            string             `env:""`
-	Password        envconfig.Password `env:""`
+	Host            string
+	Port            int
+	User            string
+	Password        envconfig.Password
 	Extra           string
 	PoolSize        int
 	ConnMaxLifetime envconfig.Duration
 	Retry
-	Database *sqlx.Database `env:"-"`
-	*sqlx.DB `env:"-"`
+	Database *sqlx.Database `ignored:"true"`
+	*sqlx.DB `ignored:"true"`
 }
 
 func (m *MySQL) SetDefaults() {

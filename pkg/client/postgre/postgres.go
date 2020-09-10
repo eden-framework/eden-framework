@@ -10,19 +10,19 @@ import (
 )
 
 type Postgres struct {
-	Host            string `env:",upstream"`
-	SlaveHost       string `env:",upstream"`
+	Host            string
+	SlaveHost       string
 	Port            int
-	User            string             `env:""`
-	Password        envconfig.Password `env:""`
+	User            string
+	Password        envconfig.Password
 	Extra           string
 	Extensions      []string
 	PoolSize        int
 	ConnMaxLifetime envconfig.Duration
-	Database        *sqlx.Database `env:"-"`
+	Database        *sqlx.Database `ignored:"true"`
 
-	*sqlx.DB `env:"-"`
-	slaveDB  *sqlx.DB `env:"-"`
+	*sqlx.DB `ignored:"true"`
+	slaveDB  *sqlx.DB `ignored:"true"`
 }
 
 func (m *Postgres) LivenessCheck() map[string]string {
