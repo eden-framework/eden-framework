@@ -37,7 +37,7 @@ func (s ServeHTTP) MarshalDefaults(v interface{}) {
 		}
 
 		if h.SwaggerPath == "" {
-			h.SwaggerPath = "./swagger.json"
+			h.SwaggerPath = "./api/openapi.json"
 		}
 
 		if h.Port == 0 {

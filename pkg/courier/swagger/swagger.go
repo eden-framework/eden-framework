@@ -59,6 +59,13 @@ func (s SwaggerDoc) Output(c context.Context) (interface{}, error) {
 	html := &httpx.HTML{}
 	u := transport_http.GetRequest(c).URL
 
+	rootPath := strings.TrimSuffix(u.Path, s.Path())
+	bundlePath := rootPath + "/swagger-ui-bundle.js"
+	apiPath := rootPath
+	if len(apiPath) == 0 {
+		apiPath = "/"
+	}
+
 	html.WriteString(`<!-- HTML for static distribution bundle build -->
 <!DOCTYPE html>
 <html lang="en">
@@ -91,13 +98,13 @@ func (s SwaggerDoc) Output(c context.Context) (interface{}, error) {
 
   <body>
     <div id="swagger-ui"></div>
-    <script src="` + strings.TrimSuffix(u.Path, s.Path()) + "/swagger-ui-bundle.js" + `"> </script>
+    <script src="` + bundlePath + `"> </script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.17.4/swagger-ui-standalone-preset.js"> </script>
     <script>
     window.onload = function() {
       // Build a system
       var ui = SwaggerUIBundle({
-        url: "` + strings.TrimSuffix(u.Path, s.Path()) + `",
+        url: "` + apiPath + `",
         dom_id: '#swagger-ui',
         deepLinking: true,
         presets: [
