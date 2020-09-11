@@ -24,10 +24,10 @@ type Application struct {
 	envConfigPrefix    string
 	outputDockerConfig bool
 	autoMigration      bool
-	Config             interface{}
+	Config             []interface{}
 }
 
-func NewApplication(runner func(app *Application) error, config interface{}) *Application {
+func NewApplication(runner func(app *Application) error, config ...interface{}) *Application {
 	p := &project.Project{}
 	ctx := context.NewWaitStopContext()
 	err := p.UnmarshalFromFile("", "")
@@ -35,9 +35,11 @@ func NewApplication(runner func(app *Application) error, config interface{}) *Ap
 		logrus.Panic(err)
 	}
 
-	tpe := reflect.TypeOf(config)
-	if tpe.Kind() != reflect.Ptr {
-		logrus.Panic("config must be a ptr value")
+	for i, c := range config {
+		tpe := reflect.TypeOf(c)
+		if tpe.Kind() != reflect.Ptr {
+			logrus.Panicf("the [%d] config must be a ptr value", i)
+		}
 	}
 
 	app := &Application{
@@ -75,14 +77,20 @@ func (app *Application) Start() {
 	os.Setenv(internal.EnvVarKeyProjectGroup, app.p.Group)
 
 	app.envConfigPrefix = str.ToUpperSnakeCase(app.envConfigPrefix)
-	err := envconfig.Process(app.envConfigPrefix, app.Config)
-	if err != nil {
-		logrus.Panic(err)
-	}
-	envconfig.Usage(app.envConfigPrefix, app.Config)
-	envVars, err := envconfig.GatherInfo(app.envConfigPrefix, app.Config)
-	if err != nil {
-		logrus.Panic(err)
+	var envVars = make([]envconfig.EnvVar, 0)
+	for _, c := range app.Config {
+		err := envconfig.Process(app.envConfigPrefix, c)
+		if err != nil {
+			logrus.Panic(err)
+		}
+		envconfig.Usage(app.envConfigPrefix, c)
+
+		envs, err := envconfig.GatherInfo(app.envConfigPrefix, c)
+		if err != nil {
+			logrus.Panic(err)
+		}
+
+		envVars = append(envVars, envs...)
 	}
 
 	if app.outputDockerConfig {
@@ -91,7 +99,7 @@ func (app *Application) Start() {
 	}
 
 	// initialize global object
-	conf.Initialize(app.Config)
+	conf.Initialize(app.Config...)
 
 	if err := app.cmd.Execute(); err != nil {
 		logrus.Error(err)
