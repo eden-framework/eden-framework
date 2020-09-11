@@ -69,20 +69,6 @@ func (scanner *DefinitionScanner) BindSchemas(openapi *oas.OpenAPI) {
 	openapi.Components.Schemas = scanner.schemas
 }
 
-func (scanner *DefinitionScanner) isEnum(typeName *types.TypeName) bool {
-	if scanner.enumInterfaceType == nil {
-		pkgInfo := scanner.pkg.Pkg("github.com/profzone/eden-framework/pkg/enumeration")
-		if pkgInfo != nil {
-			p := packagex.NewPackage(pkgInfo)
-			scanner.enumInterfaceType = p.TypeName("Enum").Type().Underlying().(*types.Interface)
-		}
-	}
-	if scanner.enumInterfaceType != nil {
-		return types.Implements(typeName.Type(), scanner.enumInterfaceType)
-	}
-	return false
-}
-
 func (scanner *DefinitionScanner) Def(typeName *types.TypeName) *oas.Schema {
 	if s, ok := scanner.definitions[typeName]; ok {
 		return s
@@ -122,7 +108,8 @@ func (scanner *DefinitionScanner) Def(typeName *types.TypeName) *oas.Schema {
 		}
 	}
 
-	if scanner.isEnum(typeName) {
+	doc, hasEnum := ParseEnum(doc)
+	if hasEnum {
 		enumOptions := scanner.enumScanner.Enum(typeName)
 		if enumOptions == nil {
 			panic(fmt.Errorf("missing enum option but annotated by openapi:enum"))
