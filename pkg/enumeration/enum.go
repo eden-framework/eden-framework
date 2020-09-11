@@ -5,6 +5,11 @@ import (
 	"strconv"
 )
 
+type EnumTypeDescriber interface {
+	EnumType() string
+	Enums() map[int][]string
+}
+
 type EnumOption struct {
 	Val   int         `json:"val"`
 	Value interface{} `json:"value"`

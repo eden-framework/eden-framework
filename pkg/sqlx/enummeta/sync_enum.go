@@ -1,9 +1,9 @@
 package enummeta
 
 import (
+	"github.com/profzone/eden-framework/pkg/enumeration"
 	"reflect"
 
-	"github.com/go-courier/enumeration"
 	"github.com/profzone/eden-framework/pkg/sqlx"
 	"github.com/profzone/eden-framework/pkg/sqlx/builder"
 )
@@ -41,16 +41,23 @@ func SyncEnum(db sqlx.DBExecutor) error {
 		db.D().Tables.Range(func(table *builder.Table, idx int) {
 			table.Columns.Range(func(col *builder.Column, idx int) {
 				v := reflect.New(col.ColumnType.Type).Interface()
-				if enumValue, ok := v.(enumeration.Enum); ok {
-					for _, enum := range enumValue.ConstValues() {
+				if enumValue, ok := v.(enumeration.EnumTypeDescriber); ok {
+					for value, enum := range enumValue.Enums() {
 						sqlMetaEnum := &SqlMetaEnum{
 							TName: table.Name,
 							CName: col.Name,
-							Type:  enum.TypeName(),
-							Value: enum.Int(),
-							Key:   enum.String(),
-							Label: enum.Label(),
+							Value: value,
+							Type:  enumValue.EnumType(),
 						}
+
+						if len(enum) > 0 {
+							sqlMetaEnum.Key = enum[0]
+						}
+
+						if len(enum) > 1 {
+							sqlMetaEnum.Label = enum[1]
+						}
+
 						fieldValues := builder.FieldValuesFromStructByNonZero(sqlMetaEnum, "Value")
 						cols, values := metaEnumTable.ColumnsAndValuesByFieldValues(fieldValues)
 						vals = append(vals, values...)
