@@ -119,8 +119,12 @@ func CommandsForShipping(p *Project, push bool) (commands []*exec.Cmd) {
 
 	if hasDockerfileYaml {
 		p.SetEnviron()
-		dockerfile = dockerfile.AddEnv(EnvVarRef, p.Version.String()+"-"+os.Getenv(EnvVarBuildRef))
+		buildRef := os.Getenv(EnvVarBuildRef)
+		if buildRef == "" {
+			panic("this command is only used in ci environment")
+		}
 
+		dockerfile.AddEnv(EnvVarRef, p.Version.String()+"-"+buildRef)
 		dockerfile.AddEnv("PROJECT_OWNER", p.Owner)
 		dockerfile.AddEnv("PROJECT_GROUP", p.Group)
 		dockerfile.AddEnv("PROJECT_NAME", p.Name)
