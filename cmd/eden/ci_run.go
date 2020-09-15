@@ -27,9 +27,10 @@ var ciRunCmd = &cobra.Command{
 	Use:   "run",
 	Short: "ci run project's script",
 	Long:  fmt.Sprintf("%s\nci run project's script", CommandHelpHeader),
+	Run:   func(cmd *cobra.Command, args []string) {},
 }
 
 func init() {
-	ciCmd.AddCommand(ciRunCmd)
 	ciRunCmd.Flags().BoolVarP(&ciRunCmdInDocker, "in-docker", "d", false, "run script in docker")
+	ciCmd.AddCommand(ciRunCmd)
 }
