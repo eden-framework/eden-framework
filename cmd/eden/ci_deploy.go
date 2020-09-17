@@ -16,16 +16,9 @@ limitations under the License.
 package main
 
 import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"github.com/profzone/eden-framework/internal/k8s"
 	"github.com/profzone/eden-framework/internal/project"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 var (
@@ -34,85 +27,15 @@ var (
 	ciDeployCmdServiceConfigFile string
 )
 
-const (
-	DeploymentUIDEnvVarKey = "DEPLOYMENT_UID"
-)
-
 // ciShipCmd represents the ciShip command
 var ciDeployCmd = &cobra.Command{
 	Use:   "deploy",
 	Short: "ci ship a project as a image",
 	Run: func(cmd *cobra.Command, args []string) {
 		currentProject.SetEnviron()
-
-		ctx, _ := context.WithCancel(context.Background())
-		config, err := clientcmd.BuildConfigFromFlags("", ciDeployCmdConfigFile)
+		err := project.ProcessDeployment(ciDeployCmdConfigFile, ciDeployCmdDeployConfigFile, ciDeployCmdServiceConfigFile)
 		if err != nil {
-			panic(err)
-		}
-		clientset, err := kubernetes.NewForConfig(config)
-		if err != nil {
-			panic(err)
-		}
-
-		// Get Deployment
-		deployment, patch, err := k8s.MakeDeployment(ciDeployCmdDeployConfigFile)
-		if err != nil {
-			panic(err)
-		}
-		deploymentsClient := clientset.AppsV1().Deployments(deployment.Namespace)
-		_, err = deploymentsClient.Get(ctx, deployment.Name, metav1.GetOptions{})
-		if err != nil {
-			// Create Deployment
-			fmt.Println("Creating deployment...")
-			deployment, err = deploymentsClient.Create(ctx, deployment, metav1.CreateOptions{})
-			if err != nil {
-				panic(err)
-			}
-			fmt.Printf("Created deployment %s.\n", deployment.GetObjectMeta().GetName())
-		} else {
-			// Patch Deployment
-			fmt.Println("Updating deployment...")
-			data, err := json.Marshal(patch)
-			if err != nil {
-				panic(err)
-			}
-			deployment, err = deploymentsClient.Patch(ctx, deployment.Name, types.StrategicMergePatchType, data, metav1.PatchOptions{})
-			if err != nil {
-				panic(err)
-			}
-			fmt.Printf("Updated deployment %s.\n", deployment.GetObjectMeta().GetName())
-		}
-
-		project.SetEnv(DeploymentUIDEnvVarKey, string(deployment.UID))
-
-		// Get Service
-		service, patch, err := k8s.MakeService(ciDeployCmdServiceConfigFile)
-		if err != nil {
-			panic(err)
-		}
-		servicesClient := clientset.CoreV1().Services(service.Namespace)
-		_, err = servicesClient.Get(ctx, service.Name, metav1.GetOptions{})
-		if err != nil {
-			// Create Service
-			fmt.Println("Creating service...")
-			service, err = servicesClient.Create(ctx, service, metav1.CreateOptions{})
-			if err != nil {
-				panic(err)
-			}
-			fmt.Printf("Created service %s.\n", service.GetObjectMeta().GetName())
-		} else {
-			// Patch Service
-			fmt.Println("Updating service...")
-			data, err := json.Marshal(patch)
-			if err != nil {
-				panic(err)
-			}
-			service, err = servicesClient.Patch(ctx, service.Name, types.StrategicMergePatchType, data, metav1.PatchOptions{})
-			if err != nil {
-				panic(err)
-			}
-			fmt.Printf("Updated service %s.\n", service.GetObjectMeta().GetName())
+			logrus.Panic(err)
 		}
 	},
 }

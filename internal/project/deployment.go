@@ -1,199 +1,89 @@
 package project
 
 import (
-	"github.com/fatih/color"
-	"github.com/profzone/eden-framework/internal/docker"
-	"github.com/profzone/eden-framework/pkg/ptr"
-	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
-	"os/exec"
-	"strings"
+	"context"
+	"encoding/json"
+	"fmt"
+	"github.com/profzone/eden-framework/internal/k8s"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
-var (
-	EnvVarRef              = "PROJECT_REF"
-	EnvVarBuildRef         = "DRONE_COMMIT_SHA"
-	EnvVarBuildBranch      = "DRONE_COMMIT_REF"
-	EnvVarRancherEnv       = "RANCHER_ENVIRONMENT"
-	EnvVarRancherUrl       = "RANCHER_URL"
-	EnvVarRancherAccessKey = "RANCHER_ACCESS_KEY"
-	EnvVarRancherSecretKey = "RANCHER_SECRET_KEY"
+const (
+	DeploymentUIDEnvVarKey = "DEPLOYMENT_UID"
 )
 
-var (
-	EnvValRancherUrl       = "http://rancher.profzone.net:38080"
-	EnvValRancherAccessKey = "744E0D8EF311C269FED1"
-	EnvValRancherSecretKey = "yBXzp7jdaaRqCtL92TJSRbekxzYr8x7Xr2r5rq11"
-)
-
-var tmpDockerfile = "Dockerfile"
-
-var DockerfileYmlOrders = []string{
-	"build/dockerfile.default.yml",
-	"build/dockerfile.yml",
-}
-
-var (
-	CIWorkingDirectory  = "/drone/workspace"
-	CIGolangRootPath    = "/go/src/"
-	COGolangPackageName = "github.com/"
-)
-
-func CommandForDeploy(p *Project, deployEnv string) (command *exec.Cmd) {
-	SetEnv(EnvVarRancherEnv, deployEnv)
-	if viper.GetString("RANCHER_URL") == "" {
-		SetEnv(EnvVarRancherUrl, EnvValRancherUrl)
-	} else {
-		SetEnv(EnvVarRancherUrl, viper.GetString("RANCHER_URL"))
-	}
-	if viper.GetString("RANCHER_ACCESS_KEY") == "" {
-		SetEnv(EnvVarRancherAccessKey, EnvValRancherAccessKey)
-	} else {
-		SetEnv(EnvVarRancherAccessKey, viper.GetString("RANCHER_ACCESS_KEY"))
-	}
-	if viper.GetString("RANCHER_SECRET_KEY") == "" {
-		SetEnv(EnvVarRancherSecretKey, EnvValRancherSecretKey)
-	} else {
-		SetEnv(EnvVarRancherSecretKey, viper.GetString("RANCHER_SECRET_KEY"))
-	}
-	stackName := p.Group
-
-	if p.Feature != "" {
-		stackName = stackName + "--" + p.Feature
-	}
-
-	LoadEnv(deployEnv, p.Feature)
-
-	writeMemoryLimit(p.Name)
-
-	rancherUp := []string{
-		"rancher",
-		"up",
-		"-d",
-	}
-
-	_, err := os.Stat("/usr/local/bin/rancher-env.sh")
-	if err == nil {
-		rancherUp = append([]string{"rancher-env.sh"}, rancherUp...)
-	}
-
-	dockerComposeFiles := []string{
-		"docker-compose.initial.yml",
-		"docker-compose.default.yml",
-		"docker-compose.yml",
-	}
-
-	for _, dockerComposeFile := range dockerComposeFiles {
-		if isPathExist(dockerComposeFile) {
-			rancherUp = append(rancherUp, "-f", dockerComposeFile)
-		}
-	}
-
-	if p.Feature != "" {
-		p.Version.Prefix = p.Feature
-	}
-
-	rancherUp = append(rancherUp, "--stack", stackName, "--pull", "--force-upgrade", "--confirm-upgrade")
-
-	return p.Command(rancherUp...)
-}
-
-func CommandsForShipping(p *Project, push bool) (commands []*exec.Cmd) {
-	dockerfile := &docker.Dockerfile{}
-
-	hasDockerfileYaml := false
-
-	for _, dockerfileYml := range DockerfileYmlOrders {
-		if isPathExist(dockerfileYml) {
-			hasDockerfileYaml = true
-			mayReadFileAndUnmarshal(dockerfileYml, dockerfile)
-		}
-	}
-
-	if dockerfile.Image == "" {
-		dockerfile.Image = "${PROFZONE_DOCKER_REGISTRY}/${PROJECT_OWNER}/${PROJECT_NAME}:${PROJECT_REF}"
-	}
-
-	if hasDockerfileYaml {
-		p.SetEnviron()
-
-		dockerfile.AddEnv(EnvVarRef, p.Ref)
-		dockerfile.AddEnv("PROJECT_OWNER", p.Owner)
-		dockerfile.AddEnv("PROJECT_GROUP", p.Group)
-		dockerfile.AddEnv("PROJECT_NAME", p.Name)
-		dockerfile.AddEnv("PROJECT_FEATURE", p.Feature)
-
-		ioutil.WriteFile(tmpDockerfile, []byte(dockerfile.String()), os.ModePerm)
-	}
-
-	if p.Feature != "" {
-		p.Version.Prefix = p.Feature
-	}
-
-	commands = append(commands, p.Command("docker", "build", "-f", tmpDockerfile, "-t", dockerfile.Image, "."))
-	if push {
-		commands = append(commands, p.Command("docker", "push", dockerfile.Image))
-	}
-	return
-}
-
-func writeMemoryLimit(serviceName string) {
-	compose := docker.NewDockerCompose()
-
-	s := docker.NewService("busybox:latest")
-	s.MemLimit = ptr.Int64(1073741824)
-
-	compose = compose.AddService(serviceName, s)
-	data, _ := yaml.Marshal(compose)
-
-	ioutil.WriteFile("docker-compose.initial.yml", data, os.ModePerm)
-}
-
-func isPathExist(path string) bool {
-	f, _ := os.Stat(path)
-	return f != nil
-}
-
-func LoadEnv(envName string, feature string) {
-	loadEnvFromFiles("default", feature)
-	if envName != "" {
-		loadEnvFromFiles(envName, feature)
-	}
-}
-
-func loadEnvFromFiles(envName string, feature string) {
-	loadEnvFromFile(envName)
-	if feature != "" {
-		loadEnvFromFile(envName + "-" + feature)
-	}
-}
-
-func loadEnvFromFile(envName string) {
-	filename := "config/" + strings.ToLower(envName) + ".yml"
-	logrus.Infof("try to load env vars from %s ...\n", color.GreenString(filename))
-	envFileContent, err := ioutil.ReadFile(filename)
-	if err == nil {
-		var envVars map[string]string
-		err := yaml.Unmarshal([]byte(envFileContent), &envVars)
-		if err != nil {
-			panic(err)
-		}
-		for key, value := range envVars {
-			SetEnv(key, value)
-		}
-	}
-}
-
-func mayReadFileAndUnmarshal(file string, v interface{}) {
-	bytes, errForRead := ioutil.ReadFile(file)
-	if errForRead != nil {
-		panic(errForRead)
-	}
-	err := yaml.Unmarshal(bytes, v)
+func ProcessDeployment(kubeConfig, deployConfig, serviceConfig string) error {
+	ctx, _ := context.WithCancel(context.Background())
+	config, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	clientSet, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return err
+	}
+
+	// Get Deployment
+	deployment, patch, err := k8s.MakeDeployment(deployConfig)
+	if err != nil {
+		return err
+	}
+	deploymentsClient := clientSet.AppsV1().Deployments(deployment.Namespace)
+	_, err = deploymentsClient.Get(ctx, deployment.Name, metav1.GetOptions{})
+	if err != nil {
+		// Create Deployment
+		fmt.Println("Creating deployment...")
+		deployment, err = deploymentsClient.Create(ctx, deployment, metav1.CreateOptions{})
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Created deployment %s.\n", deployment.GetObjectMeta().GetName())
+	} else {
+		// Patch Deployment
+		fmt.Println("Updating deployment...")
+		data, err := json.Marshal(patch)
+		if err != nil {
+			return err
+		}
+		deployment, err = deploymentsClient.Patch(ctx, deployment.Name, types.StrategicMergePatchType, data, metav1.PatchOptions{})
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Updated deployment %s.\n", deployment.GetObjectMeta().GetName())
+	}
+
+	SetEnv(DeploymentUIDEnvVarKey, string(deployment.UID))
+
+	// Get Service
+	service, patch, err := k8s.MakeService(serviceConfig)
+	if err != nil {
+		return err
+	}
+	servicesClient := clientSet.CoreV1().Services(service.Namespace)
+	_, err = servicesClient.Get(ctx, service.Name, metav1.GetOptions{})
+	if err != nil {
+		// Create Service
+		fmt.Println("Creating service...")
+		service, err = servicesClient.Create(ctx, service, metav1.CreateOptions{})
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Created service %s.\n", service.GetObjectMeta().GetName())
+	} else {
+		// Patch Service
+		fmt.Println("Updating service...")
+		data, err := json.Marshal(patch)
+		if err != nil {
+			return err
+		}
+		service, err = servicesClient.Patch(ctx, service.Name, types.StrategicMergePatchType, data, metav1.PatchOptions{})
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Updated service %s.\n", service.GetObjectMeta().GetName())
+	}
+	return nil
 }
