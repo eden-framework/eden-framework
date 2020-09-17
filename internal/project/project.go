@@ -31,6 +31,8 @@ type Project struct {
 	Workflow        Workflow          `yaml:"workflow,omitempty"`
 	Scripts         map[string]Script `yaml:"scripts,omitempty"`
 	Feature         string            `yaml:"feature,omitempty"`
+	Ref             string            `env:"ref" yaml:"-"`
+	Selector        string            `env:"selector" yaml:"-"`
 }
 
 func (p *Project) UnmarshalFromFile(filePath, fileName string) error {
@@ -113,6 +115,14 @@ func (p *Project) SetEnviron() {
 	if os.Getenv(DOCKER_REGISTRY_KEY) == "" {
 		SetEnv(DOCKER_REGISTRY_KEY, DOCKER_REGISTRY)
 	}
+
+	projectRef := p.Version.String()
+	buildRef := os.Getenv(EnvVarBuildRef)
+	if buildRef != "" {
+		projectRef += "-" + buildRef
+	}
+	p.Ref = projectRef
+	p.Selector = fmt.Sprintf("deployment-%s-%s", p.Group, p.Ref)
 
 	tpe := reflect.TypeOf(p).Elem()
 	rv := reflect.Indirect(reflect.ValueOf(p))
