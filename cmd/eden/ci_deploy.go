@@ -29,7 +29,6 @@ import (
 )
 
 var (
-	ciDeployCmdNamespace         string
 	ciDeployCmdConfigFile        string
 	ciDeployCmdDeployConfigFile  string
 	ciDeployCmdServiceConfigFile string
@@ -57,11 +56,11 @@ var ciDeployCmd = &cobra.Command{
 		}
 
 		// Get Deployment
-		deploymentsClient := clientset.AppsV1().Deployments(ciDeployCmdNamespace)
 		deployment, patch, err := k8s.MakeDeployment(ciDeployCmdDeployConfigFile)
 		if err != nil {
 			panic(err)
 		}
+		deploymentsClient := clientset.AppsV1().Deployments(deployment.Namespace)
 		_, err = deploymentsClient.Get(ctx, deployment.Name, metav1.GetOptions{})
 		if err != nil {
 			// Create Deployment
@@ -88,11 +87,11 @@ var ciDeployCmd = &cobra.Command{
 		project.SetEnv(DeploymentUIDEnvVarKey, string(deployment.UID))
 
 		// Get Service
-		servicesClient := clientset.CoreV1().Services(ciDeployCmdNamespace)
 		service, patch, err := k8s.MakeService(ciDeployCmdServiceConfigFile)
 		if err != nil {
 			panic(err)
 		}
+		servicesClient := clientset.CoreV1().Services(service.Namespace)
 		_, err = servicesClient.Get(ctx, service.Name, metav1.GetOptions{})
 		if err != nil {
 			// Create Service
@@ -122,6 +121,5 @@ func init() {
 	ciDeployCmd.Flags().StringVarP(&ciDeployCmdConfigFile, "config", "c", "", "kubeconfig file path")
 	ciDeployCmd.Flags().StringVarP(&ciDeployCmdDeployConfigFile, "deploy", "d", "./build/deploy.yml", "deploy yaml file path")
 	ciDeployCmd.Flags().StringVarP(&ciDeployCmdServiceConfigFile, "service", "s", "./build/service.yml", "service yaml file path")
-	ciDeployCmd.Flags().StringVarP(&ciDeployCmdNamespace, "namespace", "n", "default", "eden ci deploy --namespace=default")
 	ciCmd.AddCommand(ciDeployCmd)
 }

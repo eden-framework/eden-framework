@@ -26,16 +26,6 @@ func init() {
 		Image:           getEnvOrDefault("BUILDER_GOLANG", "profzone/golang-onbuild:1.14"),
 		WorkingDir:      "/go/src/github.com/${PROJECT_GROUP}/${PROJECT_NAME}",
 	})
-	project.RegisterBuilder("BUILDER_VUE", &project.Builder{
-		ProgramLanguage: "vue",
-		Image:           getEnvOrDefault("BUILDER_VUE", "profzone/node:alpine"),
-		WorkingDir:      "/go/src/github.com/${PROJECT_GROUP}/${PROJECT_NAME}",
-	})
-	project.RegisterBuilder("BUILDER_GITBOOK", &project.Builder{
-		ProgramLanguage: "gitbook",
-		Image:           getEnvOrDefault("BUILDER_GITBOOK", "g7pay/env-node:gitbook-builder"),
-		WorkingDir:      "/go/src/github.com/${PROJECT_GROUP}/${PROJECT_NAME}",
-	})
 
 	if currentProject.Scripts != nil {
 		for scriptCmd, script := range currentProject.Scripts {
