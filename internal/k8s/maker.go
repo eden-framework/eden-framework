@@ -32,6 +32,7 @@ func MakeDeployment(pathToYaml string) (*appsv1.Deployment, map[string]interface
 	if err := yaml.NewYAMLOrJSONDecoder(reader, 100).Decode(&deployment); err != nil {
 		return nil, nil, errors.Wrap(err, fmt.Sprintf("failed to decode file %s into Deployment", pathToYaml))
 	}
+
 	reader.Reset(manifestData)
 
 	patch := make(map[string]interface{})

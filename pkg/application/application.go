@@ -23,7 +23,7 @@ type Application struct {
 	cmd                *cobra.Command
 	envConfigPrefix    string
 	outputDockerConfig bool
-	autoMigration      bool
+	outputK8sConfig    bool
 	Config             []interface{}
 }
 
@@ -61,8 +61,8 @@ func NewApplication(runner func(app *Application) error, config ...interface{}) 
 	}
 
 	app.cmd.PersistentFlags().StringVarP(&app.envConfigPrefix, "env-prefix", "e", app.p.Name, "prefix for env var")
-	app.cmd.PersistentFlags().BoolVarP(&app.outputDockerConfig, "docker", "d", true, "whether or not output configuration of docker")
-	app.cmd.PersistentFlags().BoolVarP(&app.autoMigration, "db-migration", "m", os.Getenv("GOENV") == "DEV" || os.Getenv("GOENV") == "TEST", "auto migrate database if needed")
+	app.cmd.PersistentFlags().BoolVarP(&app.outputDockerConfig, "with-docker", "d", true, "whether or not output configuration of docker")
+	app.cmd.PersistentFlags().BoolVarP(&app.outputK8sConfig, "with-k8s", "k", true, "whether or not output configuration of k8s")
 
 	return app
 }
@@ -95,6 +95,11 @@ func (app *Application) Start() {
 
 	if app.outputDockerConfig {
 		generate := generator.NewDockerGenerator(app.p.Name, envVars)
+		generator.Generate(generate, "", "")
+	}
+
+	if app.outputK8sConfig {
+		generate := generator.NewK8sGenerator(app.p.Name, envVars)
 		generator.Generate(generate, "", "")
 	}
 

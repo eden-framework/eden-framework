@@ -2,21 +2,12 @@ package files
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/profzone/eden-framework/pkg/executil"
 	str "github.com/profzone/eden-framework/pkg/strings"
 	"reflect"
 	"strconv"
 	"strings"
 )
-
-func EnvVarInDocker(key string) string {
-	return fmt.Sprintf("$${%s}", key)
-}
-
-func EnvVar(key string) string {
-	return fmt.Sprintf("${%s}", key)
-}
 
 type Dockerfile struct {
 	From       string            `docker:"FROM" yaml:"from,omitempty"`

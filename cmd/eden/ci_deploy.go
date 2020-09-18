@@ -42,7 +42,7 @@ var ciDeployCmd = &cobra.Command{
 
 func init() {
 	ciDeployCmd.Flags().StringVarP(&ciDeployCmdConfigFile, "config", "c", "", "kubeconfig file path")
-	ciDeployCmd.Flags().StringVarP(&ciDeployCmdDeployConfigFile, "deploy", "d", "./build/deploy.yml", "deploy yaml file path")
-	ciDeployCmd.Flags().StringVarP(&ciDeployCmdServiceConfigFile, "service", "s", "./build/service.yml", "service yaml file path")
+	ciDeployCmd.Flags().StringVarP(&ciDeployCmdDeployConfigFile, "deploy", "d", "./build/deploy.default.yml", "deploy yaml file path")
+	ciDeployCmd.Flags().StringVarP(&ciDeployCmdServiceConfigFile, "service", "s", "./build/service.default.yml", "service yaml file path")
 	ciCmd.AddCommand(ciDeployCmd)
 }
