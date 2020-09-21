@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/go-courier/oas"
 	"github.com/profzone/eden-framework/internal/generator/scanner"
-	"github.com/profzone/eden-framework/internal/project"
 	"github.com/profzone/eden-framework/pkg/packagex"
 	"github.com/sirupsen/logrus"
 	"go/ast"
@@ -42,13 +41,6 @@ func (a *OpenApiGenerator) Load(cwd string) {
 	}
 
 	a.pkg = pkg
-
-	proj := project.Project{}
-	err = proj.UnmarshalFromFile(cwd, "")
-	if err != nil {
-		logrus.Panic(err)
-	}
-
 	a.routerScanner = scanner.NewRouterScanner(pkg)
 }
 

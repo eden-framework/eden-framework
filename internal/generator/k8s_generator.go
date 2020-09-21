@@ -6,14 +6,19 @@ import (
 	"github.com/profzone/eden-framework/internal"
 	"github.com/profzone/eden-framework/internal/generator/files"
 	"github.com/profzone/eden-framework/internal/project"
-	"github.com/profzone/envconfig"
+	"github.com/profzone/eden-framework/pkg/courier/transport_grpc"
+	"github.com/profzone/eden-framework/pkg/courier/transport_http"
+	"github.com/profzone/eden-framework/pkg/reflectx"
 	"github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"path"
+	"reflect"
+	"strings"
 )
 
 const (
@@ -21,18 +26,16 @@ const (
 )
 
 type K8sGenerator struct {
-	ServiceName string
-	EnvVars     []envconfig.EnvVar
+	config []interface{}
 }
 
-func NewK8sGenerator(serviceName string, envVars []envconfig.EnvVar) *K8sGenerator {
+func NewK8sGenerator(config []interface{}) *K8sGenerator {
 	return &K8sGenerator{
-		ServiceName: serviceName,
-		EnvVars:     envVars,
+		config: config,
 	}
 }
 
-func (d *K8sGenerator) Load(path string) {
+func (d *K8sGenerator) Load(cwd string) {
 }
 
 func (d *K8sGenerator) Pick() {
@@ -40,6 +43,8 @@ func (d *K8sGenerator) Pick() {
 
 func (d *K8sGenerator) Output(outputPath string) Outputs {
 	outputs := Outputs{}
+
+	serverPorts := findServerPorts(d.config)
 
 	// Deployment config file
 	deploymentConfig := &appsv1.Deployment{
@@ -110,6 +115,19 @@ func (d *K8sGenerator) Output(outputPath string) Outputs {
 		},
 	}
 
+	for _, port := range serverPorts {
+		deploymentConfig.Spec.Template.Spec.Containers[0].Ports = append(deploymentConfig.Spec.Template.Spec.Containers[0].Ports, apiv1.ContainerPort{
+			HostPort:      port,
+			ContainerPort: port,
+			Protocol:      apiv1.ProtocolTCP,
+		})
+		serviceConfig.Spec.Ports = append(serviceConfig.Spec.Ports, apiv1.ServicePort{
+			Protocol:   apiv1.ProtocolTCP,
+			Port:       port,
+			TargetPort: intstr.FromInt(int(port)),
+		})
+	}
+
 	serializer := json.NewSerializerWithOptions(json.DefaultMetaFactory, nil, nil, json.SerializerOptions{
 		Yaml:   true,
 		Pretty: true,
@@ -129,4 +147,47 @@ func (d *K8sGenerator) Output(outputPath string) Outputs {
 	outputs.Add(path.Join(outputPath, "build/deploy.default.yml"), deploymentBuffer.String())
 	outputs.Add(path.Join(outputPath, "build/service.default.yml"), serviceBuffer.String())
 	return outputs
+}
+
+func findServerPorts(config []interface{}) (ports []int32) {
+	for _, c := range config {
+		val := reflect.ValueOf(c)
+
+		exampleNames := exampleServerFullTypeName()
+		EachFieldValue(val.Elem(), func(field reflect.Value) bool {
+			fullName := reflectx.FullTypeName(reflectx.FromRType(field.Type()))
+			for _, name := range exampleNames {
+				if strings.HasSuffix(fullName, name) {
+					field = reflectx.Indirect(field)
+					portVal := field.FieldByName("Port")
+					if !reflectx.IsEmptyValue(portVal) {
+						ports = append(ports, int32(portVal.Int()))
+					}
+				}
+			}
+
+			return true
+		})
+	}
+	return
+}
+
+func exampleServerFullTypeName() (names []string) {
+	exampleHttpServer := transport_http.ServeHTTP{}
+	exampleGrpcServer := transport_grpc.ServeGRPC{}
+
+	httpTyp := reflect.TypeOf(exampleHttpServer)
+	names = append(names, httpTyp.PkgPath()+"."+httpTyp.Name())
+	grpcTyp := reflect.TypeOf(exampleGrpcServer)
+	names = append(names, grpcTyp.PkgPath()+"."+grpcTyp.Name())
+	return
+}
+
+func EachFieldValue(val reflect.Value, walker func(value reflect.Value) bool) {
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+		if !walker(field) {
+			break
+		}
+	}
 }

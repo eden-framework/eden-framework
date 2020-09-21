@@ -93,14 +93,14 @@ func (app *Application) Start() {
 		envVars = append(envVars, envs...)
 	}
 
-	if app.outputDockerConfig {
-		generate := generator.NewDockerGenerator(app.p.Name, envVars)
-		generator.Generate(generate, "", "")
-	}
+	if os.Getenv("GOENV") != "PROD" {
+		cwd, _ := os.Getwd()
 
-	if app.outputK8sConfig {
-		generate := generator.NewK8sGenerator(app.p.Name, envVars)
-		generator.Generate(generate, "", "")
+		generate := generator.NewDockerGenerator(app.p.Name, envVars)
+		generator.Generate(generate, cwd, cwd)
+
+		k8sGenerator := generator.NewK8sGenerator(app.Config)
+		generator.Generate(k8sGenerator, cwd, cwd)
 	}
 
 	// initialize global object
