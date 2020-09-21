@@ -3,19 +3,31 @@ package project
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/profzone/eden-framework/internal/k8s"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"strings"
 )
 
 const (
 	DeploymentUIDEnvVarKey = "DEPLOYMENT_UID"
 )
 
-func ProcessDeployment(kubeConfig, deployConfig, serviceConfig string) error {
+func ProcessDeployment(p *Project, env, kubeConfig, deployConfig, serviceConfig string) error {
+	if env == "" {
+		return errors.New("deployment must specify a environment name")
+	}
+	envVars := LoadEnv(env, p.Feature)
+
 	ctx, _ := context.WithCancel(context.Background())
 	config, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
 	if err != nil {
@@ -31,6 +43,15 @@ func ProcessDeployment(kubeConfig, deployConfig, serviceConfig string) error {
 	if err != nil {
 		return err
 	}
+
+	for key, val := range envVars {
+		deployment.Spec.Template.Spec.Containers[0].Env = append(deployment.Spec.Template.Spec.Containers[0].Env, apiv1.EnvVar{
+			Name:  key,
+			Value: val,
+		})
+	}
+	patch = patchEnvVars(patch, envVars)
+
 	deploymentsClient := clientSet.AppsV1().Deployments(deployment.Namespace)
 	_, err = deploymentsClient.Get(ctx, deployment.Name, metav1.GetOptions{})
 	if err != nil {
@@ -86,4 +107,63 @@ func ProcessDeployment(kubeConfig, deployConfig, serviceConfig string) error {
 		fmt.Printf("Updated service %s.\n", service.GetObjectMeta().GetName())
 	}
 	return nil
+}
+
+func LoadEnv(envName string, feature string) map[string]string {
+	defaultEnv := loadEnvFromFiles("default", feature)
+	if envName != "" {
+		extendEnv := loadEnvFromFiles(envName, feature)
+		defaultEnv = mergeEnvVars(defaultEnv, extendEnv)
+	}
+
+	return defaultEnv
+}
+
+func loadEnvFromFiles(envName string, feature string) map[string]string {
+	defaultEnv := loadEnvFromFile(envName)
+	if feature != "" {
+		extendEnv := loadEnvFromFile(envName + "-" + feature)
+		defaultEnv = mergeEnvVars(defaultEnv, extendEnv)
+	}
+
+	return defaultEnv
+}
+
+func loadEnvFromFile(envName string) map[string]string {
+	filename := "build/configs/" + strings.ToLower(envName) + ".yml"
+	logrus.Infof("try to load env vars from %s ...\n", color.GreenString(filename))
+	envFileContent, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil
+	}
+
+	var envVars map[string]string
+	err = yaml.Unmarshal(envFileContent, &envVars)
+	if err != nil {
+		panic(err)
+	}
+	for key, value := range envVars {
+		SetEnv(key, value)
+	}
+	return envVars
+}
+
+func mergeEnvVars(self map[string]string, source map[string]string) map[string]string {
+	for key, val := range source {
+		self[key] = val
+	}
+	return self
+}
+
+func patchEnvVars(patch map[string]interface{}, envVars map[string]string) map[string]interface{} {
+	envs := make([]map[string]string, 0)
+	for key, val := range envVars {
+		envs = append(envs, map[string]string{
+			"name":  key,
+			"value": val,
+		})
+	}
+	patch["spec"].(map[string]interface{})["template"].(map[string]interface{})["spec"].(map[string]interface{})["containers"].([]interface{})[0].(map[string]interface{})["env"] = envs
+
+	return patch
 }

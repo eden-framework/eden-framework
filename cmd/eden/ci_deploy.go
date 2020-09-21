@@ -22,6 +22,7 @@ import (
 )
 
 var (
+	ciDeployCmdEnv               string
 	ciDeployCmdConfigFile        string
 	ciDeployCmdDeployConfigFile  string
 	ciDeployCmdServiceConfigFile string
@@ -33,7 +34,7 @@ var ciDeployCmd = &cobra.Command{
 	Short: "ci ship a project as a image",
 	Run: func(cmd *cobra.Command, args []string) {
 		currentProject.SetEnviron()
-		err := project.ProcessDeployment(ciDeployCmdConfigFile, ciDeployCmdDeployConfigFile, ciDeployCmdServiceConfigFile)
+		err := project.ProcessDeployment(currentProject, ciDeployCmdEnv, ciDeployCmdConfigFile, ciDeployCmdDeployConfigFile, ciDeployCmdServiceConfigFile)
 		if err != nil {
 			logrus.Panic(err)
 		}
@@ -41,6 +42,7 @@ var ciDeployCmd = &cobra.Command{
 }
 
 func init() {
+	ciDeployCmd.Flags().StringVarP(&ciDeployCmdEnv, "env", "e", "", "deploy environment name")
 	ciDeployCmd.Flags().StringVarP(&ciDeployCmdConfigFile, "config", "c", "", "kubeconfig file path")
 	ciDeployCmd.Flags().StringVarP(&ciDeployCmdDeployConfigFile, "deploy", "d", "./build/deploy.default.yml", "deploy yaml file path")
 	ciDeployCmd.Flags().StringVarP(&ciDeployCmdServiceConfigFile, "service", "s", "./build/service.default.yml", "service yaml file path")
