@@ -23,7 +23,6 @@ type ServeHTTP struct {
 	Name         string
 	IP           string
 	Port         int
-	SwaggerPath  string
 	WriteTimeout time.Duration
 	ReadTimeout  time.Duration
 	WithCORS     bool
@@ -36,12 +35,8 @@ func (s ServeHTTP) MarshalDefaults(v interface{}) {
 			h.Name = os.Getenv("PROJECT_NAME")
 		}
 
-		if h.SwaggerPath == "" {
-			h.SwaggerPath = "./api/openapi.json"
-		}
-
 		if h.Port == 0 {
-			h.Port = 80
+			h.Port = 8000
 		}
 
 		if h.ReadTimeout == 0 {

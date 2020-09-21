@@ -117,11 +117,12 @@ func (d *K8sGenerator) Output(outputPath string) Outputs {
 
 	for _, port := range serverPorts {
 		deploymentConfig.Spec.Template.Spec.Containers[0].Ports = append(deploymentConfig.Spec.Template.Spec.Containers[0].Ports, apiv1.ContainerPort{
-			HostPort:      port,
+			Name:          fmt.Sprintf("tcp%d", port),
 			ContainerPort: port,
 			Protocol:      apiv1.ProtocolTCP,
 		})
 		serviceConfig.Spec.Ports = append(serviceConfig.Spec.Ports, apiv1.ServicePort{
+			Name:       fmt.Sprintf("tcp%d", port),
 			Protocol:   apiv1.ProtocolTCP,
 			Port:       port,
 			TargetPort: intstr.FromInt(int(port)),

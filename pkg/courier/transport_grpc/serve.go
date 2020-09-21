@@ -26,7 +26,7 @@ func (s ServeGRPC) MarshalDefaults(v interface{}) {
 		}
 
 		if grpc.Port == 0 {
-			grpc.Port = 777
+			grpc.Port = 9000
 		}
 
 		if grpc.ReadTimeout == 0 {
