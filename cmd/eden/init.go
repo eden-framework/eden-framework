@@ -18,11 +18,26 @@ package main
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/AlecAivazis/survey/v2/core"
+	"github.com/profzone/eden-framework/internal/generator/files"
 	"github.com/profzone/eden-framework/internal/project"
 	"github.com/spf13/cobra"
 	"os"
 	"path"
 )
+
+type expressBool bool
+
+func (e *expressBool) WriteAnswer(field string, value interface{}) error {
+	result := value.(core.OptionAnswer)
+	switch result.Value {
+	case "是":
+		*e = true
+	case "否":
+		*e = false
+	}
+	return nil
+}
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
@@ -58,6 +73,7 @@ var initCmd = &cobra.Command{
 			Version         string
 			ProgramLanguage string `survey:"project_language"`
 			Workflow        string
+			ApolloSupport   expressBool `survey:"apollo_support"`
 		}{}
 
 		var qs = []*survey.Question{
@@ -122,6 +138,14 @@ var initCmd = &cobra.Command{
 					}(),
 				},
 			},
+			{
+				Name: "apollo_support",
+				Prompt: &survey.Select{
+					Message: "是否启用Apollo配置中心支持",
+					Options: []string{"是", "否"},
+					Default: "否",
+				},
+			},
 		}
 
 		err := survey.Ask(qs, &answers)
@@ -144,11 +168,19 @@ var initCmd = &cobra.Command{
 		if answers.Workflow != "" && answers.Workflow != "custom" {
 			newProject = newProject.WithWorkflow(answers.Workflow)
 		}
-		if newProject.Scripts == nil {
-			newProject.Scripts = map[string]project.Script{
-				"build": []string{"go build -v -o ./build/$PROJECT_NAME ./cmd && eden generate openapi"},
-				"test":  []string{"go test ./cmd"},
-			}
+
+		var withApolloFlag string
+		if answers.ApolloSupport {
+			withApolloFlag = fmt.Sprintf("-ldflags \"-X github.com/profzone/eden-framework/pkg/conf/apollo.Branch=%s.json\"", files.EnvVarInBash(project.EnvKeyCIBranch))
+		}
+		newProject.Scripts = map[string]project.Script{
+			"build": []string{
+				fmt.Sprintf("go build -v -o ./build/$PROJECT_NAME%s ./cmd", withApolloFlag),
+				"eden generate openapi",
+			},
+			"test": []string{
+				"go test ./cmd",
+			},
 		}
 		newProject.WriteToFile("./", "project.yml")
 		newProject.SetEnviron()

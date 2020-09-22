@@ -9,3 +9,7 @@ func EnvVarInDocker(key string) string {
 func EnvVar(key string) string {
 	return fmt.Sprintf("${%s}", key)
 }
+
+func EnvVarInBash(key string) string {
+	return fmt.Sprintf("$%s", key)
+}
