@@ -18,26 +18,12 @@ package main
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/AlecAivazis/survey/v2/core"
-	"github.com/profzone/eden-framework/internal/generator/files"
+	"github.com/profzone/eden-framework/internal/generator"
 	"github.com/profzone/eden-framework/internal/project"
 	"github.com/spf13/cobra"
 	"os"
 	"path"
 )
-
-type expressBool bool
-
-func (e *expressBool) WriteAnswer(field string, value interface{}) error {
-	result := value.(core.OptionAnswer)
-	switch result.Value {
-	case "是":
-		*e = true
-	case "否":
-		*e = false
-	}
-	return nil
-}
 
 // initCmd represents the init command
 var initCmd = &cobra.Command{
@@ -65,16 +51,7 @@ var initCmd = &cobra.Command{
 			currentProject.Workflow.Extends = "feature-pr"
 		}
 
-		answers := struct {
-			Name            string
-			Group           string
-			Owner           string
-			Desc            string
-			Version         string
-			ProgramLanguage string `survey:"project_language"`
-			Workflow        string
-			ApolloSupport   expressBool `survey:"apollo_support"`
-		}{}
+		answers := generator.ProjectOption{}
 
 		var qs = []*survey.Question{
 			{
@@ -154,37 +131,10 @@ var initCmd = &cobra.Command{
 			return
 		}
 
-		newProject := currentProject.
-			WithName(answers.Name).
-			WithGroup(answers.Group).
-			WithOwner(answers.Owner).
-			WithDesc(answers.Desc).
-			WithLanguage(answers.ProgramLanguage)
+		cwd, _ := os.Getwd()
 
-		if answers.Version != "" {
-			newProject = newProject.WithVersion(answers.Version)
-		}
-
-		if answers.Workflow != "" && answers.Workflow != "custom" {
-			newProject = newProject.WithWorkflow(answers.Workflow)
-		}
-
-		var withApolloFlag string
-		if answers.ApolloSupport {
-			withApolloFlag = fmt.Sprintf("-ldflags \"-X github.com/profzone/eden-framework/pkg/conf/apollo.Branch=%s.json\"", files.EnvVarInBash(project.EnvKeyCIBranch))
-		}
-		newProject.Scripts = map[string]project.Script{
-			"build": []string{
-				fmt.Sprintf("go build -v -o ./build/$PROJECT_NAME%s ./cmd", withApolloFlag),
-				"eden generate openapi",
-			},
-			"test": []string{
-				"go test ./cmd",
-			},
-		}
-		newProject.WriteToFile("./", "project.yml")
-		newProject.SetEnviron()
-		newProject.Workflow.TryExtendsOrSetDefaults().ToDroneConfig(&newProject).WriteToFile()
+		gen := generator.NewProjectGenerator(answers)
+		generator.Generate(gen, cwd, cwd)
 	},
 }
 

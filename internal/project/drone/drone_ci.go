@@ -89,10 +89,20 @@ func NewCIDronePipelineDocker() *CIDronePipelineDocker {
 	return p
 }
 
+// Deprecated
 func (c *CIDronePipelineDocker) WriteToFile() {
 	bytes, err := yaml.Marshal(c)
 	if err != nil {
 		panic(err)
 	}
 	ioutil.WriteFile(".drone.yml", bytes, os.ModePerm)
+}
+
+func (c *CIDronePipelineDocker) String() string {
+	bytes, err := yaml.Marshal(c)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(bytes)
 }

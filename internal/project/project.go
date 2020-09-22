@@ -201,6 +201,15 @@ func (p *Project) WriteToFile(filePath, fileName string) {
 	ioutil.WriteFile(path.Join(filePath, fileName), bytes, os.ModePerm)
 }
 
+func (p *Project) String() string {
+	bytes, err := yaml.Marshal(p)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(bytes)
+}
+
 type Script []string
 
 func (s Script) IsZero() bool {

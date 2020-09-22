@@ -52,7 +52,7 @@ var openApiCmd = &cobra.Command{
 }
 
 func init() {
-	generateCmd.AddCommand(openApiCmd)
 	openApiCmd.Flags().StringVarP(&openApiCmdInputPath, "input-path", "i", "", "eden generate api --input-path=/go/src/eden-server")
 	openApiCmd.Flags().StringVarP(&openApiCmdOutputPath, "output-path", "o", "", "eden generate api --output-path=/go/src/eden-server")
+	generateCmd.AddCommand(openApiCmd)
 }
