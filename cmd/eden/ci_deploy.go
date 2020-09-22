@@ -33,7 +33,6 @@ var ciDeployCmd = &cobra.Command{
 	Use:   "deploy",
 	Short: "ci ship a project as a image",
 	Run: func(cmd *cobra.Command, args []string) {
-		currentProject.SetEnviron()
 		err := project.ProcessDeployment(currentProject, ciDeployCmdEnv, ciDeployCmdConfigFile, ciDeployCmdDeployConfigFile, ciDeployCmdServiceConfigFile)
 		if err != nil {
 			logrus.Panic(err)

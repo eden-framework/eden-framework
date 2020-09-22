@@ -3,7 +3,6 @@ package generator
 import (
 	"bytes"
 	"fmt"
-	"github.com/profzone/eden-framework/internal"
 	"github.com/profzone/eden-framework/internal/generator/files"
 	"github.com/profzone/eden-framework/internal/project"
 	"github.com/profzone/eden-framework/pkg/courier/transport_grpc"
@@ -19,10 +18,6 @@ import (
 	"path"
 	"reflect"
 	"strings"
-)
-
-const (
-	EnvVarKeyDeploymentUID = "DEPLOYMENT_UID"
 )
 
 type K8sGenerator struct {
@@ -53,31 +48,31 @@ func (d *K8sGenerator) Output(outputPath string) Outputs {
 			APIVersion: "apps/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      files.EnvVar(internal.EnvVarKeyProjectName),
-			Namespace: files.EnvVar(internal.EnvVarKeyProjectGroup),
+			Name:      files.EnvVar(project.EnvKeyProjectName),
+			Namespace: files.EnvVar(project.EnvKeyProjectGroup),
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: int2Ptr(1),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"workload.user.cattle.io/workloadselector": files.EnvVar(internal.EnvVarKeyProjectSelector),
+					"workload.user.cattle.io/workloadselector": files.EnvVar(project.EnvKeyProjectSelector),
 				},
 			},
 			Template: apiv1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: map[string]string{
-						"workload.user.cattle.io/workloadselector": files.EnvVar(internal.EnvVarKeyProjectSelector),
+						"workload.user.cattle.io/workloadselector": files.EnvVar(project.EnvKeyProjectSelector),
 					},
 				},
 				Spec: apiv1.PodSpec{
 					Containers: []apiv1.Container{
 						{
-							Name: files.EnvVar(internal.EnvVarKeyProjectName),
+							Name: files.EnvVar(project.EnvKeyProjectName),
 							Image: fmt.Sprintf("%s/%s/%s:%s",
-								files.EnvVar(project.DOCKER_REGISTRY_KEY),
-								files.EnvVar(internal.EnvVarKeyProjectGroup),
-								files.EnvVar(internal.EnvVarKeyProjectName),
-								files.EnvVar(internal.EnvVarKeyProjectRef),
+								files.EnvVar(project.EnvKeyDockerRegistryKey),
+								files.EnvVar(project.EnvKeyProjectGroup),
+								files.EnvVar(project.EnvKeyProjectName),
+								files.EnvVar(project.EnvKeyProjectVersion),
 							),
 							ImagePullPolicy: apiv1.PullAlways,
 							Ports:           []apiv1.ContainerPort{},
@@ -96,20 +91,20 @@ func (d *K8sGenerator) Output(outputPath string) Outputs {
 			APIVersion: "apps/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      files.EnvVar(internal.EnvVarKeyProjectName),
-			Namespace: files.EnvVar(internal.EnvVarKeyProjectGroup),
+			Name:      files.EnvVar(project.EnvKeyProjectName),
+			Namespace: files.EnvVar(project.EnvKeyProjectGroup),
 			OwnerReferences: []metav1.OwnerReference{
 				{
 					APIVersion: "apps/v1beta2",
 					Kind:       "Deployment",
-					Name:       files.EnvVar(internal.EnvVarKeyProjectName),
-					UID:        types.UID(files.EnvVar(EnvVarKeyDeploymentUID)),
+					Name:       files.EnvVar(project.EnvKeyProjectName),
+					UID:        types.UID(files.EnvVar(project.EnvKeyDeploymentUID)),
 				},
 			},
 		},
 		Spec: apiv1.ServiceSpec{
 			Selector: map[string]string{
-				"workload.user.cattle.io/workloadselector": files.EnvVar(internal.EnvVarKeyProjectSelector),
+				"workload.user.cattle.io/workloadselector": files.EnvVar(project.EnvKeyProjectSelector),
 			},
 			Ports: []apiv1.ServicePort{},
 		},

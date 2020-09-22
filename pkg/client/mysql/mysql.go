@@ -5,6 +5,7 @@ import (
 	"github.com/profzone/eden-framework/pkg/sqlx"
 	"github.com/profzone/eden-framework/pkg/sqlx/mysqlconnector"
 	"github.com/profzone/envconfig"
+	"io"
 	"net/url"
 	"time"
 )
@@ -20,6 +21,7 @@ type MySQL struct {
 	ConnMaxLifetime envconfig.Duration
 	Retry
 	Database *sqlx.Database `json:"-" ignored:"true"`
+
 	*sqlx.DB `json:"-" ignored:"true"`
 }
 
@@ -73,6 +75,16 @@ func (m *MySQL) Init() {
 	if m.DB == nil {
 		m.Do(m.Connect)
 	}
+}
+
+func (m *MySQL) Refresh() {
+	// TODO use pool to prevent close the connection immediately
+	if m.DB != nil {
+		if closer, ok := m.DB.SqlExecutor.(io.Closer); ok {
+			closer.Close()
+		}
+	}
+	m.Do(m.Connect)
 }
 
 func (m *MySQL) Get() *sqlx.DB {

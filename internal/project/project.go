@@ -16,9 +16,8 @@ import (
 
 const DefaultConfigFile = "project.yml"
 
-var (
-	DOCKER_REGISTRY_KEY = "PROFZONE_DOCKER_REGISTRY"
-	DOCKER_REGISTRY     = "registry.cn-hangzhou.aliyuncs.com"
+const (
+	DockerRegistry = "registry.cn-hangzhou.aliyuncs.com"
 )
 
 type Project struct {
@@ -31,7 +30,6 @@ type Project struct {
 	Workflow        Workflow          `yaml:"workflow,omitempty"`
 	Scripts         map[string]Script `yaml:"scripts,omitempty"`
 	Feature         string            `yaml:"feature,omitempty"`
-	Ref             string            `env:"ref" yaml:"-"`
 	Selector        string            `env:"selector" yaml:"-"`
 }
 
@@ -112,17 +110,9 @@ func SetEnv(k string, v string) {
 }
 
 func (p *Project) SetEnviron() {
-	if os.Getenv(DOCKER_REGISTRY_KEY) == "" {
-		SetEnv(DOCKER_REGISTRY_KEY, DOCKER_REGISTRY)
+	if os.Getenv(EnvKeyDockerRegistryKey) == "" {
+		SetEnv(EnvKeyDockerRegistryKey, DockerRegistry)
 	}
-
-	projectRef := p.Version.String()
-	buildRef := os.Getenv(EnvVarBuildRef)
-	if buildRef != "" {
-		projectRef += "-" + buildRef
-	}
-	p.Ref = projectRef
-	p.Selector = fmt.Sprintf("deployment-%s-%s", p.Group, p.Ref)
 
 	tpe := reflect.TypeOf(p).Elem()
 	rv := reflect.Indirect(reflect.ValueOf(p))

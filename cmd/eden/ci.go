@@ -17,7 +17,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/profzone/eden-framework/internal/project"
 	"github.com/spf13/cobra"
+	"os"
+	"regexp"
 )
 
 // ciCmd represents the ci command
@@ -25,8 +28,42 @@ var ciCmd = &cobra.Command{
 	Use:   "ci",
 	Short: "ci/cd workflow",
 	Long:  fmt.Sprintf("%s\nci/cd workflow", CommandHelpHeader),
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if currentProject.Feature == "" {
+			featureName := getFeatureName()
+			if featureName != "" {
+				currentProject.Feature = featureName
+			}
+		}
+
+		branchName := os.Getenv(project.EnvKeyCIBranch)
+		if branchName != "master" {
+			currentProject.Version.Prefix = currentProject.Feature
+		}
+		currentProject.Version.Suffix = getSha()
+		currentProject.Selector = fmt.Sprintf("deployment-%s-%s", currentProject.Group, currentProject.Version)
+		currentProject.SetEnviron()
+	},
 }
 
 func init() {
 	rootCmd.AddCommand(ciCmd)
+}
+
+var reFeatureBranch = regexp.MustCompile("feature/([a-z0-9\\-]+)")
+
+func getFeatureName() string {
+	matched := reFeatureBranch.FindAllStringSubmatch(os.Getenv(project.EnvKeyCIBranch), -1)
+	if len(matched) > 0 {
+		return matched[0][1]
+	}
+	return ""
+}
+
+func getSha() string {
+	ref := os.Getenv(project.EnvKeyCICommitSHA)
+	if len(ref) > 8 {
+		return ref[0:8]
+	}
+	return ""
 }

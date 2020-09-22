@@ -8,11 +8,6 @@ import (
 	"os/exec"
 )
 
-var (
-	EnvVarRef      = "PROJECT_REF"
-	EnvVarBuildRef = "DRONE_COMMIT_SHA"
-)
-
 var tmpDockerfile = "Dockerfile"
 
 var DockerfileYmlOrders = []string{
@@ -33,23 +28,17 @@ func CommandsForShipping(p *Project, push bool) (commands []*exec.Cmd) {
 	}
 
 	if dockerfile.Image == "" {
-		dockerfile.Image = "${PROFZONE_DOCKER_REGISTRY}/${PROJECT_OWNER}/${PROJECT_NAME}:${PROJECT_REF}"
+		dockerfile.Image = "${PROFZONE_DOCKER_REGISTRY}/${PROJECT_OWNER}/${PROJECT_NAME}:${PROJECT_VERSION}"
 	}
 
 	if hasDockerfileYaml {
-		p.SetEnviron()
-
-		dockerfile.AddEnv(EnvVarRef, p.Ref)
-		dockerfile.AddEnv("PROJECT_OWNER", p.Owner)
-		dockerfile.AddEnv("PROJECT_GROUP", p.Group)
-		dockerfile.AddEnv("PROJECT_NAME", p.Name)
-		dockerfile.AddEnv("PROJECT_FEATURE", p.Feature)
+		dockerfile.AddEnv(EnvKeyProjectVersion, p.Version.String())
+		dockerfile.AddEnv(EnvKeyProjectOwner, p.Owner)
+		dockerfile.AddEnv(EnvKeyProjectGroup, p.Group)
+		dockerfile.AddEnv(EnvKeyProjectName, p.Name)
+		dockerfile.AddEnv(EnvKeyProjectFeature, p.Feature)
 
 		ioutil.WriteFile(tmpDockerfile, []byte(dockerfile.String()), os.ModePerm)
-	}
-
-	if p.Feature != "" {
-		p.Version.Prefix = p.Feature
 	}
 
 	commands = append(commands, p.Command("docker", "build", "-f", tmpDockerfile, "-t", dockerfile.Image, "."))

@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	Image     = "${PROFZONE_DOCKER_REGISTRY}/${PROJECT_GROUP}/${PROJECT_NAME}:${PROJECT_REF}"
+	Image     = "${PROFZONE_DOCKER_REGISTRY}/${PROJECT_GROUP}/${PROJECT_NAME}:${PROJECT_VERSION}"
 	FromImage = "${PROFZONE_DOCKER_REGISTRY}/profzone/golang-runtime:1.14"
 )
 

@@ -18,10 +18,6 @@ import (
 	"strings"
 )
 
-const (
-	DeploymentUIDEnvVarKey = "DEPLOYMENT_UID"
-)
-
 func ProcessDeployment(p *Project, env, kubeConfig, deployConfig, serviceConfig string) error {
 	if env == "" {
 		return errors.New("deployment must specify a environment name")
@@ -76,7 +72,7 @@ func ProcessDeployment(p *Project, env, kubeConfig, deployConfig, serviceConfig 
 		fmt.Printf("Updated deployment %s.\n", deployment.GetObjectMeta().GetName())
 	}
 
-	SetEnv(DeploymentUIDEnvVarKey, string(deployment.UID))
+	SetEnv(EnvKeyDeploymentUID, string(deployment.UID))
 
 	// Get Service
 	service, patch, err := k8s.MakeService(serviceConfig)

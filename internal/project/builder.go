@@ -16,7 +16,7 @@ func RegisterBuilder(name string, builder *Builder) {
 type FullImage string
 
 func (i FullImage) String() string {
-	return fmt.Sprintf("${%s}/%s", DOCKER_REGISTRY_KEY, string(i))
+	return fmt.Sprintf("${%s}/%s", EnvKeyDockerRegistryKey, string(i))
 }
 
 type Builder struct {
