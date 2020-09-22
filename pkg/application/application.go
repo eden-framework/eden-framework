@@ -5,29 +5,27 @@ import (
 	"github.com/profzone/eden-framework/internal/generator"
 	"github.com/profzone/eden-framework/internal/project"
 	"github.com/profzone/eden-framework/pkg/conf"
+	"github.com/profzone/eden-framework/pkg/conf/apollo"
 	"github.com/profzone/eden-framework/pkg/context"
 	str "github.com/profzone/eden-framework/pkg/strings"
-	"github.com/profzone/envconfig"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
 	"os/signal"
-	"reflect"
 	"strings"
 	"syscall"
 )
 
 type Application struct {
-	ctx                *context.WaitStopContext
-	p                  *project.Project
-	cmd                *cobra.Command
-	envConfigPrefix    string
-	outputDockerConfig bool
-	outputK8sConfig    bool
-	Config             []interface{}
+	ctx             *context.WaitStopContext
+	p               *project.Project
+	cmd             *cobra.Command
+	envConfigPrefix string
+	apolloConfig    *apollo.ApolloBaseConfig
+	envConfig       []interface{}
 }
 
-func NewApplication(runner func(app *Application) error, config ...interface{}) *Application {
+func NewApplication(runner func(app *Application) error, opts ...ApplicationOption) *Application {
 	p := &project.Project{}
 	ctx := context.NewWaitStopContext()
 	err := p.UnmarshalFromFile("", "")
@@ -35,17 +33,13 @@ func NewApplication(runner func(app *Application) error, config ...interface{}) 
 		logrus.Panic(err)
 	}
 
-	for i, c := range config {
-		tpe := reflect.TypeOf(c)
-		if tpe.Kind() != reflect.Ptr {
-			logrus.Panicf("the [%d] config must be a ptr value", i)
-		}
+	app := &Application{
+		p:   p,
+		ctx: ctx,
 	}
 
-	app := &Application{
-		p:      p,
-		ctx:    ctx,
-		Config: config,
+	for _, opt := range opts {
+		opt(app)
 	}
 
 	app.cmd = &cobra.Command{
@@ -61,8 +55,6 @@ func NewApplication(runner func(app *Application) error, config ...interface{}) 
 	}
 
 	app.cmd.PersistentFlags().StringVarP(&app.envConfigPrefix, "env-prefix", "e", app.p.Name, "prefix for env var")
-	app.cmd.PersistentFlags().BoolVarP(&app.outputDockerConfig, "with-docker", "d", true, "whether or not output configuration of docker")
-	app.cmd.PersistentFlags().BoolVarP(&app.outputK8sConfig, "with-k8s", "k", true, "whether or not output configuration of k8s")
 
 	return app
 }
@@ -72,39 +64,37 @@ func (app *Application) AddCommand(cmd ...*cobra.Command) {
 }
 
 func (app *Application) Start() {
+	app.envConfigPrefix = str.ToUpperSnakeCase(app.envConfigPrefix)
+
 	os.Setenv(internal.EnvVarKeyProjectName, app.p.Name)
 	os.Setenv(internal.EnvVarKeyServiceName, strings.Replace(app.p.Name, "service-", "", 1))
 	os.Setenv(internal.EnvVarKeyProjectGroup, app.p.Group)
 
-	app.envConfigPrefix = str.ToUpperSnakeCase(app.envConfigPrefix)
-	var envVars = make([]envconfig.EnvVar, 0)
-	for _, c := range app.Config {
-		err := envconfig.Process(app.envConfigPrefix, c)
-		if err != nil {
-			logrus.Panic(err)
-		}
-		envconfig.Usage(app.envConfigPrefix, c)
-
-		envs, err := envconfig.GatherInfo(app.envConfigPrefix, c)
-		if err != nil {
-			logrus.Panic(err)
-		}
-
-		envVars = append(envVars, envs...)
+	// config from env
+	var confs []interface{}
+	if app.apolloConfig != nil && os.Getenv("GOENV") != "LOCAL" {
+		confs = append(confs, app.apolloConfig)
+	} else {
+		confs = append(confs, app.envConfig...)
 	}
+	envVars := conf.FromEnv(app.envConfigPrefix, confs)
 
+	// config from apollo
+	conf.FromApollo(app.apolloConfig, app.envConfig)
+
+	// output config env variables
 	if os.Getenv("GOENV") != "PROD" {
 		cwd, _ := os.Getwd()
 
 		generate := generator.NewDockerGenerator(app.p.Name, envVars)
 		generator.Generate(generate, cwd, cwd)
 
-		k8sGenerator := generator.NewK8sGenerator(app.Config)
+		k8sGenerator := generator.NewK8sGenerator(app.envConfig)
 		generator.Generate(k8sGenerator, cwd, cwd)
 	}
 
 	// initialize global object
-	conf.Initialize(app.Config...)
+	conf.Initialize(app.envConfig...)
 
 	if err := app.cmd.Execute(); err != nil {
 		logrus.Error(err)
