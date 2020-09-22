@@ -19,8 +19,8 @@ type MySQL struct {
 	PoolSize        int
 	ConnMaxLifetime envconfig.Duration
 	Retry
-	Database *sqlx.Database `ignored:"true"`
-	*sqlx.DB `ignored:"true"`
+	Database *sqlx.Database `json:"-" ignored:"true"`
+	*sqlx.DB `json:"-" ignored:"true"`
 }
 
 func (m *MySQL) SetDefaults() {

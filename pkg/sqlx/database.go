@@ -26,7 +26,7 @@ func NewDatabase(name string) *Database {
 type Database struct {
 	Name   string
 	Schema string
-	Tables builder.Tables `ignored:true`
+	Tables builder.Tables `json:"-" ignored:true`
 }
 
 func (database Database) WithSchema(schema string) *Database {

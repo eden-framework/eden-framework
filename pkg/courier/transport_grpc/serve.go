@@ -2,6 +2,7 @@ package transport_grpc
 
 import (
 	"fmt"
+	"github.com/profzone/envconfig"
 	"net"
 	"os"
 	"time"
@@ -14,27 +15,27 @@ import (
 type ServeGRPC struct {
 	IP           string
 	Port         int
-	WriteTimeout time.Duration
-	ReadTimeout  time.Duration
+	WriteTimeout envconfig.Duration
+	ReadTimeout  envconfig.Duration
 	Name         string
 }
 
 func (s ServeGRPC) MarshalDefaults(v interface{}) {
-	if grpc, ok := v.(*ServeGRPC); ok {
-		if grpc.Name == "" {
-			grpc.Name = os.Getenv("PROJECT_NAME")
+	if srv, ok := v.(*ServeGRPC); ok {
+		if srv.Name == "" {
+			srv.Name = os.Getenv("PROJECT_NAME")
 		}
 
-		if grpc.Port == 0 {
-			grpc.Port = 9000
+		if srv.Port == 0 {
+			srv.Port = 9000
 		}
 
-		if grpc.ReadTimeout == 0 {
-			grpc.ReadTimeout = 15 * time.Second
+		if srv.ReadTimeout == 0 {
+			srv.ReadTimeout = envconfig.Duration(15 * time.Second)
 		}
 
-		if grpc.WriteTimeout == 0 {
-			grpc.WriteTimeout = 15 * time.Second
+		if srv.WriteTimeout == 0 {
+			srv.WriteTimeout = envconfig.Duration(15 * time.Second)
 		}
 	}
 }

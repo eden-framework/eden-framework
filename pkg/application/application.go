@@ -25,7 +25,7 @@ type Application struct {
 	envConfig       []interface{}
 }
 
-func NewApplication(runner func(app *Application) error, opts ...ApplicationOption) *Application {
+func NewApplication(runner func(ctx *context.WaitStopContext) error, opts ...Option) *Application {
 	p := &project.Project{}
 	ctx := context.NewWaitStopContext()
 	err := p.UnmarshalFromFile("", "")
@@ -46,7 +46,7 @@ func NewApplication(runner func(app *Application) error, opts ...ApplicationOpti
 		Use:   app.p.Name,
 		Short: app.p.Desc,
 		Run: func(cmd *cobra.Command, args []string) {
-			go runner(app)
+			go runner(ctx)
 			app.WaitStop(func(ctx *context.WaitStopContext) error {
 				ctx.Cancel()
 				return nil

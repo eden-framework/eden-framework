@@ -3,7 +3,7 @@ package apollo
 import (
 	"encoding/json"
 	"fmt"
-	"os"
+	"github.com/profzone/eden-framework/pkg/reflectx"
 	"reflect"
 	"strings"
 
@@ -23,23 +23,8 @@ func fetchBranchLastName(branch string) string {
 	return nameList[len(nameList)-1]
 }
 
-type Initializer interface {
-	Init()
-}
-
 type Refresher interface {
 	Refresh()
-}
-
-func InitialConf(conf interface{}) {
-	rv := reflect.Indirect(reflect.ValueOf(conf))
-	tpe := rv.Type()
-	for i := 0; i < tpe.NumField(); i++ {
-		value := rv.Field(i)
-		if conf, ok := value.Interface().(Initializer); ok {
-			conf.Init()
-		}
-	}
 }
 
 func RefreshConf(conf interface{}) {
@@ -53,17 +38,7 @@ func RefreshConf(conf interface{}) {
 	}
 }
 
-func AssignConf(conf interface{}) {
-	AssignConfWithDefault(conf, ApolloBaseConfig{})
-}
-
-func AssignConfWithDefault(conf interface{}, defaultBaseConf ApolloBaseConfig) {
-	// LOCAL environment doesn't fetch config from apollo
-	if os.Getenv("APOLLO_ENV") == "LOCAL" {
-		InitialConf(conf)
-		return
-	}
-
+func AssignConfWithDefault(defaultBaseConf ApolloBaseConfig, conf ...interface{}) {
 	if Branch == "" {
 		panic(fmt.Sprintf("Namespece[Branch] is empty!"))
 	}
@@ -74,55 +49,59 @@ func AssignConfWithDefault(conf interface{}, defaultBaseConf ApolloBaseConfig) {
 	}
 
 	workerCh := make(chan bool)
-	apolloConfig := NewApolloConfig(Branch, conf, defaultBaseConf)
+	apolloConfig := NewApolloConfig(Branch, defaultBaseConf, conf...)
 	if err := apolloConfig.Start(workerCh); err != nil {
 		panic(err)
 	}
 
-	InitialConf(conf)
-
-	marshalConfStruct(conf)
+	marshalConfStruct(conf...)
 
 	// wait for update action
-	go worker(workerCh, conf)
+	go worker(workerCh, conf...)
 }
 
-func worker(refreshWork chan bool, conf interface{}) {
+func worker(refreshWork chan bool, conf ...interface{}) {
 	for {
 		<-refreshWork
 		logrus.Infof("worker:%+v", conf)
-		RefreshConf(conf)
+
+		for _, c := range conf {
+			RefreshConf(c)
+		}
 	}
 }
 
-func marshalConfStruct(conf interface{}) {
-	rv := reflect.ValueOf(conf)
-	if rv.Kind() != reflect.Ptr {
-		logrus.Errorf("conf is not a pointer")
-		return
+func marshalConfStruct(conf ...interface{}) {
+	for _, c := range conf {
+		rv := reflect.ValueOf(c)
+		if rv.Kind() != reflect.Ptr {
+			logrus.Errorf("conf is not a pointer")
+			return
+		}
+
+		rve := rv.Elem()
+		if rve.Kind() != reflect.Struct {
+			logrus.Errorf("conf is not a pointer to struct")
+			return
+		}
+
+		// get a copy of conf
+		tmpConf := reflect.New(rve.Type())
+		tmpConf.Elem().Set(rve)
+		tempConfIntf := tmpConf.Interface()
+
+		// hide sensitive information
+		hideSensitiveInfo(tempConfIntf)
+
+		// print apollo config json string
+		jsonConf, err := json.MarshalIndent(tempConfIntf, "", "    ")
+		if err != nil {
+			logrus.Errorf("json marshal err: %v", err)
+			return
+		}
+
+		logrus.Infof("apollo config json from [%s]: \n%s", reflectx.FullTypeName(reflectx.FromRType(reflect.TypeOf(c))), string(jsonConf))
 	}
-
-	rve := rv.Elem()
-	if rve.Kind() != reflect.Struct {
-		logrus.Errorf("conf is not a pointer to struct")
-		return
-	}
-
-	// get a copy of conf
-	tmpConf := reflect.New(rve.Type())
-	tmpConf.Elem().Set(rve)
-	tempConfIntf := tmpConf.Interface()
-
-	// hide sensitive information
-	hideSensitiveInfo(tempConfIntf)
-
-	// print apollo config json string
-	jsonConf, err := json.Marshal(tempConfIntf)
-	if err != nil {
-		logrus.Errorf("json marshal err: %v", err)
-		return
-	}
-	logrus.Infof("apollo config json: %s", string(jsonConf))
 }
 
 func hideSensitiveInfo(v interface{}) {

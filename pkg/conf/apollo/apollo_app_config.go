@@ -12,7 +12,7 @@ type ApolloAppConfig struct {
 	Configurations struct {
 		Content string `json:"content"`
 	} `json:"configurations"`
-	InputConf interface{}
+	InputConf []interface{}
 }
 
 func (ac *ApolloAppConfig) Unmarshal(rawBytes []byte) error {
@@ -20,8 +20,10 @@ func (ac *ApolloAppConfig) Unmarshal(rawBytes []byte) error {
 		return err
 	}
 
-	if err := json.Unmarshal([]byte(ac.Configurations.Content), ac.InputConf); err != nil {
-		return err
+	for _, c := range ac.InputConf {
+		if err := json.Unmarshal([]byte(ac.Configurations.Content), c); err != nil {
+			return err
+		}
 	}
 
 	return nil

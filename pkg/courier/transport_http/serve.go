@@ -3,6 +3,7 @@ package transport_http
 import (
 	"context"
 	"fmt"
+	"github.com/profzone/envconfig"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -23,8 +24,8 @@ type ServeHTTP struct {
 	Name         string
 	IP           string
 	Port         int
-	WriteTimeout time.Duration
-	ReadTimeout  time.Duration
+	WriteTimeout envconfig.Duration
+	ReadTimeout  envconfig.Duration
 	WithCORS     bool
 	router       *httprouter.Router
 }
@@ -40,11 +41,11 @@ func (s ServeHTTP) MarshalDefaults(v interface{}) {
 		}
 
 		if h.ReadTimeout == 0 {
-			h.ReadTimeout = 15 * time.Second
+			h.ReadTimeout = envconfig.Duration(15 * time.Second)
 		}
 
 		if h.WriteTimeout == 0 {
-			h.WriteTimeout = 15 * time.Second
+			h.WriteTimeout = envconfig.Duration(15 * time.Second)
 		}
 	}
 }
@@ -57,8 +58,8 @@ func (s *ServeHTTP) Serve(router *courier.Router) error {
 	srv := &http.Server{
 		Handler:      s,
 		Addr:         fmt.Sprintf("%s:%d", s.IP, s.Port),
-		WriteTimeout: s.WriteTimeout,
-		ReadTimeout:  s.ReadTimeout,
+		WriteTimeout: time.Duration(s.WriteTimeout),
+		ReadTimeout:  time.Duration(s.ReadTimeout),
 	}
 
 	idleConnsClosed := make(chan struct{})

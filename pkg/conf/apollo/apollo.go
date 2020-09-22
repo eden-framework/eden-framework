@@ -8,11 +8,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func NewApolloConfig(namespace string, conf interface{}, defaultBaseConf ApolloBaseConfig) *Apollo {
+func NewApolloConfig(namespace string, defaultBaseConf ApolloBaseConfig, conf ...interface{}) *Apollo {
 	apollo := &Apollo{
 		ApolloBaseConfig: defaultBaseConf,
 	}
-	BindEnv(&apollo.ApolloBaseConfig, "S")
 	apollo.Cluster = defaultBaseConf.Cluster
 	apollo.NamespaceName = namespace
 

@@ -10,10 +10,5 @@ func FromApollo(apolloConfig *apollo.ApolloBaseConfig, conf []interface{}) {
 		return
 	}
 
-	for _, c := range conf {
-		apollo.AssignConfWithDefault(c, *apolloConfig)
-
-		// TODO range
-		break
-	}
+	apollo.AssignConfWithDefault(*apolloConfig, conf...)
 }
