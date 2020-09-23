@@ -111,7 +111,7 @@ var (
 
 func (nc *NotifyComponent) acceptNotify(apollo *Apollo) {
 	timer := time.NewTimer(PoolInterval)
-	httpUtil := NewHttpUtil(http.MethodGet, nc.getNotifyUrl(apollo), LongPollTimeout, nil)
+	httpUtil := NewHttpUtil(apollo.SecretKey, apollo.AppId, http.MethodGet, nc.getNotifyUrl(apollo), LongPollTimeout, nil)
 	for {
 		select {
 		case <-timer.C:

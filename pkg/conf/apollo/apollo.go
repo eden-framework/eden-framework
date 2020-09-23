@@ -22,10 +22,11 @@ func NewApolloConfig(namespace string, defaultBaseConf ApolloBaseConfig, conf ..
 }
 
 type ApolloBaseConfig struct {
-	AppId            string `json:"appId" conf:"env"`
-	Host             string `json:"host" conf:"env"`
-	BackupConfigPath string `json:"backupConfigPath" conf:"env"`
-	Cluster          string `json:"cluster" conf:"env"`
+	AppId            string `json:"appId"`
+	Host             string `json:"host"`
+	BackupConfigPath string `json:"backupConfigPath"`
+	Cluster          string `json:"cluster"`
+	SecretKey        string `json:"-"`
 }
 
 type Apollo struct {
@@ -63,7 +64,7 @@ func (a *Apollo) Start(worker chan bool) error {
 }
 
 func (a *Apollo) fetchConfigFromServer() error {
-	httpUtil := NewHttpUtil(http.MethodGet, a.getConfigUrl(), 0, nil)
+	httpUtil := NewHttpUtil(a.SecretKey, a.AppId, http.MethodGet, a.getConfigUrl(), 0, nil)
 	respBody, httpCode, err := httpUtil.Request()
 	if err != nil {
 		logrus.Errorf("fetchConfigFromServer failed![%+v]", err)

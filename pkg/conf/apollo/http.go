@@ -2,6 +2,7 @@ package apollo
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -9,12 +10,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func NewHttpUtil(method, url string, timeout time.Duration, requestBody []byte) *HttpUtil {
+func NewHttpUtil(secretKey, appID, method, url string, timeout time.Duration, requestBody []byte) *HttpUtil {
 	httpUtil := new(HttpUtil)
 	httpUtil.Method = method
 	httpUtil.Url = url
 	httpUtil.RequestBody = requestBody
 	httpUtil.Timeout = timeout
+	httpUtil.appID = appID
+	httpUtil.secretKey = secretKey
 	return httpUtil
 }
 
@@ -23,6 +26,9 @@ type HttpUtil struct {
 	Url         string
 	RequestBody []byte
 	Timeout     time.Duration
+
+	appID     string
+	secretKey string
 }
 
 func (hu *HttpUtil) Request() ([]byte, int, error) {
@@ -42,6 +48,13 @@ func (hu *HttpUtil) Request() ([]byte, int, error) {
 	}
 
 	req.Header.Add("Content-type", "application/json;charset=UTF-8")
+
+	if hu.secretKey != "" {
+		var timestamp = getCurrentTimeMillis()
+		req.Header.Add("Authorization", fmt.Sprintf("Apollo %s:%s", hu.appID, getSignature(timestamp, url2PathWithQuery(hu.Url), hu.secretKey)))
+		req.Header.Add("Timestamp", timestamp)
+	}
+
 	client := &http.Client{
 		Timeout: hu.Timeout,
 	}
@@ -52,7 +65,7 @@ func (hu *HttpUtil) Request() ([]byte, int, error) {
 	}
 
 	defer resp.Body.Close()
-	resp_data, err := ioutil.ReadAll(resp.Body)
+	respData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		logrus.Warningf("ReadAll failed![err:%v]", err)
 		return []byte(""), -1, err
@@ -65,11 +78,11 @@ func (hu *HttpUtil) Request() ([]byte, int, error) {
 			logrus.Warnf("Request return fail![err:%v], request[%s], resp[%+v]", err, string(hu.RequestBody), resp)
 		}
 	} else {
-		logrus.Debugf("apollo result[%s], request[%s], httpCoce[%d]", string(resp_data), string(hu.RequestBody),
+		logrus.Debugf("apollo result[%s], request[%s], httpCoce[%d]", string(respData), string(hu.RequestBody),
 			resp.StatusCode)
 	}
 
-	return resp_data, resp.StatusCode, nil
+	return respData, resp.StatusCode, nil
 }
 
 func (hu *HttpUtil) Is2xxCode(httpCode int) bool {
