@@ -16,17 +16,168 @@ limitations under the License.
 package main
 
 import (
+	"fmt"
+	"github.com/AlecAivazis/survey/v2"
+	"github.com/profzone/eden-framework/internal/generator"
+	"github.com/profzone/eden-framework/internal/project"
 	"github.com/spf13/cobra"
+	"os"
+	"path"
 )
+
+var createCmdInitProject bool
 
 // createCmd represents the create and init command
 var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "create and initialize a project",
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(currentProject.Group) == 0 {
+			currentProject.Group = "profzone"
+		}
+
+		if len(currentProject.Owner) == 0 {
+			currentProject.Owner = "profzone"
+		}
+
+		if len(currentProject.ProgramLanguage) == 0 {
+			currentProject.ProgramLanguage = "golang"
+		}
+
+		if currentProject.Workflow.Extends == "" {
+			currentProject.Workflow.Extends = "feature-pr"
+		}
+
+		answers := generator.ServiceOption{}
+
+		var qs = []*survey.Question{
+			{
+				Name: "name",
+				Prompt: &survey.Input{
+					Message: "项目名称",
+					Default: currentProject.Name,
+				},
+				Validate: func(ans interface{}) error {
+					err := survey.Required(ans)
+					if err != nil {
+						return err
+					}
+
+					cwd, _ := os.Getwd()
+					p := path.Join(cwd, ans.(string))
+					if generator.PathExist(p) {
+						return fmt.Errorf("the path %s already exist", p)
+					}
+					return nil
+				},
+			},
+			{
+				Name: "package_name",
+				Prompt: &survey.Input{
+					Message: "包名",
+				},
+				Validate: survey.Required,
+			},
+			{
+				Name: "database_support",
+				Prompt: &survey.Select{
+					Message: "数据库支持",
+					Options: []string{"是", "否"},
+					Default: "是",
+				},
+			},
+			{
+				Name: "apollo_support",
+				Prompt: &survey.Select{
+					Message: "是否启用Apollo配置中心支持",
+					Options: []string{"是", "否"},
+					Default: "是",
+				},
+			},
+		}
+
+		if createCmdInitProject {
+			qs = append(qs, []*survey.Question{
+				{
+					Name: "desc",
+					Prompt: &survey.Input{
+						Message: "项目描述",
+						Default: currentProject.Desc,
+					},
+					Validate: survey.Required,
+				},
+				{
+					Name: "group",
+					Prompt: &survey.Input{
+						Message: "项目所属应用",
+						Default: currentProject.Group,
+					},
+					Validate: survey.Required,
+				},
+				{
+					Name: "owner",
+					Prompt: &survey.Input{
+						Message: "项目所属用户组",
+						Default: currentProject.Owner,
+					},
+					Validate: survey.Required,
+				},
+				{
+					Name: "version",
+					Prompt: &survey.Input{
+						Message: "项目版本号 (x.x.x)",
+						Default: currentProject.Version.String(),
+					},
+					Validate: survey.Required,
+				},
+				{
+					Name: "project_language",
+					Prompt: &survey.Select{
+						Message: "项目所用编程语言",
+						Options: append(project.RegisteredBuilders.SupportProgramLanguages(), "custom"),
+						Default: currentProject.ProgramLanguage,
+					},
+				},
+				{
+					Name: "workflow",
+					Prompt: &survey.Select{
+						Message: "项目 workflow",
+						Options: append(project.PresetWorkflows.List(), "custom"),
+						Default: currentProject.Workflow.Extends,
+					},
+				},
+			}...)
+		}
+
+		err := survey.Ask(qs, &answers)
+		if err != nil {
+			panic(err)
+		}
+
+		cwd, _ := os.Getwd()
+
+		gen := generator.NewServiceGenerator(answers)
+		generator.Generate(gen, cwd, cwd)
+
+		if createCmdInitProject {
+			projectOpt := generator.ProjectOption{
+				Name:            answers.Name,
+				Group:           answers.Group,
+				Owner:           answers.Owner,
+				Desc:            answers.Desc,
+				Version:         answers.Version,
+				ProgramLanguage: answers.ProgramLanguage,
+				Workflow:        answers.Workflow,
+				ApolloSupport:   answers.ApolloSupport,
+			}
+			cwd = path.Join(cwd, answers.Name)
+			projectGen := generator.NewProjectGenerator(projectOpt)
+			generator.Generate(projectGen, cwd, cwd)
+		}
 	},
 }
 
 func init() {
+	createCmd.Flags().BoolVarP(&createCmdInitProject, "init", "", true, "init after create")
 	rootCmd.AddCommand(createCmd)
 }

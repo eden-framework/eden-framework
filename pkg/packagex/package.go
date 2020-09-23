@@ -15,7 +15,40 @@ type Poser interface {
 
 func Load(pattern string) (*Package, error) {
 	pkgs, err := packages.Load(&packages.Config{
-		Mode: packages.LoadAllSyntax,
+		Mode: packages.NeedName |
+			packages.NeedFiles |
+			packages.NeedTypes |
+			packages.NeedImports |
+			packages.NeedTypesSizes |
+			packages.NeedSyntax |
+			packages.NeedTypesInfo |
+			packages.NeedDeps,
+	}, pattern)
+
+	if err != nil {
+		return nil, err
+	}
+
+	errs := packages.PrintErrors(pkgs)
+	if errs > 0 {
+		err = fmt.Errorf("packages.PrintErrors(a.pkgs) = %d", errs)
+		return nil, err
+	}
+
+	return NewPackage(pkgs[0]), nil
+}
+
+func LoadFrom(pattern, path string) (*Package, error) {
+	pkgs, err := packages.Load(&packages.Config{
+		Mode: packages.NeedName |
+			packages.NeedFiles |
+			packages.NeedTypes |
+			packages.NeedImports |
+			packages.NeedTypesSizes |
+			packages.NeedSyntax |
+			packages.NeedTypesInfo |
+			packages.NeedDeps,
+		Dir: path,
 	}, pattern)
 
 	if err != nil {

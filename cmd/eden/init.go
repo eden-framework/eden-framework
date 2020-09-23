@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	"path"
+	"strings"
 )
 
 // initCmd represents the init command
@@ -120,7 +121,14 @@ var initCmd = &cobra.Command{
 				Prompt: &survey.Select{
 					Message: "是否启用Apollo配置中心支持",
 					Options: []string{"是", "否"},
-					Default: "否",
+					Default: func() string {
+						if script, ok := currentProject.Scripts["build"]; ok {
+							if strings.Contains(script.String(), "apollo.Branch") {
+								return "是"
+							}
+						}
+						return "否"
+					}(),
 				},
 			},
 		}

@@ -3,9 +3,9 @@ package importer
 import (
 	"bytes"
 	"fmt"
+	"github.com/profzone/eden-framework/pkg/packagex"
 	str "github.com/profzone/eden-framework/pkg/strings"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/tools/go/packages"
 	"io"
 	"strings"
 )
@@ -29,32 +29,47 @@ func (i *PackageImporter) AddImport(importPath string, p *Package) {
 	i.pkgs[importPath] = p
 }
 
-func (i *PackageImporter) Import(importPath string, useAlias bool) *Package {
-	importPath = ParseVendor(importPath)
-	p, ok := i.pkgs[importPath]
+func (i *PackageImporter) Import(pkgNamePattern, searchPath string, useAlias bool) *Package {
+	pkgNamePattern = ParseVendor(pkgNamePattern)
+	p, ok := i.pkgs[pkgNamePattern]
 	if !ok {
-		pkgs, err := packages.Load(nil, importPath)
+		pkg, err := packagex.LoadFrom(pkgNamePattern, searchPath)
 		if err != nil {
 			logrus.Panic(err)
 		}
 		p = &Package{
-			Package: pkgs[0],
+			Package: pkg.Package,
 		}
 		if useAlias {
-			p.Alias = str.ToLowerSnakeCase(importPath)
+			p.Alias = str.ToLowerSnakeCase(pkgNamePattern)
 		}
-		i.pkgs[importPath] = p
+		i.pkgs[pkgNamePattern] = p
 	}
 
 	return p
 }
 
-func (i *PackageImporter) Use(importPath string, subs ...string) string {
-	importPath, decl := GetPackagePathAndDecl(strings.Join(append([]string{importPath}, subs...), "/"))
-	p := i.Import(importPath, true)
+func (i *PackageImporter) Use(pkgName string, subs ...string) string {
+	pkgName, decl := GetPackagePathAndDecl(strings.Join(append([]string{pkgName}, subs...), "/"))
+	p := i.Import(pkgName, "", true)
 
 	if decl != "" {
-		if importPath == i.PackagePath {
+		if pkgName == i.PackagePath {
+			return decl
+		}
+
+		return fmt.Sprintf("%s.%s", p.GetSelector(), decl)
+	}
+
+	return p.GetSelector()
+}
+
+func (i *PackageImporter) UseWithoutAlias(pkgName, searchPath string, subs ...string) string {
+	pkgName, decl := GetPackagePathAndDecl(strings.Join(append([]string{pkgName}, subs...), "/"))
+	p := i.Import(pkgName, searchPath, false)
+
+	if decl != "" {
+		if pkgName == i.PackagePath {
 			return decl
 		}
 

@@ -50,7 +50,7 @@ func NewProjectGenerator(opt ProjectOption) *ProjectGenerator {
 
 	var withApolloFlag string
 	if opt.ApolloSupport {
-		withApolloFlag = fmt.Sprintf("-ldflags \"-X github.com/profzone/eden-framework/pkg/conf/apollo.Branch=%s.json\"", files.EnvVarInBash(project.EnvKeyCIBranch))
+		withApolloFlag = fmt.Sprintf(" -ldflags \"-X github.com/profzone/eden-framework/pkg/conf/apollo.Branch=%s.json\"", files.EnvVarInBash(project.EnvKeyCIBranch))
 	}
 	p.Scripts = map[string]project.Script{
 		"build": []string{

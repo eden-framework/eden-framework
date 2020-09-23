@@ -27,6 +27,17 @@ func WriteFile(filename string, content string) {
 	log.Printf(color.GreenString("Generated file to %s (%d KiB)", color.BlueString(path.Join(pwd, filename)), n3/1024))
 }
 
+func PathExist(p string) bool {
+	_, err := os.Stat(p)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func GeneratedSuffix(filename string) string {
 	dir := filepath.Dir(filename)
 	base := filepath.Base(filename)
