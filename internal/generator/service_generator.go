@@ -208,7 +208,7 @@ type RootRouter struct {
 func (RootRouter) Path() string {
 	return "/%s"
 }
-`, pkgPath, filePath, s.opt.Name))
+`, pkgPath, filePath, GetServiceName(s.opt.Name)))
 
 	return file
 }

@@ -38,6 +38,12 @@ func PathExist(p string) bool {
 	return true
 }
 
+func GetServiceName(projectName string) string {
+	projectName = strings.TrimPrefix(projectName, "srv-")
+	projectName = strings.TrimPrefix(projectName, "service-")
+	return projectName
+}
+
 func GeneratedSuffix(filename string) string {
 	dir := filepath.Dir(filename)
 	base := filepath.Base(filename)
