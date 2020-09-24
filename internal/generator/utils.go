@@ -79,5 +79,3 @@ func mustWriteFile(filename string, content string) int {
 
 	return n3
 }
-
-func int2Ptr(i int32) *int32 { return &i }

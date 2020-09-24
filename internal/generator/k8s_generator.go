@@ -7,6 +7,7 @@ import (
 	"github.com/eden-framework/eden-framework/internal/project"
 	"github.com/eden-framework/eden-framework/pkg/courier/transport_grpc"
 	"github.com/eden-framework/eden-framework/pkg/courier/transport_http"
+	"github.com/eden-framework/eden-framework/pkg/ptr"
 	"github.com/eden-framework/eden-framework/pkg/reflectx"
 	"github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
@@ -52,7 +53,7 @@ func (d *K8sGenerator) Output(outputPath string) Outputs {
 			Namespace: files.EnvVar(project.EnvKeyProjectGroup),
 		},
 		Spec: appsv1.DeploymentSpec{
-			Replicas: int2Ptr(1),
+			Replicas: ptr.Int32(1),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
 					"workload.user.cattle.io/workloadselector": files.EnvVar(project.EnvKeyProjectSelector),
