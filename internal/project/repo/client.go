@@ -13,7 +13,7 @@ type Client struct {
 
 func NewClient(mode, host string, port int16) *Client {
 	cli := &Client{
-		tagUri: "/repos/profzone/eden-framework/tags",
+		tagUri: "/repos/eden-framework/eden-framework/tags",
 		Client: &client.Client{
 			Host:    host,
 			Mode:    mode,
