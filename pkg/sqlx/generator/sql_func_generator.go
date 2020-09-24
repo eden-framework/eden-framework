@@ -1,8 +1,8 @@
 package generator
 
 import (
-	"github.com/eden-framework/eden-framework/internal/generator"
 	"github.com/eden-framework/eden-framework/pkg/codegen"
+	"github.com/eden-framework/eden-framework/pkg/generator"
 	"github.com/eden-framework/eden-framework/pkg/packagex"
 	"github.com/sirupsen/logrus"
 	"go/types"

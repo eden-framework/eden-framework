@@ -2,11 +2,11 @@ package application
 
 import (
 	"github.com/eden-framework/eden-framework/internal"
-	"github.com/eden-framework/eden-framework/internal/generator"
 	"github.com/eden-framework/eden-framework/internal/project"
 	"github.com/eden-framework/eden-framework/pkg/conf"
 	"github.com/eden-framework/eden-framework/pkg/conf/apollo"
 	"github.com/eden-framework/eden-framework/pkg/context"
+	"github.com/eden-framework/eden-framework/pkg/generator"
 	str "github.com/eden-framework/eden-framework/pkg/strings"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

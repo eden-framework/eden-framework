@@ -3,7 +3,7 @@ package files
 import (
 	"bytes"
 	"fmt"
-	"github.com/eden-framework/eden-framework/internal/generator/importer"
+	"github.com/eden-framework/eden-framework/pkg/generator/importer"
 	"github.com/sirupsen/logrus"
 	"html/template"
 )
