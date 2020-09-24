@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/eden-framework/eden-framework/pkg/executil"
-	"github.com/eden-framework/eden-framework/pkg/godash"
+	str "github.com/eden-framework/eden-framework/pkg/strings"
 )
 
 func EnvVarInDocker(key string) string {
@@ -109,7 +109,7 @@ func GetDockerfileTemplate(d Dockerfile) string {
 			switch field.Type.Kind() {
 			case reflect.String:
 				if len(value.String()) > 0 {
-					inline := godash.StringIncludes(dockerFlags, "inline")
+					inline := str.StringIncludes(dockerFlags, "inline")
 					if inline {
 						appendDockerConfig(dockerKey, value.String())
 					} else {
@@ -117,7 +117,7 @@ func GetDockerfileTemplate(d Dockerfile) string {
 					}
 				}
 			case reflect.Slice:
-				jsonArray := godash.StringIncludes(dockerFlags, "array")
+				jsonArray := str.StringIncludes(dockerFlags, "array")
 				slice := make([]string, 0)
 				for i := 0; i < value.Len(); i++ {
 					slice = append(slice, value.Index(i).String())
@@ -141,8 +141,8 @@ func GetDockerfileTemplate(d Dockerfile) string {
 				}
 
 			case reflect.Map:
-				multi := godash.StringIncludes(dockerFlags, "multi")
-				join := godash.StringIncludes(dockerFlags, "join")
+				multi := str.StringIncludes(dockerFlags, "multi")
+				join := str.StringIncludes(dockerFlags, "join")
 
 				if join {
 					destMap := map[string][]string{}

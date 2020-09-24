@@ -14,6 +14,7 @@ type ServiceOption struct {
 	PackageName      string      `survey:"package_name"`
 	DatabaseSupport  expressBool `survey:"database_support"`
 	ApolloSupport    expressBool `survey:"apollo_support"`
+	Plugins          []string
 
 	Group           string
 	Owner           string

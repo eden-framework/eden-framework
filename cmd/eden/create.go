@@ -52,18 +52,29 @@ var createCmd = &cobra.Command{
 		}
 
 		// get the tag list of eden-framework
+		fmt.Println("fetch the tag list of eden-framework...")
 		cli := repo.NewClient("https", "api.github.com", 80)
 		tags, err := cli.GetTags()
 		if err != nil {
 			logrus.Panicf("cannot get tag list of repo. err=%v", err)
 		}
-
 		var tagList []string
 		for _, t := range tags {
 			tagList = append(tagList, t.Name)
 		}
 		if len(tagList) == 0 {
 			logrus.Panic("cannot get tag list of repo. tag list is empty")
+		}
+
+		// get the plugin list of eden-framework
+		fmt.Println("fetch the plugin list of eden-framework...")
+		plugins, err := cli.GetPlugins()
+		if err != nil {
+			logrus.Panicf("cannot get plugin list of eden-framework. err=%v", err)
+		}
+		var pluginList []string
+		for _, p := range plugins {
+			pluginList = append(pluginList, p.GetPackageName())
 		}
 
 		answers := generator.ServiceOption{}
@@ -118,6 +129,14 @@ var createCmd = &cobra.Command{
 					Message: "Apollo配置中心支持",
 					Options: []string{"是", "否"},
 					Default: "是",
+				},
+			},
+			{
+				Name: "plugins",
+				Prompt: &survey.MultiSelect{
+					Message:  "插件支持",
+					Options:  pluginList,
+					PageSize: 5,
 				},
 			},
 		}
