@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/eden-framework/eden-framework/pkg/sqlx/builder"
 	"github.com/onsi/gomega"
-	"github.com/profzone/eden-framework/pkg/sqlx/builder"
 )
 
 func init() {

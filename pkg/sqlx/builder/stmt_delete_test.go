@@ -3,9 +3,9 @@ package builder_test
 import (
 	"testing"
 
+	. "github.com/eden-framework/eden-framework/pkg/sqlx/builder"
+	. "github.com/eden-framework/eden-framework/pkg/sqlx/builder/buidertestingutils"
 	"github.com/onsi/gomega"
-	. "github.com/profzone/eden-framework/pkg/sqlx/builder"
-	. "github.com/profzone/eden-framework/pkg/sqlx/builder/buidertestingutils"
 )
 
 func TestStmtDelete(t *testing.T) {

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/profzone/eden-framework/pkg/enumeration"
+	"github.com/eden-framework/eden-framework/pkg/enumeration"
 	"sort"
 )
 

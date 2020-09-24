@@ -1,7 +1,7 @@
 package project
 
 import (
-	"github.com/profzone/eden-framework/internal/docker"
+	"github.com/eden-framework/eden-framework/internal/docker"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"

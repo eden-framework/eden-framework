@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/profzone/eden-framework/pkg/courier/httpx"
+	"github.com/eden-framework/eden-framework/pkg/courier/httpx"
 )
 
 func setCORS(headers *http.Header) {

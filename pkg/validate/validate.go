@@ -1,7 +1,7 @@
 package validate
 
 import (
-	"github.com/profzone/eden-framework/pkg/validate/validatetpl"
+	"github.com/eden-framework/eden-framework/pkg/validate/validatetpl"
 )
 
 type ValidateFn func(v interface{}) (bool, string)

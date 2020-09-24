@@ -1,11 +1,11 @@
 package scanner
 
 import (
+	"github.com/eden-framework/eden-framework/pkg/courier"
+	"github.com/eden-framework/eden-framework/pkg/courier/httpx"
+	"github.com/eden-framework/eden-framework/pkg/courier/transport_http"
+	"github.com/eden-framework/eden-framework/pkg/reflectx"
 	"github.com/go-courier/oas"
-	"github.com/profzone/eden-framework/pkg/courier"
-	"github.com/profzone/eden-framework/pkg/courier/httpx"
-	"github.com/profzone/eden-framework/pkg/courier/transport_http"
-	"github.com/profzone/eden-framework/pkg/reflectx"
 	"go/ast"
 	"go/constant"
 	"go/types"

@@ -11,11 +11,11 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	logContext "github.com/profzone/eden-framework/pkg/context"
-	"github.com/profzone/eden-framework/pkg/courier"
-	"github.com/profzone/eden-framework/pkg/courier/httpx"
-	"github.com/profzone/eden-framework/pkg/courier/status_error"
-	"github.com/profzone/eden-framework/pkg/duration"
+	logContext "github.com/eden-framework/eden-framework/pkg/context"
+	"github.com/eden-framework/eden-framework/pkg/courier"
+	"github.com/eden-framework/eden-framework/pkg/courier/httpx"
+	"github.com/eden-framework/eden-framework/pkg/courier/status_error"
+	"github.com/eden-framework/eden-framework/pkg/duration"
 )
 
 type DecodeStreamFunc func(c context.Context, data []byte) (request interface{}, err error)

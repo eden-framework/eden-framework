@@ -11,11 +11,11 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/profzone/eden-framework/pkg/courier"
-	"github.com/profzone/eden-framework/pkg/courier/httpx"
-	"github.com/profzone/eden-framework/pkg/courier/status_error"
-	"github.com/profzone/eden-framework/pkg/courier/transport_http/transform"
-	"github.com/profzone/eden-framework/pkg/duration"
+	"github.com/eden-framework/eden-framework/pkg/courier"
+	"github.com/eden-framework/eden-framework/pkg/courier/httpx"
+	"github.com/eden-framework/eden-framework/pkg/courier/status_error"
+	"github.com/eden-framework/eden-framework/pkg/courier/transport_http/transform"
+	"github.com/eden-framework/eden-framework/pkg/duration"
 )
 
 type TransportWrapper func(rt http.RoundTripper) http.RoundTripper

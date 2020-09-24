@@ -3,8 +3,8 @@ package k8s
 import (
 	"bytes"
 	"fmt"
+	"github.com/eden-framework/eden-framework/pkg/executil"
 	"github.com/pkg/errors"
-	"github.com/profzone/eden-framework/pkg/executil"
 	"io/ioutil"
 	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"

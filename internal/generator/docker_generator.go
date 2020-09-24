@@ -1,7 +1,7 @@
 package generator
 
 import (
-	"github.com/profzone/eden-framework/internal/generator/files"
+	"github.com/eden-framework/eden-framework/internal/generator/files"
 	"github.com/profzone/envconfig"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"

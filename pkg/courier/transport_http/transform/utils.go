@@ -9,9 +9,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/profzone/eden-framework/pkg/env"
-	"github.com/profzone/eden-framework/pkg/reflectx"
-	"github.com/profzone/eden-framework/pkg/strings"
+	"github.com/eden-framework/eden-framework/pkg/env"
+	"github.com/eden-framework/eden-framework/pkg/reflectx"
+	"github.com/eden-framework/eden-framework/pkg/strings"
 )
 
 type TagFlags map[string]bool

@@ -1,7 +1,7 @@
 package sqlx
 
 import (
-	"github.com/profzone/eden-framework/pkg/sqlx/builder"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/builder"
 )
 
 func InsertToDB(db DBExecutor, model builder.Model, zeroFields []string, additions ...builder.Addition) builder.SqlExpr {

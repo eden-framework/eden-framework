@@ -4,9 +4,9 @@ import (
 	fmt "fmt"
 	time "time"
 
-	github_com_go_courier_sqlx_v2 "github.com/profzone/eden-framework/pkg/sqlx"
-	github_com_go_courier_sqlx_v2_builder "github.com/profzone/eden-framework/pkg/sqlx/builder"
-	github_com_go_courier_sqlx_v2_datatypes "github.com/profzone/eden-framework/pkg/sqlx/datatypes"
+	github_com_go_courier_sqlx_v2 "github.com/eden-framework/eden-framework/pkg/sqlx"
+	github_com_go_courier_sqlx_v2_builder "github.com/eden-framework/eden-framework/pkg/sqlx/builder"
+	github_com_go_courier_sqlx_v2_datatypes "github.com/eden-framework/eden-framework/pkg/sqlx/datatypes"
 )
 
 func (User) PrimaryKey() []string {

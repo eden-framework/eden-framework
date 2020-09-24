@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
 
-	"github.com/profzone/eden-framework/pkg/courier/httpx"
+	"github.com/eden-framework/eden-framework/pkg/courier/httpx"
 )
 
 func ClientIP(ctx context.Context) string {

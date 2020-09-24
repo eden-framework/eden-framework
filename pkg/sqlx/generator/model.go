@@ -1,12 +1,12 @@
 package generator
 
 import (
-	"github.com/profzone/eden-framework/pkg/codegen"
-	"github.com/profzone/eden-framework/pkg/packagex"
+	"github.com/eden-framework/eden-framework/pkg/codegen"
+	"github.com/eden-framework/eden-framework/pkg/packagex"
 	"go/types"
 	"strings"
 
-	"github.com/profzone/eden-framework/pkg/sqlx/builder"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/builder"
 )
 
 func NewModel(pkg *packagex.Package, typeName *types.TypeName, comments string, cfg *Config) *Model {

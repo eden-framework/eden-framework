@@ -5,7 +5,7 @@ import (
 	"encoding"
 	"errors"
 
-	github_com_profzone_eden_framework_pkg_enumeration "github.com/profzone/eden-framework/pkg/enumeration"
+	github_com_profzone_eden_framework_pkg_enumeration "github.com/eden-framework/eden-framework/pkg/enumeration"
 )
 
 var InvalidDroneCiKind = errors.New("invalid DroneCiKind")

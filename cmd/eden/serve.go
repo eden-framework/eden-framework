@@ -16,9 +16,9 @@ limitations under the License.
 package main
 
 import (
-	"github.com/profzone/eden-framework/pkg/courier"
-	"github.com/profzone/eden-framework/pkg/courier/swagger"
-	"github.com/profzone/eden-framework/pkg/courier/transport_http"
+	"github.com/eden-framework/eden-framework/pkg/courier"
+	"github.com/eden-framework/eden-framework/pkg/courier/swagger"
+	"github.com/eden-framework/eden-framework/pkg/courier/transport_http"
 	"github.com/spf13/cobra"
 )
 

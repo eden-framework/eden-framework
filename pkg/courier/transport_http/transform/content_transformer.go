@@ -6,7 +6,7 @@ import (
 	"encoding/xml"
 	"reflect"
 
-	"github.com/profzone/eden-framework/pkg/courier/httpx"
+	"github.com/eden-framework/eden-framework/pkg/courier/httpx"
 )
 
 func init() {

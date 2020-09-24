@@ -2,8 +2,8 @@ package files
 
 import (
 	"encoding/json"
-	"github.com/profzone/eden-framework/pkg/executil"
-	str "github.com/profzone/eden-framework/pkg/strings"
+	"github.com/eden-framework/eden-framework/pkg/executil"
+	str "github.com/eden-framework/eden-framework/pkg/strings"
 	"reflect"
 	"strconv"
 	"strings"

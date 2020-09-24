@@ -1,13 +1,13 @@
 package application
 
 import (
-	"github.com/profzone/eden-framework/internal"
-	"github.com/profzone/eden-framework/internal/generator"
-	"github.com/profzone/eden-framework/internal/project"
-	"github.com/profzone/eden-framework/pkg/conf"
-	"github.com/profzone/eden-framework/pkg/conf/apollo"
-	"github.com/profzone/eden-framework/pkg/context"
-	str "github.com/profzone/eden-framework/pkg/strings"
+	"github.com/eden-framework/eden-framework/internal"
+	"github.com/eden-framework/eden-framework/internal/generator"
+	"github.com/eden-framework/eden-framework/internal/project"
+	"github.com/eden-framework/eden-framework/pkg/conf"
+	"github.com/eden-framework/eden-framework/pkg/conf/apollo"
+	"github.com/eden-framework/eden-framework/pkg/context"
+	str "github.com/eden-framework/eden-framework/pkg/strings"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"

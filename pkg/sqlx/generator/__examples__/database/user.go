@@ -3,7 +3,7 @@ package database
 import (
 	"database/sql/driver"
 
-	"github.com/profzone/eden-framework/pkg/sqlx/datatypes"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/datatypes"
 )
 
 // @def primary ID

@@ -10,10 +10,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/eden-framework/eden-framework/pkg/sqlx"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/builder"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/migration"
 	"github.com/lib/pq"
-	"github.com/profzone/eden-framework/pkg/sqlx"
-	"github.com/profzone/eden-framework/pkg/sqlx/builder"
-	"github.com/profzone/eden-framework/pkg/sqlx/migration"
 	"github.com/sirupsen/logrus"
 )
 

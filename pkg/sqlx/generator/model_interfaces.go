@@ -1,10 +1,10 @@
 package generator
 
 import (
-	"github.com/profzone/eden-framework/pkg/codegen"
+	"github.com/eden-framework/eden-framework/pkg/codegen"
 	"sort"
 
-	"github.com/profzone/eden-framework/pkg/sqlx/builder"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/builder"
 )
 
 func (m *Model) IndexFieldNames() []string {
@@ -32,7 +32,7 @@ func (m *Model) IndexFieldNames() []string {
 func (m *Model) WriteTableName(file *codegen.File) {
 	file.WriteBlock(
 		codegen.DeclVar(codegen.Var(codegen.Star(
-			codegen.Type(file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Table"))),
+			codegen.Type(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Table"))),
 			m.VarTable(),
 		)),
 
@@ -120,7 +120,7 @@ func (m *Model) WriteTableInterfaces(file *codegen.File) {
 			codegen.Func().
 				Named("Field" + col.FieldName).
 				MethodOf(codegen.Var(m.PtrType(), "m")).
-				Return(codegen.Var(codegen.Star(codegen.Type(file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Column"))))).
+				Return(codegen.Var(codegen.Star(codegen.Type(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Column"))))).
 				Do(
 					codegen.Return(codegen.Expr("?.F(m.FieldKey"+col.FieldName+"())", codegen.Id(m.VarTable()))),
 				),
@@ -153,16 +153,16 @@ func (m *Model) WriteTableInterfaces(file *codegen.File) {
 
 	file.WriteBlock(
 		codegen.Func(
-			codegen.Var(codegen.Type(file.Use("github.com/profzone/eden-framework/pkg/sqlx", "DBExecutor")), "db"),
+			codegen.Var(codegen.Type(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx", "DBExecutor")), "db"),
 		).
 			Named("ConditionByStruct").
 			MethodOf(codegen.Var(m.PtrType(), "m")).
-			Return(codegen.Var(codegen.Type(file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "SqlCondition")))).
+			Return(codegen.Var(codegen.Type(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "SqlCondition")))).
 			Do(
 				codegen.Expr(`table := db.T(m)`),
-				codegen.Expr(`fieldValues := `+file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "FieldValuesFromStructByNonZero")+`(m)
+				codegen.Expr(`fieldValues := `+file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "FieldValuesFromStructByNonZero")+`(m)
 
-conditions := make([]`+file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "SqlCondition")+`, 0)
+conditions := make([]`+file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "SqlCondition")+`, 0)
 
 for _, fieldName := range m.IndexFieldNames() {
 	if v, exists := fieldValues[fieldName]; exists {
@@ -179,13 +179,13 @@ for fieldName, v := range fieldValues {
 	conditions = append(conditions, table.F(fieldName).Eq(v))
 }
 
-condition := `+file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "And")+`(conditions...)
+condition := `+file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "And")+`(conditions...)
 `),
 
 				func() codegen.Snippet {
 					if m.HasDeletedAt {
 						return codegen.Expr(
-							`condition = `+file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "And")+`(condition, table.F(?).Eq(0))`,
+							`condition = `+file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "And")+`(condition, table.F(?).Eq(0))`,
 							file.Val(m.FieldKeyDeletedAt),
 						)
 					}
@@ -216,7 +216,7 @@ func (m *Model) WriteTableKeyInterfaces(file *codegen.File) {
 			codegen.Func().
 				Named("Indexes").
 				MethodOf(codegen.Var(m.Type())).
-				Return(codegen.Var(codegen.Type(file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Indexes")))).
+				Return(codegen.Var(codegen.Type(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Indexes")))).
 				Do(
 					codegen.Return(file.Val(m.Keys.Indexes)),
 				),
@@ -248,7 +248,7 @@ func (m *Model) WriteTableKeyInterfaces(file *codegen.File) {
 			codegen.Func().
 				Named("UniqueIndexes").
 				MethodOf(codegen.Var(m.Type())).
-				Return(codegen.Var(codegen.Type(file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Indexes")))).
+				Return(codegen.Var(codegen.Type(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Indexes")))).
 				Do(
 					codegen.Return(file.Val(m.Keys.UniqueIndexes)),
 				),

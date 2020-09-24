@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/profzone/eden-framework/pkg/courier"
-	"github.com/profzone/eden-framework/pkg/courier/httpx"
-	"github.com/profzone/eden-framework/pkg/courier/status_error"
+	"github.com/eden-framework/eden-framework/pkg/courier"
+	"github.com/eden-framework/eden-framework/pkg/courier/httpx"
+	"github.com/eden-framework/eden-framework/pkg/courier/status_error"
 )
 
 func MetadataWithMocker(mocker *Mocker) courier.Metadata {

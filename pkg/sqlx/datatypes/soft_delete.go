@@ -1,7 +1,7 @@
 package datatypes
 
 import (
-	"github.com/profzone/eden-framework/pkg/enumeration"
+	"github.com/eden-framework/eden-framework/pkg/enumeration"
 )
 
 type SoftDelete struct {

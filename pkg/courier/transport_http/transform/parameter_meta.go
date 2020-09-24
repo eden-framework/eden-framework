@@ -7,9 +7,9 @@ import (
 	"io/ioutil"
 	"reflect"
 
-	"github.com/profzone/eden-framework/pkg/courier/status_error"
-	"github.com/profzone/eden-framework/pkg/reflectx"
-	"github.com/profzone/eden-framework/pkg/strings"
+	"github.com/eden-framework/eden-framework/pkg/courier/status_error"
+	"github.com/eden-framework/eden-framework/pkg/reflectx"
+	"github.com/eden-framework/eden-framework/pkg/strings"
 )
 
 func NewParameterMeta(field *reflect.StructField, rv reflect.Value, tagIn string, tagInFlags TagFlags) *ParameterMeta {

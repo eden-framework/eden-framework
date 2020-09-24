@@ -9,10 +9,10 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/eden-framework/eden-framework/pkg/sqlx"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/builder"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/migration"
 	"github.com/go-sql-driver/mysql"
-	"github.com/profzone/eden-framework/pkg/sqlx"
-	"github.com/profzone/eden-framework/pkg/sqlx/builder"
-	"github.com/profzone/eden-framework/pkg/sqlx/migration"
 	"github.com/sirupsen/logrus"
 )
 

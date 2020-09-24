@@ -16,7 +16,7 @@ limitations under the License.
 package main
 
 import (
-	"github.com/profzone/eden-framework/internal/project"
+	"github.com/eden-framework/eden-framework/internal/project"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )

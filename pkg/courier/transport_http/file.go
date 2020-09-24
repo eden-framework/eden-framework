@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/profzone/eden-framework/pkg/courier"
+	"github.com/eden-framework/eden-framework/pkg/courier"
 )
 
 func NewFile(filename string, contentType string) *File {

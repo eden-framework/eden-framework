@@ -3,9 +3,9 @@ package generator
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/eden-framework/eden-framework/internal/generator/scanner"
+	"github.com/eden-framework/eden-framework/pkg/packagex"
 	"github.com/go-courier/oas"
-	"github.com/profzone/eden-framework/internal/generator/scanner"
-	"github.com/profzone/eden-framework/pkg/packagex"
 	"github.com/sirupsen/logrus"
 	"go/ast"
 	"go/types"

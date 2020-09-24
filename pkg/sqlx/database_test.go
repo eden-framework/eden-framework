@@ -7,16 +7,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/eden-framework/eden-framework/pkg/sqlx"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/builder"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/datatypes"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/migration"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/mysqlconnector"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/postgresqlconnector"
 	"github.com/go-courier/metax"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 	. "github.com/onsi/gomega"
-	"github.com/profzone/eden-framework/pkg/sqlx"
-	"github.com/profzone/eden-framework/pkg/sqlx/builder"
-	"github.com/profzone/eden-framework/pkg/sqlx/datatypes"
-	"github.com/profzone/eden-framework/pkg/sqlx/migration"
-	"github.com/profzone/eden-framework/pkg/sqlx/mysqlconnector"
-	"github.com/profzone/eden-framework/pkg/sqlx/postgresqlconnector"
 	"github.com/sirupsen/logrus"
 )
 

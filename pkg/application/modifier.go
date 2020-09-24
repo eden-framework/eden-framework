@@ -1,8 +1,8 @@
 package application
 
 import (
-	"github.com/profzone/eden-framework/pkg/conf/apollo"
-	"github.com/profzone/eden-framework/pkg/reflectx"
+	"github.com/eden-framework/eden-framework/pkg/conf/apollo"
+	"github.com/eden-framework/eden-framework/pkg/reflectx"
 	"github.com/sirupsen/logrus"
 	"reflect"
 )

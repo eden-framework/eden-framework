@@ -2,7 +2,7 @@ package workflows
 
 import (
 	"fmt"
-	"github.com/profzone/eden-framework/internal/project"
+	"github.com/eden-framework/eden-framework/internal/project"
 )
 
 func init() {

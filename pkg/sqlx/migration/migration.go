@@ -3,8 +3,8 @@ package migration
 import (
 	"context"
 
-	"github.com/profzone/eden-framework/pkg/sqlx"
-	"github.com/profzone/eden-framework/pkg/sqlx/enummeta"
+	"github.com/eden-framework/eden-framework/pkg/sqlx"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/enummeta"
 )
 
 type MigrationOpts struct {

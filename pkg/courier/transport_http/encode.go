@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/profzone/eden-framework/pkg/courier"
-	"github.com/profzone/eden-framework/pkg/courier/httpx"
-	"github.com/profzone/eden-framework/pkg/courier/status_error"
-	"github.com/profzone/eden-framework/pkg/courier/transport_http/transform"
+	"github.com/eden-framework/eden-framework/pkg/courier"
+	"github.com/eden-framework/eden-framework/pkg/courier/httpx"
+	"github.com/eden-framework/eden-framework/pkg/courier/status_error"
+	"github.com/eden-framework/eden-framework/pkg/courier/transport_http/transform"
 )
 
 func setContextType(w http.ResponseWriter, s string) {

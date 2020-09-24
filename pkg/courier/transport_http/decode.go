@@ -6,10 +6,10 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 
-	"github.com/profzone/eden-framework/pkg/courier"
-	"github.com/profzone/eden-framework/pkg/courier/httpx"
-	"github.com/profzone/eden-framework/pkg/courier/transport_http/transform"
-	"github.com/profzone/eden-framework/pkg/reflectx"
+	"github.com/eden-framework/eden-framework/pkg/courier"
+	"github.com/eden-framework/eden-framework/pkg/courier/httpx"
+	"github.com/eden-framework/eden-framework/pkg/courier/transport_http/transform"
+	"github.com/eden-framework/eden-framework/pkg/reflectx"
 )
 
 func createHttpRequestDecoder(r *http.Request, params *httprouter.Params) courier.OperatorDecoder {

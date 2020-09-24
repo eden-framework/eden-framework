@@ -12,10 +12,10 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/sirupsen/logrus"
 
-	logContext "github.com/profzone/eden-framework/pkg/context"
-	"github.com/profzone/eden-framework/pkg/courier"
-	"github.com/profzone/eden-framework/pkg/courier/httpx"
-	"github.com/profzone/eden-framework/pkg/duration"
+	logContext "github.com/eden-framework/eden-framework/pkg/context"
+	"github.com/eden-framework/eden-framework/pkg/courier"
+	"github.com/eden-framework/eden-framework/pkg/courier/httpx"
+	"github.com/eden-framework/eden-framework/pkg/duration"
 )
 
 func CreateHttpHandler(s *ServeHTTP, ops ...courier.IOperator) httprouter.Handle {

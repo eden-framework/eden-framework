@@ -3,15 +3,15 @@ package generator
 import (
 	"fmt"
 
-	"github.com/profzone/eden-framework/pkg/codegen"
+	"github.com/eden-framework/eden-framework/pkg/codegen"
 )
 
 func (m *Model) WriteCount(file *codegen.File) {
 	file.WriteBlock(
 		codegen.Func(
-			codegen.Var(codegen.Type(file.Use("github.com/profzone/eden-framework/pkg/sqlx", "DBExecutor")), "db"),
-			codegen.Var(codegen.Type(file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "SqlCondition")), "condition"),
-			codegen.Var(codegen.Ellipsis(codegen.Type(file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Addition"))), "additions"),
+			codegen.Var(codegen.Type(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx", "DBExecutor")), "db"),
+			codegen.Var(codegen.Type(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "SqlCondition")), "condition"),
+			codegen.Var(codegen.Ellipsis(codegen.Type(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Addition"))), "additions"),
 		).
 			Named("Count").
 			MethodOf(codegen.Var(m.PtrType(), "m")).
@@ -31,7 +31,7 @@ _ = table
 					if m.HasDeletedAt {
 						return codegen.Expr(
 							`condition = ?(condition, table.F("`+m.FieldKeyDeletedAt+`").Eq(0))`,
-							codegen.Id(file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "And")),
+							codegen.Id(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "And")),
 						)
 					}
 					return nil
@@ -39,9 +39,9 @@ _ = table
 
 				codegen.Expr(`
 
-finalAdditions := []`+file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Addition")+`{
-`+file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Where")+`(condition),
-`+file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Comment")+`(?),
+finalAdditions := []`+file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Addition")+`{
+`+file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Where")+`(condition),
+`+file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Comment")+`(?),
 }
 
 if len(additions) > 0 {
@@ -49,8 +49,8 @@ if len(additions) > 0 {
 }
 
 err := db.QueryExprAndScan(
-`+file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Select")+`(
-	`+file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Count")+`(),
+`+file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Select")+`(
+	`+file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Count")+`(),
 ).
 From(db.T(m), finalAdditions...),
 &count,
@@ -67,9 +67,9 @@ return count, err
 func (m *Model) WriteList(file *codegen.File) {
 	file.WriteBlock(
 		codegen.Func(
-			codegen.Var(codegen.Type(file.Use("github.com/profzone/eden-framework/pkg/sqlx", "DBExecutor")), "db"),
-			codegen.Var(codegen.Type(file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "SqlCondition")), "condition"),
-			codegen.Var(codegen.Ellipsis(codegen.Type(file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Addition"))), "additions"),
+			codegen.Var(codegen.Type(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx", "DBExecutor")), "db"),
+			codegen.Var(codegen.Type(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "SqlCondition")), "condition"),
+			codegen.Var(codegen.Ellipsis(codegen.Type(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Addition"))), "additions"),
 		).
 			Named("List").
 			MethodOf(codegen.Var(m.PtrType(), "m")).
@@ -89,7 +89,7 @@ _ = table
 					if m.HasDeletedAt {
 						return codegen.Expr(
 							`condition = ?(condition, table.F("`+m.FieldKeyDeletedAt+`").Eq(0))`,
-							codegen.Id(file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "And")),
+							codegen.Id(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "And")),
 						)
 					}
 					return nil
@@ -97,9 +97,9 @@ _ = table
 
 				codegen.Expr(`
 
-finalAdditions := []`+file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Addition")+`{
-`+file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Where")+`(condition),
-`+file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Comment")+`(?),
+finalAdditions := []`+file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Addition")+`{
+`+file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Where")+`(condition),
+`+file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Comment")+`(?),
 }
 
 if len(additions) > 0 {
@@ -107,7 +107,7 @@ if len(additions) > 0 {
 }
 
 err := db.QueryExprAndScan(
-`+file.Use("github.com/profzone/eden-framework/pkg/sqlx/builder", "Select")+`(nil).
+`+file.Use("github.com/eden-framework/eden-framework/pkg/sqlx/builder", "Select")+`(nil).
 From(db.T(m), finalAdditions...),
 &list,
 )
@@ -130,7 +130,7 @@ func (m *Model) WriteBatchList(file *codegen.File) {
 
 		file.WriteBlock(
 			codegen.Func(
-				codegen.Var(codegen.Type(file.Use("github.com/profzone/eden-framework/pkg/sqlx", "DBExecutor")), "db"),
+				codegen.Var(codegen.Type(file.Use("github.com/eden-framework/eden-framework/pkg/sqlx", "DBExecutor")), "db"),
 				codegen.Var(codegen.Slice(typ), "values"),
 			).
 				Named(method).

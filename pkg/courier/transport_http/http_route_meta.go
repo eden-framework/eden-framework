@@ -2,8 +2,8 @@ package transport_http
 
 import (
 	"fmt"
-	"github.com/profzone/eden-framework/pkg/courier"
-	"github.com/profzone/eden-framework/pkg/courier/httpx"
+	"github.com/eden-framework/eden-framework/pkg/courier"
+	"github.com/eden-framework/eden-framework/pkg/courier/httpx"
 	"net/http"
 	"reflect"
 	"regexp"

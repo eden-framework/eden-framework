@@ -17,7 +17,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/julienschmidt/httprouter"
 
-	"github.com/profzone/eden-framework/pkg/courier"
+	"github.com/eden-framework/eden-framework/pkg/courier"
 )
 
 type ServeHTTP struct {

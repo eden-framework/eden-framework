@@ -4,13 +4,13 @@ import (
 	"database/sql/driver"
 	"testing"
 
+	"github.com/eden-framework/eden-framework/pkg/sqlx/builder"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/migration"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/mysqlconnector"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/postgresqlconnector"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/uuid"
 	"github.com/onsi/gomega"
-	"github.com/profzone/eden-framework/pkg/sqlx/builder"
-	"github.com/profzone/eden-framework/pkg/sqlx/migration"
-	"github.com/profzone/eden-framework/pkg/sqlx/mysqlconnector"
-	"github.com/profzone/eden-framework/pkg/sqlx/postgresqlconnector"
 	"github.com/sirupsen/logrus"
 )
 

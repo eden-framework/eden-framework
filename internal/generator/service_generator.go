@@ -2,7 +2,7 @@ package generator
 
 import (
 	"fmt"
-	"github.com/profzone/eden-framework/internal/generator/files"
+	"github.com/eden-framework/eden-framework/internal/generator/files"
 	"github.com/sirupsen/logrus"
 	"os"
 	"path"
@@ -51,7 +51,7 @@ func (s *ServiceGenerator) Output(outputPath string) Outputs {
 	// go.mod file
 	mod := files.NewModFile(s.opt.PackageName, "1.14")
 	mod.AddReplace("k8s.io/client-go", "", "k8s.io/client-go", "v0.18.8")
-	mod.AddRequired("github.com/profzone/eden-framework", s.opt.FrameworkVersion)
+	mod.AddRequired("github.com/eden-framework/eden-framework", s.opt.FrameworkVersion)
 	mod.AddRequired("github.com/sirupsen/logrus", "v1.6.0")
 	mod.AddRequired("github.com/spf13/cobra", "v0.0.5")
 	outputs.WriteFile(path.Join(p, "go.mod"), mod.String())
@@ -106,7 +106,7 @@ func createPath(p string) {
 func (s *ServiceGenerator) createApolloFile() *files.GoFile {
 	file := files.NewGoFile("global")
 	file.WithBlock(fmt.Sprintf(`
-var ApolloConfig = {{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/conf/apollo" "" }}.ApolloBaseConfig{
+var ApolloConfig = {{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/conf/apollo" "" }}.ApolloBaseConfig{
 	AppId:            "%s",
 	Host:             "localhost:8080",
 	BackupConfigPath: "./apollo_config",
@@ -121,9 +121,9 @@ func (s *ServiceGenerator) createDbConfigFile() *files.GoFile {
 	file := files.NewGoFile("databases")
 	file.WithBlock(`
 var Config = struct {
-	DBTest *{{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/sqlx" "" }}.Database
+	DBTest *{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/sqlx" "" }}.Database
 }{
-	DBTest: &{{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/sqlx" "" }}.Database{},
+	DBTest: &{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/sqlx" "" }}.Database{},
 }
 `)
 
@@ -140,14 +140,14 @@ var Config = struct {
 	if s.opt.DatabaseSupport {
 		file.WithBlock(`
 	// db
-	MasterDB *{{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/client/mysql" "" }}.MySQL
-	SlaveDB  *{{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/client/mysql" "" }}.MySQL
+	MasterDB *{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/client/mysql" "" }}.MySQL
+	SlaveDB  *{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/client/mysql" "" }}.MySQL
 `)
 	}
 	file.WithBlock(`
 	// administrator
-	GRPCServer *{{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/courier/transport_grpc" "" }}.ServeGRPC
-	HTTPServer *{{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/courier/transport_http" "" }}.ServeHTTP
+	GRPCServer *{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier/transport_grpc" "" }}.ServeGRPC
+	HTTPServer *{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier/transport_http" "" }}.ServeHTTP
 }{
 	LogLevel: {{ .UseWithoutAlias "github.com/sirupsen/logrus" "" }}.DebugLevel,
 `)
@@ -155,15 +155,15 @@ var Config = struct {
 		dbUse := path.Join(s.opt.PackageName, "internal/databases")
 		dbPath := path.Join(cwd, "internal/databases")
 		file.WithBlock(fmt.Sprintf(`
-	MasterDB: &{{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/client/mysql" "" }}.MySQL{Database: {{ .UseWithoutAlias "%s" "%s" }}.Config.DBTest},
-	SlaveDB:  &{{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/client/mysql" "" }}.MySQL{Database: {{ .UseWithoutAlias "%s" "%s" }}.Config.DBTest},
+	MasterDB: &{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/client/mysql" "" }}.MySQL{Database: {{ .UseWithoutAlias "%s" "%s" }}.Config.DBTest},
+	SlaveDB:  &{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/client/mysql" "" }}.MySQL{Database: {{ .UseWithoutAlias "%s" "%s" }}.Config.DBTest},
 `, dbUse, dbPath, dbUse, dbPath))
 	}
 	file.WithBlock(`
-	GRPCServer: &{{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/courier/transport_grpc" "" }}.ServeGRPC{
+	GRPCServer: &{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier/transport_grpc" "" }}.ServeGRPC{
 		Port: 8900,
 	},
-	HTTPServer: &{{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/courier/transport_http" "" }}.ServeHTTP{
+	HTTPServer: &{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier/transport_http" "" }}.ServeHTTP{
 		Port:     8800,
 		WithCORS: true,
 	},
@@ -176,10 +176,10 @@ var Config = struct {
 func (s *ServiceGenerator) createRouterV0RootFile() *files.GoFile {
 	file := files.NewGoFile("v0")
 	file.WithBlock(`
-var Router = {{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/courier" "" }}.NewRouter(V0Router{})
+var Router = {{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier" "" }}.NewRouter(V0Router{})
 
 type V0Router struct {
-	{{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/courier" "" }}.EmptyOperator
+	{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier" "" }}.EmptyOperator
 }
 
 func (V0Router) Path() string {
@@ -196,14 +196,14 @@ func (s *ServiceGenerator) createRouterRootFile(cwd string) *files.GoFile {
 
 	file := files.NewGoFile("routers")
 	file.WithBlock(fmt.Sprintf(`
-var Router = {{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/courier" "" }}.NewRouter(RootRouter{})
+var Router = {{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier" "" }}.NewRouter(RootRouter{})
 
 func init() {
 	Router.Register({{ .UseWithoutAlias "%s" "%s" }}.Router)
 }
 
 type RootRouter struct {
-	{{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/courier" "" }}.EmptyOperator
+	{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier" "" }}.EmptyOperator
 }
 
 func (RootRouter) Path() string {
@@ -224,7 +224,7 @@ func main() {
 	app := application.NewApplication(runner`)
 
 	if s.opt.ApolloSupport {
-		file.WithBlock(fmt.Sprintf(`, {{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/application" "" }}.WithApollo(&{{ .UseWithoutAlias "%s" "%s" }}.ApolloConfig)`, globalPkgPath, globalFilePath))
+		file.WithBlock(fmt.Sprintf(`, {{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/application" "" }}.WithApollo(&{{ .UseWithoutAlias "%s" "%s" }}.ApolloConfig)`, globalPkgPath, globalFilePath))
 	}
 
 	file.WithBlock(fmt.Sprintf(`, application.WithConfig(&{{ .UseWithoutAlias "%s" "%s" }}.Config`, globalPkgPath, globalFilePath))
@@ -251,7 +251,7 @@ func main() {
 	routerFilePath := path.Join(cwd, "internal/routers")
 
 	file.WithBlock(fmt.Sprintf(`
-func runner(ctx *{{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/context" "" }}.WaitStopContext) error {
+func runner(ctx *{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/context" "" }}.WaitStopContext) error {
 	{{ .UseWithoutAlias "github.com/sirupsen/logrus" "" }}.SetLevel({{ .UseWithoutAlias "%s" "%s" }}.Config.LogLevel)
 	go {{ .UseWithoutAlias "%s" "%s" }}.Config.GRPCServer.Serve({{ .UseWithoutAlias "%s" "%s" }}.Router)
 	return {{ .UseWithoutAlias "%s" "%s" }}.Config.HTTPServer.Serve({{ .UseWithoutAlias "%s" "%s" }}.Router)
@@ -260,7 +260,7 @@ func runner(ctx *{{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/con
 
 	file.WithBlock(fmt.Sprintf(`
 func migrate(args []string) {
-	if err := {{ .UseWithoutAlias "github.com/profzone/eden-framework/pkg/sqlx/migration" "" }}.Migrate({{ .UseWithoutAlias "%s" "%s" }}.Config.MasterDB, nil); err != nil {
+	if err := {{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/sqlx/migration" "" }}.Migrate({{ .UseWithoutAlias "%s" "%s" }}.Config.MasterDB, nil); err != nil {
 		panic(err)
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	"net/http"
 
-	"github.com/profzone/eden-framework/pkg/courier/transport_http"
+	"github.com/eden-framework/eden-framework/pkg/courier/transport_http"
 )
 
 func NewInsecureTLSTransport(rootCA []byte) transport_http.TransportWrapper {

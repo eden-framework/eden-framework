@@ -2,7 +2,7 @@ package project
 
 import (
 	"fmt"
-	"github.com/profzone/eden-framework/pkg/executil"
+	"github.com/eden-framework/eden-framework/pkg/executil"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"

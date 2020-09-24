@@ -1,7 +1,7 @@
 package repo
 
 import (
-	"github.com/profzone/eden-framework/pkg/courier/client"
+	"github.com/eden-framework/eden-framework/pkg/courier/client"
 	"net/http"
 	"time"
 )

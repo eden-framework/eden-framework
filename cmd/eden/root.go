@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/profzone/eden-framework/internal/project"
-	_ "github.com/profzone/eden-framework/internal/workflows"
+	"github.com/eden-framework/eden-framework/internal/project"
+	_ "github.com/eden-framework/eden-framework/internal/workflows"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"

@@ -1,6 +1,6 @@
-module github.com/profzone/eden-framework
+module github.com/eden-framework/eden-framework
 
-go 1.13
+go 1.14
 
 replace k8s.io/client-go => k8s.io/client-go v0.18.8
 

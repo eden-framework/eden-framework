@@ -2,9 +2,9 @@ package project
 
 import (
 	"fmt"
-	"github.com/profzone/eden-framework/internal/project/drone"
-	"github.com/profzone/eden-framework/pkg/executil"
-	str "github.com/profzone/eden-framework/pkg/strings"
+	"github.com/eden-framework/eden-framework/internal/project/drone"
+	"github.com/eden-framework/eden-framework/pkg/executil"
+	str "github.com/eden-framework/eden-framework/pkg/strings"
 	"strings"
 )
 

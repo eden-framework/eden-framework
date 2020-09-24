@@ -1,8 +1,8 @@
 package drone
 
 import (
+	"github.com/eden-framework/eden-framework/internal/project/drone/enums"
 	"github.com/imdario/mergo"
-	"github.com/profzone/eden-framework/internal/project/drone/enums"
 )
 
 type PipelineStep struct {

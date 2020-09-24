@@ -2,9 +2,9 @@ package scanner
 
 import (
 	"fmt"
-	"github.com/profzone/eden-framework/pkg/courier/status_error"
-	"github.com/profzone/eden-framework/pkg/packagex"
-	"github.com/profzone/eden-framework/pkg/reflectx"
+	"github.com/eden-framework/eden-framework/pkg/courier/status_error"
+	"github.com/eden-framework/eden-framework/pkg/packagex"
+	"github.com/eden-framework/eden-framework/pkg/reflectx"
 	"go/ast"
 	"go/types"
 	"sort"

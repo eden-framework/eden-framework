@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/profzone/eden-framework/pkg/sqlx/er"
-	"github.com/profzone/eden-framework/pkg/sqlx/generator/__examples__/database"
-	"github.com/profzone/eden-framework/pkg/sqlx/postgresqlconnector"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/er"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/generator/__examples__/database"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/postgresqlconnector"
 )
 
 func TestDatabaseERFromDB(t *testing.T) {

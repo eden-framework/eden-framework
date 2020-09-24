@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/profzone/eden-framework/pkg/courier"
+	"github.com/eden-framework/eden-framework/pkg/courier"
 )
 
 type IRequest interface {

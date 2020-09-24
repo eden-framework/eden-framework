@@ -3,8 +3,8 @@ package database
 import (
 	fmt "fmt"
 
-	github_com_go_courier_sqlx_v2 "github.com/profzone/eden-framework/pkg/sqlx"
-	github_com_go_courier_sqlx_v2_builder "github.com/profzone/eden-framework/pkg/sqlx/builder"
+	github_com_go_courier_sqlx_v2 "github.com/eden-framework/eden-framework/pkg/sqlx"
+	github_com_go_courier_sqlx_v2_builder "github.com/eden-framework/eden-framework/pkg/sqlx/builder"
 )
 
 func (Org) PrimaryKey() []string {

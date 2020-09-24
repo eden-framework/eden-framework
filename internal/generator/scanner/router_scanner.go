@@ -2,9 +2,9 @@ package scanner
 
 import (
 	"bytes"
+	"github.com/eden-framework/eden-framework/pkg/packagex"
+	"github.com/eden-framework/eden-framework/pkg/reflectx"
 	"github.com/julienschmidt/httprouter"
-	"github.com/profzone/eden-framework/pkg/packagex"
-	"github.com/profzone/eden-framework/pkg/reflectx"
 	"go/ast"
 	"go/types"
 	"sort"

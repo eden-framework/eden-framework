@@ -3,8 +3,8 @@ package confpostgres
 import (
 	"context"
 	"fmt"
-	"github.com/profzone/eden-framework/pkg/sqlx"
-	"github.com/profzone/eden-framework/pkg/sqlx/postgresqlconnector"
+	"github.com/eden-framework/eden-framework/pkg/sqlx"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/postgresqlconnector"
 	"github.com/profzone/envconfig"
 	"time"
 )

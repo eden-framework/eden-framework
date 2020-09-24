@@ -18,9 +18,10 @@ package main
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/profzone/eden-framework/internal/generator"
-	"github.com/profzone/eden-framework/internal/project"
-	"github.com/profzone/eden-framework/internal/project/repo"
+	"github.com/AlecAivazis/survey/v2/terminal"
+	"github.com/eden-framework/eden-framework/internal/generator"
+	"github.com/eden-framework/eden-framework/internal/project"
+	"github.com/eden-framework/eden-framework/internal/project/repo"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
@@ -176,6 +177,9 @@ var createCmd = &cobra.Command{
 
 		err = survey.Ask(qs, &answers)
 		if err != nil {
+			if err == terminal.InterruptErr {
+				return
+			}
 			panic(err)
 		}
 

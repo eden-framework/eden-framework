@@ -1,8 +1,8 @@
 package mysqlconnector
 
 import (
-	"github.com/profzone/eden-framework/pkg/sqlx"
-	"github.com/profzone/eden-framework/pkg/sqlx/builder"
+	"github.com/eden-framework/eden-framework/pkg/sqlx"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/builder"
 )
 
 func toInterfaces(list ...string) []interface{} {

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/profzone/eden-framework/pkg/sqlx/builder"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/builder"
 )
 
 var ErrNotTx = errors.New("db is not *sql.Tx")

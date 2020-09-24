@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/profzone/eden-framework/pkg/codegen"
-	"github.com/profzone/eden-framework/pkg/sqlx/builder"
+	"github.com/eden-framework/eden-framework/pkg/codegen"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/builder"
 )
 
 var (

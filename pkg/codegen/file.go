@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/profzone/eden-framework/pkg/codegen/formatx"
+	"github.com/eden-framework/eden-framework/pkg/codegen/formatx"
 	"golang.org/x/tools/go/packages"
 )
 

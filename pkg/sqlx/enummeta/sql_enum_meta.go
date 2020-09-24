@@ -1,7 +1,7 @@
 package enummeta
 
 import (
-	"github.com/profzone/eden-framework/pkg/sqlx/builder"
+	"github.com/eden-framework/eden-framework/pkg/sqlx/builder"
 )
 
 type SqlMetaEnum struct {

@@ -2,8 +2,8 @@ package generator
 
 import (
 	"fmt"
-	"github.com/profzone/eden-framework/internal/generator/format"
-	"github.com/profzone/eden-framework/pkg/duration"
+	"github.com/eden-framework/eden-framework/internal/generator/format"
+	"github.com/eden-framework/eden-framework/pkg/duration"
 	"golang.org/x/tools/imports"
 	"reflect"
 	"strings"

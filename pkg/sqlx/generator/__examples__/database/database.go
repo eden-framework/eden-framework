@@ -1,7 +1,7 @@
 package database
 
 import (
-	"github.com/profzone/eden-framework/pkg/sqlx"
+	"github.com/eden-framework/eden-framework/pkg/sqlx"
 )
 
 var DBTest = sqlx.NewDatabase("test")

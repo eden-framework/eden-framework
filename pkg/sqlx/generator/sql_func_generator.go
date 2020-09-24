@@ -1,9 +1,9 @@
 package generator
 
 import (
-	"github.com/profzone/eden-framework/internal/generator"
-	"github.com/profzone/eden-framework/pkg/codegen"
-	"github.com/profzone/eden-framework/pkg/packagex"
+	"github.com/eden-framework/eden-framework/internal/generator"
+	"github.com/eden-framework/eden-framework/pkg/codegen"
+	"github.com/eden-framework/eden-framework/pkg/packagex"
 	"github.com/sirupsen/logrus"
 	"go/types"
 	"os"

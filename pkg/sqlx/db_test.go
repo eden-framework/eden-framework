@@ -3,7 +3,7 @@ package sqlx_test
 import (
 	"testing"
 
-	"github.com/profzone/eden-framework/pkg/sqlx"
+	"github.com/eden-framework/eden-framework/pkg/sqlx"
 )
 
 func BenchmarkDB_DBExecutor(b *testing.B) {

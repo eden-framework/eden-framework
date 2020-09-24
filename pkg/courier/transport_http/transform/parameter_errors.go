@@ -1,7 +1,7 @@
 package transform
 
 import (
-	"github.com/profzone/eden-framework/pkg/courier/status_error"
+	"github.com/eden-framework/eden-framework/pkg/courier/status_error"
 )
 
 type ParameterErrors struct {

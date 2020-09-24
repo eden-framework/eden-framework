@@ -3,8 +3,8 @@ package generator
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2/core"
-	"github.com/profzone/eden-framework/internal/generator/files"
-	"github.com/profzone/eden-framework/internal/project"
+	"github.com/eden-framework/eden-framework/internal/generator/files"
+	"github.com/eden-framework/eden-framework/internal/project"
 	"path"
 )
 
@@ -50,7 +50,7 @@ func NewProjectGenerator(opt ProjectOption) *ProjectGenerator {
 
 	var withApolloFlag string
 	if opt.ApolloSupport {
-		withApolloFlag = fmt.Sprintf(" -ldflags \"-X github.com/profzone/eden-framework/pkg/conf/apollo.Branch=%s.json\"", files.EnvVarInBash(project.EnvKeyCIBranch))
+		withApolloFlag = fmt.Sprintf(" -ldflags \"-X github.com/eden-framework/eden-framework/pkg/conf/apollo.Branch=%s.json\"", files.EnvVarInBash(project.EnvKeyCIBranch))
 	}
 	p.Scripts = map[string]project.Script{
 		"build": []string{

@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/eden-framework/eden-framework/pkg/sqlx/builder"
 	"github.com/onsi/gomega"
 	"github.com/onsi/gomega/types"
-	"github.com/profzone/eden-framework/pkg/sqlx/builder"
 )
 
 func BeExpr(query string, args ...interface{}) types.GomegaMatcher {

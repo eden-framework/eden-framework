@@ -9,12 +9,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 
-	"github.com/profzone/eden-framework/pkg/context"
-	"github.com/profzone/eden-framework/pkg/courier"
-	"github.com/profzone/eden-framework/pkg/courier/httpx"
-	"github.com/profzone/eden-framework/pkg/courier/transport_grpc"
-	"github.com/profzone/eden-framework/pkg/courier/transport_http"
-	"github.com/profzone/eden-framework/pkg/env"
+	"github.com/eden-framework/eden-framework/pkg/context"
+	"github.com/eden-framework/eden-framework/pkg/courier"
+	"github.com/eden-framework/eden-framework/pkg/courier/httpx"
+	"github.com/eden-framework/eden-framework/pkg/courier/transport_grpc"
+	"github.com/eden-framework/eden-framework/pkg/courier/transport_http"
+	"github.com/eden-framework/eden-framework/pkg/env"
 )
 
 type Client struct {
