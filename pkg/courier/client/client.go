@@ -57,7 +57,7 @@ func (c Client) GetBaseURL(protocol string) (url string) {
 	if protocol != "" {
 		url = fmt.Sprintf("%s://%s", protocol, c.Host)
 	}
-	if c.Port > 0 {
+	if c.Port > 0 && c.Port != 80 {
 		url = fmt.Sprintf("%s:%d", url, c.Port)
 	}
 	return

@@ -20,6 +20,8 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/profzone/eden-framework/internal/generator"
 	"github.com/profzone/eden-framework/internal/project"
+	"github.com/profzone/eden-framework/internal/project/repo"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
 	"path"
@@ -48,9 +50,32 @@ var createCmd = &cobra.Command{
 			currentProject.Workflow.Extends = "feature-pr"
 		}
 
-		answers := generator.ServiceOption{}
+		// get the tag list of eden-framework
+		cli := repo.NewClient("https", "api.github.com", 80)
+		tags, err := cli.GetTags()
+		if err != nil {
+			logrus.Panicf("cannot get tag list of repo. err=%v", err)
+		}
 
+		var tagList []string
+		for _, t := range tags {
+			tagList = append(tagList, t.Name)
+		}
+		if len(tagList) == 0 {
+			logrus.Panic("cannot get tag list of repo. tag list is empty")
+		}
+
+		answers := generator.ServiceOption{}
 		var qs = []*survey.Question{
+			{
+				Name: "framework_version",
+				Prompt: &survey.Select{
+					Message:  "框架版本",
+					PageSize: 5,
+					Options:  tagList,
+					Default:  tagList[0],
+				},
+			},
 			{
 				Name: "name",
 				Prompt: &survey.Input{
@@ -89,7 +114,7 @@ var createCmd = &cobra.Command{
 			{
 				Name: "apollo_support",
 				Prompt: &survey.Select{
-					Message: "是否启用Apollo配置中心支持",
+					Message: "Apollo配置中心支持",
 					Options: []string{"是", "否"},
 					Default: "是",
 				},
@@ -149,7 +174,7 @@ var createCmd = &cobra.Command{
 			}...)
 		}
 
-		err := survey.Ask(qs, &answers)
+		err = survey.Ask(qs, &answers)
 		if err != nil {
 			panic(err)
 		}

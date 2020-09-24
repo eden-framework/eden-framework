@@ -63,7 +63,7 @@ func (httpRequest *HttpRequest) Do() (result courier.Result) {
 
 	resp, err := httpClient.Do(request)
 	if err != nil {
-		result.Err = status_error.RequestTimeout.StatusError().WithDesc(err.Error())
+		result.Err = status_error.HttpRequestFailed.StatusError().WithDesc(err.Error())
 		return
 	}
 	defer resp.Body.Close()

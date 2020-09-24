@@ -14,6 +14,7 @@ const (
 	TEST
 	STAGING
 	DEV
+	LOCAL
 )
 
 type GoEnv int
@@ -55,6 +56,8 @@ func GetRuntimeEnv() GoEnv {
 		return STAGING
 	case "DEV":
 		return DEV
+	case "LOCAL":
+		return LOCAL
 	default:
 		panic("invalid go env " + goEnv)
 	}

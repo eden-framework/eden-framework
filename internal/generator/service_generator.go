@@ -9,10 +9,11 @@ import (
 )
 
 type ServiceOption struct {
-	Name            string
-	PackageName     string      `survey:"package_name"`
-	DatabaseSupport expressBool `survey:"database_support"`
-	ApolloSupport   expressBool `survey:"apollo_support"`
+	FrameworkVersion string `survey:"framework_version"`
+	Name             string
+	PackageName      string      `survey:"package_name"`
+	DatabaseSupport  expressBool `survey:"database_support"`
+	ApolloSupport    expressBool `survey:"apollo_support"`
 
 	Group           string
 	Owner           string
@@ -50,7 +51,7 @@ func (s *ServiceGenerator) Output(outputPath string) Outputs {
 	// go.mod file
 	mod := files.NewModFile(s.opt.PackageName, "1.14")
 	mod.AddReplace("k8s.io/client-go", "", "k8s.io/client-go", "v0.18.8")
-	mod.AddRequired("github.com/profzone/eden-framework", "v1.0.9")
+	mod.AddRequired("github.com/profzone/eden-framework", s.opt.FrameworkVersion)
 	mod.AddRequired("github.com/sirupsen/logrus", "v1.6.0")
 	mod.AddRequired("github.com/spf13/cobra", "v0.0.5")
 	outputs.WriteFile(path.Join(p, "go.mod"), mod.String())
