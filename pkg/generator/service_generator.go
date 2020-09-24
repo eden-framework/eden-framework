@@ -24,7 +24,8 @@ type ServiceOption struct {
 }
 
 type ServiceGenerator struct {
-	opt ServiceOption
+	opt     ServiceOption
+	plugins []interface{}
 }
 
 func NewServiceGenerator(opt ServiceOption) *ServiceGenerator {
@@ -101,6 +102,17 @@ func createPath(p string) {
 		return
 	}
 	logrus.Panicf("os.Stat exist: %s", p)
+}
+
+func (s *ServiceGenerator) withEntryPointPlugins(cwd string) string {
+	var pluginTpl string
+	for _, p := range s.plugins {
+		if v, ok := p.(EntryPointPlugins); ok {
+			pluginTpl += v.NewApplicationGenerationPoint(s.opt, cwd)
+		}
+	}
+
+	return pluginTpl
 }
 
 func (s *ServiceGenerator) createApolloFile() *files.GoFile {
@@ -235,6 +247,8 @@ func main() {
 		file.WithBlock(fmt.Sprintf(`,
 		{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/application" "" }}.WithConfig(&{{ .UseWithoutAlias "%s" "%s" }}.Config)`, pkgPath, filePath))
 	}
+
+	file.WithBlock(s.withEntryPointPlugins(cwd))
 
 	file.WithBlock(`)
 
