@@ -219,23 +219,25 @@ func (s *ServiceGenerator) createMainFile(cwd string) *files.GoFile {
 	globalFilePath := path.Join(cwd, "internal/global")
 
 	file := files.NewGoFile("main")
-	file.WithBlock(`
+	file.WithBlock(fmt.Sprintf(`
 func main() {
-	app := application.NewApplication(runner`)
+	app := application.NewApplication(runner,
+		{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/application" "" }}.WithConfig(&{{ .UseWithoutAlias "%s" "%s" }}.Config)`, globalPkgPath, globalFilePath))
 
 	if s.opt.ApolloSupport {
-		file.WithBlock(fmt.Sprintf(`, {{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/application" "" }}.WithApollo(&{{ .UseWithoutAlias "%s" "%s" }}.ApolloConfig)`, globalPkgPath, globalFilePath))
+		file.WithBlock(fmt.Sprintf(`,
+		{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/application" "" }}.WithApollo(&{{ .UseWithoutAlias "%s" "%s" }}.ApolloConfig)`, globalPkgPath, globalFilePath))
 	}
-
-	file.WithBlock(fmt.Sprintf(`, application.WithConfig(&{{ .UseWithoutAlias "%s" "%s" }}.Config`, globalPkgPath, globalFilePath))
 
 	if s.opt.DatabaseSupport {
 		pkgPath := path.Join(s.opt.PackageName, "internal/databases")
 		filePath := path.Join(cwd, "internal/databases")
-		file.WithBlock(fmt.Sprintf(`, &{{ .UseWithoutAlias "%s" "%s" }}.Config`, pkgPath, filePath))
+		file.WithBlock(fmt.Sprintf(`,
+		{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/application" "" }}.WithConfig(&{{ .UseWithoutAlias "%s" "%s" }}.Config)`, pkgPath, filePath))
 	}
 
-	file.WithBlock(`))
+	file.WithBlock(`)
+
 	app.AddCommand(&{{ .UseWithoutAlias "github.com/spf13/cobra" "" }}.Command{
 		Use: "migrate",
 		Run: func(cmd *{{ .UseWithoutAlias "github.com/spf13/cobra" "" }}.Command, args []string) {
