@@ -108,7 +108,7 @@ func (s *ServiceGenerator) withEntryPointPlugins(cwd string) string {
 	var pluginTpl string
 	for _, p := range s.plugins {
 		if v, ok := p.(EntryPointPlugins); ok {
-			pluginTpl += v.NewApplicationGenerationPoint(s.opt, cwd)
+			pluginTpl += v.GenerateEntryPoint(s.opt, cwd)
 		}
 	}
 
