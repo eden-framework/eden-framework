@@ -54,7 +54,7 @@ var createCmd = &cobra.Command{
 		// get the tag list of eden-framework
 		fmt.Println("fetch the tag list of eden-framework...")
 		cli := repo.NewClient("https", "api.github.com", 80)
-		tags, err := cli.GetTags()
+		tags, err := cli.GetTags("eden-framework/eden-framework")
 		if err != nil {
 			logrus.Panicf("cannot get tag list of repo. err=%v", err)
 		}
@@ -73,11 +73,30 @@ var createCmd = &cobra.Command{
 			logrus.Panicf("cannot get plugin list of eden-framework. err=%v", err)
 		}
 		var pluginList []string
+		var answers generator.ServiceOption
 		for _, p := range plugins {
-			pluginList = append(pluginList, p.GetPackageName())
+			tags, err := cli.GetTags(p.FullName)
+			if err != nil {
+				logrus.Panicf("cannot get tag list of repo [%s]. err=%v", p.FullName, err)
+			}
+
+			var pkgDisplayName, version string
+			var pluginDetail generator.PluginDetail
+			if len(tags) > 0 {
+				version = tags[0].Name
+				pkgDisplayName = fmt.Sprintf("%s@%s", p.GetPackagePath(), version)
+				pluginDetail.Tag = tags[0]
+			} else {
+				pkgDisplayName = p.GetPackagePath()
+			}
+			pluginDetail.RepoFullName = p.FullName
+			pluginDetail.PackageName = pkgDisplayName
+			pluginDetail.PackagePath = p.GetPackagePath()
+			pluginDetail.Version = version
+			answers.PluginDetails = append(answers.PluginDetails, pluginDetail)
+			pluginList = append(pluginList, pkgDisplayName)
 		}
 
-		answers := generator.ServiceOption{}
 		var qs = []*survey.Question{
 			{
 				Name: "framework_version",

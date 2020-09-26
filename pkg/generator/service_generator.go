@@ -2,11 +2,22 @@ package generator
 
 import (
 	"fmt"
+	"github.com/eden-framework/eden-framework/internal/project/repo"
 	"github.com/eden-framework/eden-framework/pkg/generator/files"
+	"github.com/eden-framework/plugins"
 	"github.com/sirupsen/logrus"
 	"os"
 	"path"
+	"strings"
 )
+
+type PluginDetail struct {
+	RepoFullName string
+	PackageName  string
+	PackagePath  string
+	Version      string
+	Tag          repo.Tag
+}
 
 type ServiceOption struct {
 	FrameworkVersion string `survey:"framework_version"`
@@ -15,6 +26,7 @@ type ServiceOption struct {
 	DatabaseSupport  expressBool `survey:"database_support"`
 	ApolloSupport    expressBool `survey:"apollo_support"`
 	Plugins          []string
+	PluginDetails    []PluginDetail `survey:"-"`
 
 	Group           string
 	Owner           string
@@ -22,6 +34,15 @@ type ServiceOption struct {
 	Version         string
 	ProgramLanguage string `survey:"project_language"`
 	Workflow        string
+}
+
+func (opt ServiceOption) GetPluginDetailByPackageName(pkgName string) *PluginDetail {
+	for _, d := range opt.PluginDetails {
+		if d.PackageName == pkgName {
+			return &d
+		}
+	}
+	return nil
 }
 
 type ServiceGenerator struct {
@@ -63,33 +84,66 @@ func (s *ServiceGenerator) Output(outputPath string) Outputs {
 		logrus.Panicf("os.Chdir failed: %v", err)
 	}
 
+	// plugin
+	ldr := plugins.NewLoader(p)
+	defer ldr.Clear()
+
+	if len(s.opt.Plugins) >= 0 {
+		for _, plugName := range s.opt.Plugins {
+			detail := s.opt.GetPluginDetailByPackageName(plugName)
+			zipFileName := fmt.Sprintf("%s-%s", strings.ReplaceAll(detail.RepoFullName, "/", "-"), detail.Version)
+			plugin, err := ldr.Load(zipFileName, detail.Tag.ZipBallUrl)
+			if err != nil {
+				logrus.Warningf("load plugin [%s] failed: %v", detail.PackageName, err)
+				continue
+			}
+
+			symbol, err := plugin.Lookup("Plugin")
+			if err != nil {
+				logrus.Warningf("load plugin [%s] failed: lookup 'Plugin' symbol failed: %v", detail.PackageName, err)
+				continue
+			}
+
+			s.plugins = append(s.plugins, symbol)
+			fmt.Printf("plugin [%s] has been loaded\n", detail.PackageName)
+		}
+	}
+
 	// apollo config file
 	if s.opt.ApolloSupport {
-		apolloFile := s.createApolloFile()
-		outputs.WriteFile(path.Join(p, "internal/global/apollo.go"), apolloFile.String())
+		apolloFile := s.createApolloFile(p)
+		outputs.WriteFile(apolloFile.FileFullName, apolloFile.String())
 	}
 
 	// db config file
 	if s.opt.DatabaseSupport {
-		dbFile := s.createDbConfigFile()
-		outputs.WriteFile(path.Join(p, "internal/databases/db.go"), dbFile.String())
+		dbFile := s.createDbConfigFile(p)
+		outputs.WriteFile(dbFile.FileFullName, dbFile.String())
+	}
+
+	// plugin files
+	if len(s.plugins) > 0 {
+		pluginFiles := s.withFilePointPlugins(p)
+		for _, f := range pluginFiles {
+			outputs.WriteFile(f.FileFullName, f.String())
+		}
 	}
 
 	// general config file
 	configFile := s.createConfigFile(p)
-	outputs.WriteFile(path.Join(p, "internal/global/config.go"), configFile.String())
+	outputs.WriteFile(configFile.FileFullName, configFile.String())
 
 	// router v0 root files
-	routerV0RootFile := s.createRouterV0RootFile()
-	outputs.WriteFile(path.Join(p, "internal/routers/v0/root.go"), routerV0RootFile.String())
+	routerV0RootFile := s.createRouterV0RootFile(p)
+	outputs.WriteFile(routerV0RootFile.FileFullName, routerV0RootFile.String())
 
 	// router root files
 	routerRootFile := s.createRouterRootFile(p)
-	outputs.WriteFile(path.Join(p, "internal/routers/root.go"), routerRootFile.String())
+	outputs.WriteFile(routerRootFile.FileFullName, routerRootFile.String())
 
 	// main file
 	mainFile := s.createMainFile(p)
-	outputs.Add(path.Join(p, "cmd/main.go"), mainFile.String())
+	outputs.Add(mainFile.FileFullName, mainFile.String())
 
 	return outputs
 }
@@ -108,16 +162,36 @@ func createPath(p string) {
 func (s *ServiceGenerator) withEntryPointPlugins(cwd string) string {
 	var pluginTpl string
 	for _, p := range s.plugins {
-		if v, ok := p.(EntryPointPlugins); ok {
-			pluginTpl += v.GenerateEntryPoint(s.opt, cwd)
+		if v, ok := p.(plugins.EntryPointPlugins); ok {
+			opt := plugins.Option{
+				PackageName: s.opt.PackageName,
+			}
+			pluginTpl += v.GenerateEntryPoint(opt, cwd)
 		}
 	}
 
 	return pluginTpl
 }
 
-func (s *ServiceGenerator) createApolloFile() *files.GoFile {
-	file := files.NewGoFile("global")
+func (s *ServiceGenerator) withFilePointPlugins(cwd string) []*files.GoFile {
+	var list []*files.GoFile
+	for _, p := range s.plugins {
+		if v, ok := p.(plugins.FilePlugins); ok {
+			opt := plugins.Option{
+				PackageName: s.opt.PackageName,
+			}
+			tpls := v.GenerateFilePoint(opt, cwd)
+			for _, t := range tpls {
+				list = append(list, files.NewGoFile(t.PackageName, t.FileFullName).WithBlock(t.Tpl))
+			}
+		}
+	}
+
+	return list
+}
+
+func (s *ServiceGenerator) createApolloFile(cwd string) *files.GoFile {
+	file := files.NewGoFile("global", path.Join(cwd, "internal/global/apollo.go"))
 	file.WithBlock(fmt.Sprintf(`
 var ApolloConfig = {{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/conf/apollo" "" }}.ApolloBaseConfig{
 	AppId:            "%s",
@@ -130,8 +204,8 @@ var ApolloConfig = {{ .UseWithoutAlias "github.com/eden-framework/eden-framework
 	return file
 }
 
-func (s *ServiceGenerator) createDbConfigFile() *files.GoFile {
-	file := files.NewGoFile("databases")
+func (s *ServiceGenerator) createDbConfigFile(cwd string) *files.GoFile {
+	file := files.NewGoFile("databases", path.Join(cwd, "internal/databases/db.go"))
 	file.WithBlock(`
 var Config = struct {
 	DBTest *{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/sqlx" "" }}.Database
@@ -144,7 +218,7 @@ var Config = struct {
 }
 
 func (s *ServiceGenerator) createConfigFile(cwd string) *files.GoFile {
-	file := files.NewGoFile("global")
+	file := files.NewGoFile("global", path.Join(cwd, "internal/global/config.go"))
 
 	file.WithBlock(`
 var Config = struct {
@@ -186,8 +260,8 @@ var Config = struct {
 	return file
 }
 
-func (s *ServiceGenerator) createRouterV0RootFile() *files.GoFile {
-	file := files.NewGoFile("v0")
+func (s *ServiceGenerator) createRouterV0RootFile(cwd string) *files.GoFile {
+	file := files.NewGoFile("v0", path.Join(cwd, "internal/routers/v0/root.go"))
 	file.WithBlock(`
 var Router = {{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier" "" }}.NewRouter(V0Router{})
 
@@ -207,7 +281,7 @@ func (s *ServiceGenerator) createRouterRootFile(cwd string) *files.GoFile {
 	pkgPath := path.Join(s.opt.PackageName, "internal/routers/v0")
 	filePath := path.Join(cwd, "internal/routers/v0")
 
-	file := files.NewGoFile("routers")
+	file := files.NewGoFile("routers", path.Join(cwd, "internal/routers/root.go"))
 	file.WithBlock(fmt.Sprintf(`
 var Router = {{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier" "" }}.NewRouter(RootRouter{})
 
@@ -231,7 +305,7 @@ func (s *ServiceGenerator) createMainFile(cwd string) *files.GoFile {
 	globalPkgPath := path.Join(s.opt.PackageName, "internal/global")
 	globalFilePath := path.Join(cwd, "internal/global")
 
-	file := files.NewGoFile("main")
+	file := files.NewGoFile("main", path.Join(cwd, "cmd/main.go"))
 	file.WithBlock(fmt.Sprintf(`
 func main() {
 	app := application.NewApplication(runner,

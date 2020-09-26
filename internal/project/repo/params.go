@@ -27,7 +27,7 @@ type Repository struct {
 	HtmlUrl  string `json:"html_url"`
 }
 
-func (r Repository) GetPackageName() string {
+func (r Repository) GetPackagePath() string {
 	return path.Join("github.com", r.FullName)
 }
 

@@ -9,15 +9,17 @@ import (
 )
 
 type GoFile struct {
-	PackageName string
+	PackageName  string
+	FileFullName string
 	*importer.PackageImporter
 
 	buf *bytes.Buffer
 }
 
-func NewGoFile(pkgName string) *GoFile {
+func NewGoFile(pkgName, fileFullName string) *GoFile {
 	return &GoFile{
 		PackageName:     pkgName,
+		FileFullName:    fileFullName,
 		PackageImporter: importer.NewPackageImporter(""),
 		buf:             bytes.NewBuffer([]byte{}),
 	}
