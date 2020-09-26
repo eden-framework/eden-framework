@@ -2,13 +2,11 @@ module github.com/eden-framework/eden-framework
 
 go 1.14
 
-replace (
-	k8s.io/client-go => k8s.io/client-go v0.18.8
-)
+replace k8s.io/client-go => k8s.io/client-go v0.18.8
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.0.7
-	github.com/eden-framework/plugins v0.0.3
+	github.com/eden-framework/plugins v0.0.4
 	github.com/fatih/color v1.7.0
 	github.com/go-courier/enumeration v1.0.1
 	github.com/go-courier/metax v1.2.1
