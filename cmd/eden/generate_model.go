@@ -17,7 +17,7 @@ package main
 
 import (
 	"fmt"
-	mainGenerator "github.com/eden-framework/eden-framework/pkg/generator"
+	mainGenerator "github.com/eden-framework/eden-framework/internal/generator"
 	"github.com/eden-framework/eden-framework/pkg/sqlx/generator"
 	"github.com/spf13/cobra"
 )

@@ -1,8 +1,8 @@
 package generator
 
 import (
-	"github.com/eden-framework/eden-framework/pkg/generator/files"
-	"github.com/eden-framework/eden-framework/pkg/generator/scanner"
+	"github.com/eden-framework/eden-framework/internal/generator/files"
+	"github.com/eden-framework/eden-framework/internal/generator/scanner"
 	"github.com/eden-framework/eden-framework/pkg/packagex"
 	str "github.com/eden-framework/eden-framework/pkg/strings"
 	"github.com/sirupsen/logrus"

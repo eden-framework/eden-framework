@@ -17,7 +17,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/eden-framework/eden-framework/pkg/generator"
+	"github.com/eden-framework/eden-framework/internal/generator"
 	"os"
 	"path"
 

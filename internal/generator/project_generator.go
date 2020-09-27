@@ -3,8 +3,8 @@ package generator
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2/core"
+	"github.com/eden-framework/eden-framework/internal/generator/files"
 	"github.com/eden-framework/eden-framework/internal/project"
-	"github.com/eden-framework/eden-framework/pkg/generator/files"
 	"path"
 )
 

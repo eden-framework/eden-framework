@@ -2,8 +2,8 @@ package generator
 
 import (
 	"fmt"
+	"github.com/eden-framework/eden-framework/internal/generator/files"
 	"github.com/eden-framework/eden-framework/internal/project/repo"
-	"github.com/eden-framework/eden-framework/pkg/generator/files"
 	"github.com/eden-framework/plugins"
 	"github.com/sirupsen/logrus"
 	"os"

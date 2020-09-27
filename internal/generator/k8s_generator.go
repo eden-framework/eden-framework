@@ -3,10 +3,10 @@ package generator
 import (
 	"bytes"
 	"fmt"
+	"github.com/eden-framework/eden-framework/internal/generator/files"
 	"github.com/eden-framework/eden-framework/internal/project"
 	"github.com/eden-framework/eden-framework/pkg/courier/transport_grpc"
 	"github.com/eden-framework/eden-framework/pkg/courier/transport_http"
-	"github.com/eden-framework/eden-framework/pkg/generator/files"
 	"github.com/eden-framework/eden-framework/pkg/ptr"
 	"github.com/eden-framework/eden-framework/pkg/reflectx"
 	"github.com/sirupsen/logrus"

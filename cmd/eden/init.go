@@ -18,8 +18,8 @@ package main
 import (
 	"fmt"
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/eden-framework/eden-framework/internal/generator"
 	"github.com/eden-framework/eden-framework/internal/project"
-	"github.com/eden-framework/eden-framework/pkg/generator"
 	"github.com/spf13/cobra"
 	"os"
 	"path"
