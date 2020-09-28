@@ -344,8 +344,8 @@ func main() {
 	file.WithBlock(fmt.Sprintf(`
 func runner(ctx *{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/context" "" }}.WaitStopContext) error {
 	{{ .UseWithoutAlias "github.com/sirupsen/logrus" "" }}.SetLevel({{ .UseWithoutAlias "%s" "%s" }}.Config.LogLevel)
-	go {{ .UseWithoutAlias "%s" "%s" }}.Config.GRPCServer.Serve({{ .UseWithoutAlias "%s" "%s" }}.Router)
-	return {{ .UseWithoutAlias "%s" "%s" }}.Config.HTTPServer.Serve({{ .UseWithoutAlias "%s" "%s" }}.Router)
+	go {{ .UseWithoutAlias "%s" "%s" }}.Config.GRPCServer.Serve(ctx, {{ .UseWithoutAlias "%s" "%s" }}.Router)
+	return {{ .UseWithoutAlias "%s" "%s" }}.Config.HTTPServer.Serve(ctx, {{ .UseWithoutAlias "%s" "%s" }}.Router)
 }
 `, globalPkgPath, globalFilePath, globalPkgPath, globalFilePath, routerPkgPath, routerFilePath, globalPkgPath, globalFilePath, routerPkgPath, routerFilePath))
 
