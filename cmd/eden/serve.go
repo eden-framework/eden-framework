@@ -16,10 +16,13 @@ limitations under the License.
 package main
 
 import (
+	"github.com/eden-framework/eden-framework/pkg/context"
 	"github.com/eden-framework/eden-framework/pkg/courier"
 	"github.com/eden-framework/eden-framework/pkg/courier/swagger"
 	"github.com/eden-framework/eden-framework/pkg/courier/transport_http"
 	"github.com/spf13/cobra"
+	"os"
+	"os/signal"
 )
 
 var serveCmdPort int
@@ -38,7 +41,16 @@ var serveCmd = &cobra.Command{
 			WithCORS: true,
 		}
 		server.MarshalDefaults(server)
-		server.Serve(RootRouter)
+
+		ctx := context.NewWaitStopContext()
+
+		go server.Serve(ctx, RootRouter)
+
+		sig := make(chan os.Signal)
+		signal.Notify(sig, os.Interrupt)
+
+		<-sig
+		ctx.Cancel()
 	},
 }
 
