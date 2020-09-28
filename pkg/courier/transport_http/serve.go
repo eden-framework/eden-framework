@@ -3,11 +3,11 @@ package transport_http
 import (
 	"context"
 	"fmt"
+	ctx "github.com/eden-framework/eden-framework/pkg/context"
 	"github.com/profzone/envconfig"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
-	"os/signal"
 	"reflect"
 	"regexp"
 	"sort"
@@ -50,7 +50,7 @@ func (s ServeHTTP) MarshalDefaults(v interface{}) {
 	}
 }
 
-func (s *ServeHTTP) Serve(router *courier.Router) error {
+func (s *ServeHTTP) Serve(wsCtx *ctx.WaitStopContext, router *courier.Router) error {
 	s.MarshalDefaults(s)
 	s.router = s.convertRouterToHttpRouter(router)
 	s.router.GET("/healthz", func(http.ResponseWriter, *http.Request, httprouter.Params) {})
@@ -62,18 +62,19 @@ func (s *ServeHTTP) Serve(router *courier.Router) error {
 		ReadTimeout:  time.Duration(s.ReadTimeout),
 	}
 
-	idleConnsClosed := make(chan struct{})
+	wsCtx.Add(1)
 	go func() {
-		sigint := make(chan os.Signal, 1)
-		signal.Notify(sigint, os.Interrupt)
-		<-sigint
+		<-wsCtx.Done()
+		fmt.Println("HTTP server shutdown...")
 		if err := srv.Shutdown(context.Background()); err != nil {
-			fmt.Printf("HTTP server Shutdown: %v", err)
+			fmt.Printf("HTTP server shutdown failed: %v", err)
+		} else {
+			fmt.Println("HTTP server shutdown complete.")
 		}
-		close(idleConnsClosed)
+		wsCtx.Finish()
 	}()
 
-	fmt.Printf("[Courier] listen on %s\n", srv.Addr)
+	fmt.Printf("[Courier] HTTP listen on %s\n", srv.Addr)
 	return srv.ListenAndServe()
 }
 

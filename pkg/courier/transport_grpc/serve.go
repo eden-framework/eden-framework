@@ -2,6 +2,7 @@ package transport_grpc
 
 import (
 	"fmt"
+	ctx "github.com/eden-framework/eden-framework/pkg/context"
 	"github.com/profzone/envconfig"
 	"net"
 	"os"
@@ -40,7 +41,7 @@ func (s ServeGRPC) MarshalDefaults(v interface{}) {
 	}
 }
 
-func (s *ServeGRPC) Serve(router *courier.Router) error {
+func (s *ServeGRPC) Serve(wsCtx *ctx.WaitStopContext, router *courier.Router) error {
 	s.MarshalDefaults(s)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%d", s.IP, s.Port))
@@ -55,8 +56,16 @@ func (s *ServeGRPC) Serve(router *courier.Router) error {
 
 	gs.RegisterService(serviceDesc, &mockServer{})
 
-	fmt.Printf("[Courier] listen on %s\n", lis.Addr().String())
+	wsCtx.Add(1)
+	go func() {
+		<-wsCtx.Done()
+		fmt.Println("GRPC server shutdown...")
+		gs.GracefulStop()
+		fmt.Println("GRPC server shutdown complete.")
+		wsCtx.Finish()
+	}()
 
+	fmt.Printf("[Courier] GRPC listen on %s\n", lis.Addr().String())
 	return gs.Serve(lis)
 }
 

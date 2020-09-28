@@ -2,22 +2,23 @@ package courier
 
 import (
 	"fmt"
+	"github.com/eden-framework/eden-framework/pkg/context"
 	"reflect"
 
 	"github.com/sirupsen/logrus"
 )
 
 type IServe interface {
-	Serve(router *Router) error
+	Serve(ctx *context.WaitStopContext, router *Router) error
 }
 
-func Run(router *Router, serves ...IServe) {
+func Run(ctx *context.WaitStopContext, router *Router, serves ...IServe) {
 	errs := make(chan error)
 
 	for i := range serves {
 		s := serves[i]
 		go func() {
-			if err := s.Serve(router); err != nil {
+			if err := s.Serve(ctx, router); err != nil {
 				errs <- err
 			}
 		}()
