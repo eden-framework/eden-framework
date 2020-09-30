@@ -5,17 +5,17 @@ import (
 	"encoding"
 	"errors"
 
-	github_com_profzone_eden_framework_pkg_enumeration "github.com/eden-framework/eden-framework/pkg/enumeration"
+	github_com_eden_framework_enumeration "github.com/eden-framework/enumeration"
 )
 
 var InvalidDroneCiType = errors.New("invalid DroneCiType")
 
 func init() {
-	github_com_profzone_eden_framework_pkg_enumeration.RegisterEnums("DroneCiType", map[string]string{
-		"docker":     "which executes each pipeline steps inside isolated Docker containers",
+	github_com_eden_framework_enumeration.RegisterEnums("DroneCiType", map[string]string{
+		"ssh":        "which executes shell commands on remote servers using the ssh protocol",
 		"exec":       "which executes pipeline steps directly on the host machine, with zero isolation",
 		"kubernetes": "which executes pipeline steps as containers inside of Kubernetes pods",
-		"ssh":        "which executes shell commands on remote servers using the ssh protocol",
+		"docker":     "which executes each pipeline steps inside isolated Docker containers",
 	})
 }
 
@@ -23,14 +23,14 @@ func ParseDroneCiTypeFromString(s string) (DroneCiType, error) {
 	switch s {
 	case "":
 		return DRONE_CI_TYPE_UNKNOWN, nil
-	case "docker":
-		return DRONE_CI_TYPE__docker, nil
+	case "ssh":
+		return DRONE_CI_TYPE__ssh, nil
 	case "exec":
 		return DRONE_CI_TYPE__exec, nil
 	case "kubernetes":
 		return DRONE_CI_TYPE__kubernetes, nil
-	case "ssh":
-		return DRONE_CI_TYPE__ssh, nil
+	case "docker":
+		return DRONE_CI_TYPE__docker, nil
 	}
 	return DRONE_CI_TYPE_UNKNOWN, InvalidDroneCiType
 }
@@ -39,14 +39,14 @@ func ParseDroneCiTypeFromLabelString(s string) (DroneCiType, error) {
 	switch s {
 	case "":
 		return DRONE_CI_TYPE_UNKNOWN, nil
-	case "which executes each pipeline steps inside isolated Docker containers":
-		return DRONE_CI_TYPE__docker, nil
+	case "which executes shell commands on remote servers using the ssh protocol":
+		return DRONE_CI_TYPE__ssh, nil
 	case "which executes pipeline steps directly on the host machine, with zero isolation":
 		return DRONE_CI_TYPE__exec, nil
 	case "which executes pipeline steps as containers inside of Kubernetes pods":
 		return DRONE_CI_TYPE__kubernetes, nil
-	case "which executes shell commands on remote servers using the ssh protocol":
-		return DRONE_CI_TYPE__ssh, nil
+	case "which executes each pipeline steps inside isolated Docker containers":
+		return DRONE_CI_TYPE__docker, nil
 	}
 	return DRONE_CI_TYPE_UNKNOWN, InvalidDroneCiType
 }
@@ -57,10 +57,10 @@ func (DroneCiType) EnumType() string {
 
 func (DroneCiType) Enums() map[int][]string {
 	return map[int][]string{
-		int(DRONE_CI_TYPE__docker):     {"docker", "which executes each pipeline steps inside isolated Docker containers"},
+		int(DRONE_CI_TYPE__ssh):        {"ssh", "which executes shell commands on remote servers using the ssh protocol"},
 		int(DRONE_CI_TYPE__exec):       {"exec", "which executes pipeline steps directly on the host machine, with zero isolation"},
 		int(DRONE_CI_TYPE__kubernetes): {"kubernetes", "which executes pipeline steps as containers inside of Kubernetes pods"},
-		int(DRONE_CI_TYPE__ssh):        {"ssh", "which executes shell commands on remote servers using the ssh protocol"},
+		int(DRONE_CI_TYPE__docker):     {"docker", "which executes each pipeline steps inside isolated Docker containers"},
 	}
 }
 
@@ -68,14 +68,14 @@ func (v DroneCiType) String() string {
 	switch v {
 	case DRONE_CI_TYPE_UNKNOWN:
 		return ""
-	case DRONE_CI_TYPE__docker:
-		return "docker"
+	case DRONE_CI_TYPE__ssh:
+		return "ssh"
 	case DRONE_CI_TYPE__exec:
 		return "exec"
 	case DRONE_CI_TYPE__kubernetes:
 		return "kubernetes"
-	case DRONE_CI_TYPE__ssh:
-		return "ssh"
+	case DRONE_CI_TYPE__docker:
+		return "docker"
 	}
 	return "UNKNOWN"
 }
@@ -84,14 +84,14 @@ func (v DroneCiType) Label() string {
 	switch v {
 	case DRONE_CI_TYPE_UNKNOWN:
 		return ""
-	case DRONE_CI_TYPE__docker:
-		return "which executes each pipeline steps inside isolated Docker containers"
+	case DRONE_CI_TYPE__ssh:
+		return "which executes shell commands on remote servers using the ssh protocol"
 	case DRONE_CI_TYPE__exec:
 		return "which executes pipeline steps directly on the host machine, with zero isolation"
 	case DRONE_CI_TYPE__kubernetes:
 		return "which executes pipeline steps as containers inside of Kubernetes pods"
-	case DRONE_CI_TYPE__ssh:
-		return "which executes shell commands on remote servers using the ssh protocol"
+	case DRONE_CI_TYPE__docker:
+		return "which executes each pipeline steps inside isolated Docker containers"
 	}
 	return "UNKNOWN"
 }

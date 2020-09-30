@@ -5,16 +5,16 @@ import (
 	"encoding"
 	"errors"
 
-	github_com_profzone_eden_framework_pkg_enumeration "github.com/eden-framework/eden-framework/pkg/enumeration"
+	github_com_eden_framework_enumeration "github.com/eden-framework/enumeration"
 )
 
 var InvalidDroneCiPlatformArch = errors.New("invalid DroneCiPlatformArch")
 
 func init() {
-	github_com_profzone_eden_framework_pkg_enumeration.RegisterEnums("DroneCiPlatformArch", map[string]string{
-		"amd64": "amd64",
+	github_com_eden_framework_enumeration.RegisterEnums("DroneCiPlatformArch", map[string]string{
 		"arm":   "arm32",
 		"arm64": "arm64",
+		"amd64": "amd64",
 	})
 }
 
@@ -22,12 +22,12 @@ func ParseDroneCiPlatformArchFromString(s string) (DroneCiPlatformArch, error) {
 	switch s {
 	case "":
 		return DRONE_CI_PLATFORM_ARCH_UNKNOWN, nil
-	case "amd64":
-		return DRONE_CI_PLATFORM_ARCH__amd64, nil
 	case "arm":
 		return DRONE_CI_PLATFORM_ARCH__arm, nil
 	case "arm64":
 		return DRONE_CI_PLATFORM_ARCH__arm64, nil
+	case "amd64":
+		return DRONE_CI_PLATFORM_ARCH__amd64, nil
 	}
 	return DRONE_CI_PLATFORM_ARCH_UNKNOWN, InvalidDroneCiPlatformArch
 }
@@ -36,12 +36,12 @@ func ParseDroneCiPlatformArchFromLabelString(s string) (DroneCiPlatformArch, err
 	switch s {
 	case "":
 		return DRONE_CI_PLATFORM_ARCH_UNKNOWN, nil
-	case "amd64":
-		return DRONE_CI_PLATFORM_ARCH__amd64, nil
 	case "arm32":
 		return DRONE_CI_PLATFORM_ARCH__arm, nil
 	case "arm64":
 		return DRONE_CI_PLATFORM_ARCH__arm64, nil
+	case "amd64":
+		return DRONE_CI_PLATFORM_ARCH__amd64, nil
 	}
 	return DRONE_CI_PLATFORM_ARCH_UNKNOWN, InvalidDroneCiPlatformArch
 }
@@ -52,9 +52,9 @@ func (DroneCiPlatformArch) EnumType() string {
 
 func (DroneCiPlatformArch) Enums() map[int][]string {
 	return map[int][]string{
-		int(DRONE_CI_PLATFORM_ARCH__amd64): {"amd64", "amd64"},
 		int(DRONE_CI_PLATFORM_ARCH__arm):   {"arm", "arm32"},
 		int(DRONE_CI_PLATFORM_ARCH__arm64): {"arm64", "arm64"},
+		int(DRONE_CI_PLATFORM_ARCH__amd64): {"amd64", "amd64"},
 	}
 }
 
@@ -62,12 +62,12 @@ func (v DroneCiPlatformArch) String() string {
 	switch v {
 	case DRONE_CI_PLATFORM_ARCH_UNKNOWN:
 		return ""
-	case DRONE_CI_PLATFORM_ARCH__amd64:
-		return "amd64"
 	case DRONE_CI_PLATFORM_ARCH__arm:
 		return "arm"
 	case DRONE_CI_PLATFORM_ARCH__arm64:
 		return "arm64"
+	case DRONE_CI_PLATFORM_ARCH__amd64:
+		return "amd64"
 	}
 	return "UNKNOWN"
 }
@@ -76,12 +76,12 @@ func (v DroneCiPlatformArch) Label() string {
 	switch v {
 	case DRONE_CI_PLATFORM_ARCH_UNKNOWN:
 		return ""
-	case DRONE_CI_PLATFORM_ARCH__amd64:
-		return "amd64"
 	case DRONE_CI_PLATFORM_ARCH__arm:
 		return "arm32"
 	case DRONE_CI_PLATFORM_ARCH__arm64:
 		return "arm64"
+	case DRONE_CI_PLATFORM_ARCH__amd64:
+		return "amd64"
 	}
 	return "UNKNOWN"
 }

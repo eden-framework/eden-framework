@@ -5,13 +5,13 @@ import (
 	"encoding"
 	"errors"
 
-	github_com_profzone_eden_framework_pkg_enumeration "github.com/eden-framework/eden-framework/pkg/enumeration"
+	github_com_eden_framework_enumeration "github.com/eden-framework/enumeration"
 )
 
 var InvalidDroneCiTriggerStatus = errors.New("invalid DroneCiTriggerStatus")
 
 func init() {
-	github_com_profzone_eden_framework_pkg_enumeration.RegisterEnums("DroneCiTriggerStatus", map[string]string{
+	github_com_eden_framework_enumeration.RegisterEnums("DroneCiTriggerStatus", map[string]string{
 		"failure": "failure",
 		"success": "success",
 	})

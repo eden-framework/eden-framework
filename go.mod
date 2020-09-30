@@ -6,6 +6,7 @@ replace k8s.io/client-go => k8s.io/client-go v0.18.8
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.0.7
+	github.com/eden-framework/enumeration v1.0.0
 	github.com/eden-framework/plugins v0.0.6
 	github.com/fatih/color v1.7.0
 	github.com/go-courier/enumeration v1.0.1

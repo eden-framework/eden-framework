@@ -69,7 +69,7 @@ func (e *Enum) WriteVars(w io.Writer) (err error) {
 
 func (e *Enum) WriteInitFunc(w io.Writer) (err error) {
 	_, err = io.WriteString(w, fmt.Sprintf(`func init() {
-	`+e.Importer.Use("github.com/eden-framework/eden-framework/pkg/enumeration.RegisterEnums")+"(\""+e.Name+"\", map[string]string{\n"))
+	`+e.Importer.Use("github.com/eden-framework/enumeration.RegisterEnums")+"(\""+e.Name+"\", map[string]string{\n"))
 
 	for _, option := range e.Options {
 		_, err = io.WriteString(w, strconv.Quote(fmt.Sprintf("%v", option.Value))+":"+strconv.Quote(option.Label)+",\n")
@@ -249,7 +249,7 @@ func (v %s) Value() (%s, error) {
 		e.Importer.Use("database/sql.Scanner"),
 		e.Importer.Use("database/sql/driver.Valuer"),
 		e.Name, e.Name,
-		e.Importer.Use("github.com/eden-framework/eden-framework/pkg/enumeration.AsInt64"),
+		e.Importer.Use("github.com/eden-framework/enumeration.AsInt64"),
 		e.ConstOffset(), e.Name, e.ConstOffset(), e.Name,
 		e.Importer.Use("database/sql/driver.Value"),
 		e.ConstOffset())

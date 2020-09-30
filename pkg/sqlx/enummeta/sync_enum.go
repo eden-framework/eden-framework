@@ -1,7 +1,7 @@
 package enummeta
 
 import (
-	"github.com/eden-framework/eden-framework/pkg/enumeration"
+	"github.com/eden-framework/enumeration"
 	"reflect"
 
 	"github.com/eden-framework/eden-framework/pkg/sqlx"
