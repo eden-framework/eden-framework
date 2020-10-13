@@ -193,7 +193,7 @@ func (s *ServiceGenerator) withFilePointPlugins(cwd string) []*files.GoFile {
 func (s *ServiceGenerator) createApolloFile(cwd string) *files.GoFile {
 	file := files.NewGoFile("global", path.Join(cwd, "internal/global/apollo.go"))
 	file.WithBlock(fmt.Sprintf(`
-var ApolloConfig = {{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/conf/apollo" "" }}.ApolloBaseConfig{
+var ApolloConfig = {{ .UseWithoutAlias "github.com/eden-framework/apollo" "" }}.ApolloBaseConfig{
 	AppId:            "%s",
 	Host:             "localhost:8080",
 	BackupConfigPath: "./apollo_config",

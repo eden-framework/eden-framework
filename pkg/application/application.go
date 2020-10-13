@@ -1,11 +1,11 @@
 package application
 
 import (
+	"github.com/eden-framework/apollo"
+	"github.com/eden-framework/autoconf"
 	"github.com/eden-framework/eden-framework/internal"
 	"github.com/eden-framework/eden-framework/internal/generator"
 	"github.com/eden-framework/eden-framework/internal/project"
-	"github.com/eden-framework/eden-framework/pkg/conf"
-	"github.com/eden-framework/eden-framework/pkg/conf/apollo"
 	"github.com/eden-framework/eden-framework/pkg/context"
 	str "github.com/eden-framework/strings"
 	"github.com/sirupsen/logrus"
@@ -77,10 +77,10 @@ func (app *Application) Start() {
 	} else {
 		confs = append(confs, app.envConfig...)
 	}
-	envVars := conf.FromEnv(app.envConfigPrefix, confs)
+	envVars := autoconf.FromEnv(app.envConfigPrefix, confs)
 
 	// config from apollo
-	conf.FromApollo(app.apolloConfig, app.envConfig)
+	autoconf.FromApollo(app.apolloConfig, app.envConfig)
 
 	// output config env variables
 	if os.Getenv("GOENV") != "PROD" {
@@ -94,7 +94,7 @@ func (app *Application) Start() {
 	}
 
 	// initialize global object
-	conf.Initialize(app.envConfig...)
+	autoconf.Initialize(app.envConfig...)
 
 	if err := app.cmd.Execute(); err != nil {
 		logrus.Error(err)
