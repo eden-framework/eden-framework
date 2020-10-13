@@ -3,7 +3,7 @@ package files
 import (
 	"encoding/json"
 	"github.com/eden-framework/eden-framework/pkg/executil"
-	str "github.com/eden-framework/eden-framework/pkg/strings"
+	str "github.com/eden-framework/strings"
 	"reflect"
 	"strconv"
 	"strings"

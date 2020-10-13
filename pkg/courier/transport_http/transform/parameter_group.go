@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/eden-framework/eden-framework/pkg/courier/status_error"
-	"github.com/eden-framework/eden-framework/pkg/reflectx"
+	"github.com/eden-framework/reflectx"
 )
 
 func ParameterGroupFromValue(v interface{}) (m *ParameterGroup) {

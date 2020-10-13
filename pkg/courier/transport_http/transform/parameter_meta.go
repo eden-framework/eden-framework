@@ -8,8 +8,8 @@ import (
 	"reflect"
 
 	"github.com/eden-framework/eden-framework/pkg/courier/status_error"
-	"github.com/eden-framework/eden-framework/pkg/reflectx"
-	"github.com/eden-framework/eden-framework/pkg/strings"
+	"github.com/eden-framework/reflectx"
+	"github.com/eden-framework/strings"
 )
 
 func NewParameterMeta(field *reflect.StructField, rv reflect.Value, tagIn string, tagInFlags TagFlags) *ParameterMeta {

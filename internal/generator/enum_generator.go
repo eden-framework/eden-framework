@@ -3,8 +3,8 @@ package generator
 import (
 	"github.com/eden-framework/eden-framework/internal/generator/files"
 	"github.com/eden-framework/eden-framework/internal/generator/scanner"
-	"github.com/eden-framework/eden-framework/pkg/packagex"
-	str "github.com/eden-framework/eden-framework/pkg/strings"
+	"github.com/eden-framework/packagex"
+	str "github.com/eden-framework/strings"
 	"github.com/sirupsen/logrus"
 	"go/ast"
 	"go/build"

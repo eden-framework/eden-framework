@@ -3,7 +3,7 @@ package apollo
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eden-framework/eden-framework/pkg/reflectx"
+	"github.com/eden-framework/reflectx"
 	"reflect"
 	"strings"
 

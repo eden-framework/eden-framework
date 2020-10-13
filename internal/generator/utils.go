@@ -2,6 +2,7 @@ package generator
 
 import (
 	"fmt"
+	str "github.com/eden-framework/strings"
 	"github.com/fatih/color"
 	"log"
 	"os"
@@ -78,4 +79,8 @@ func mustWriteFile(filename string, content string) int {
 	f.Sync()
 
 	return n3
+}
+
+func toDefaultTableName(name string) string {
+	return str.ToLowerSnakeCase("t_" + name)
 }

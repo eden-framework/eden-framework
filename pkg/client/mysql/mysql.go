@@ -2,8 +2,8 @@ package mysql
 
 import (
 	"fmt"
-	"github.com/eden-framework/eden-framework/pkg/sqlx"
-	"github.com/eden-framework/eden-framework/pkg/sqlx/mysqlconnector"
+	"github.com/eden-framework/sqlx"
+	"github.com/eden-framework/sqlx/mysqlconnector"
 	"github.com/profzone/envconfig"
 	"io"
 	"net/url"

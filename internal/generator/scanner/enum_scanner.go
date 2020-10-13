@@ -2,9 +2,9 @@ package scanner
 
 import (
 	"fmt"
-	"github.com/eden-framework/eden-framework/pkg/packagex"
-	str "github.com/eden-framework/eden-framework/pkg/strings"
 	"github.com/eden-framework/enumeration"
+	"github.com/eden-framework/packagex"
+	str "github.com/eden-framework/strings"
 	"go/ast"
 	"go/types"
 	"sort"

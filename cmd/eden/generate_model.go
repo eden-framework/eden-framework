@@ -17,8 +17,7 @@ package main
 
 import (
 	"fmt"
-	mainGenerator "github.com/eden-framework/eden-framework/internal/generator"
-	"github.com/eden-framework/eden-framework/pkg/sqlx/generator"
+	"github.com/eden-framework/eden-framework/internal/generator"
 	"github.com/spf13/cobra"
 )
 
@@ -52,7 +51,7 @@ var modelCmd = &cobra.Command{
 			g.WithMethods = cmdGenModelFlagWithTableMethods
 			g.WithComments = cmdGenModelFlagWithComments
 
-			mainGenerator.Generate(g, enumCmdInputPath, enumCmdOutputPath)
+			generator.Generate(g, enumCmdInputPath, enumCmdOutputPath)
 		}
 	},
 }

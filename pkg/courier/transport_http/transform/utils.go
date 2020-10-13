@@ -10,8 +10,8 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/eden-framework/eden-framework/pkg/env"
-	"github.com/eden-framework/eden-framework/pkg/reflectx"
-	"github.com/eden-framework/eden-framework/pkg/strings"
+	"github.com/eden-framework/reflectx"
+	"github.com/eden-framework/strings"
 )
 
 type TagFlags map[string]bool

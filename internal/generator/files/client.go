@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/eden-framework/eden-framework/internal/generator/api"
 	"github.com/eden-framework/eden-framework/internal/generator/importer"
-	str "github.com/eden-framework/eden-framework/pkg/strings"
+	str "github.com/eden-framework/strings"
 	"github.com/sirupsen/logrus"
 	"io"
 	"strings"

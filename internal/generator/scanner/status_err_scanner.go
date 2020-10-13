@@ -3,7 +3,7 @@ package scanner
 import (
 	"fmt"
 	"github.com/eden-framework/eden-framework/pkg/courier/status_error"
-	"github.com/eden-framework/eden-framework/pkg/packagex"
+	"github.com/eden-framework/packagex"
 	"go/ast"
 	"go/types"
 	"sort"

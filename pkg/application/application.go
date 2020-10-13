@@ -7,7 +7,7 @@ import (
 	"github.com/eden-framework/eden-framework/pkg/conf"
 	"github.com/eden-framework/eden-framework/pkg/conf/apollo"
 	"github.com/eden-framework/eden-framework/pkg/context"
-	str "github.com/eden-framework/eden-framework/pkg/strings"
+	str "github.com/eden-framework/strings"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"

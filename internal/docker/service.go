@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/eden-framework/eden-framework/pkg/ptr"
+	"github.com/eden-framework/pointer"
 )
 
 func NewService(image string) *Service {
@@ -120,7 +120,7 @@ func (service Service) WithImage(image string) *Service {
 }
 
 func (service Service) EnableTTY() *Service {
-	service.TTY = ptr.Bool(true)
+	service.TTY = pointer.Bool(true)
 	return &service
 }
 

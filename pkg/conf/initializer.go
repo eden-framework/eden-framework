@@ -1,7 +1,7 @@
 package conf
 
 import (
-	"github.com/eden-framework/eden-framework/pkg/reflectx"
+	"github.com/eden-framework/reflectx"
 	"reflect"
 )
 

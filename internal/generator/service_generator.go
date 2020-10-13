@@ -208,9 +208,9 @@ func (s *ServiceGenerator) createDbConfigFile(cwd string) *files.GoFile {
 	file := files.NewGoFile("databases", path.Join(cwd, "internal/databases/db.go"))
 	file.WithBlock(`
 var Config = struct {
-	DBTest *{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/sqlx" "" }}.Database
+	DBTest *{{ .UseWithoutAlias "github.com/eden-framework/sqlx" "" }}.Database
 }{
-	DBTest: &{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/sqlx" "" }}.Database{},
+	DBTest: &{{ .UseWithoutAlias "github.com/eden-framework/sqlx" "" }}.Database{},
 }
 `)
 
@@ -351,7 +351,7 @@ func runner(ctx *{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/p
 
 	file.WithBlock(fmt.Sprintf(`
 func migrate(args []string) {
-	if err := {{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/sqlx/migration" "" }}.Migrate({{ .UseWithoutAlias "%s" "%s" }}.Config.MasterDB, nil); err != nil {
+	if err := {{ .UseWithoutAlias "github.com/eden-framework/sqlx/migration" "" }}.Migrate({{ .UseWithoutAlias "%s" "%s" }}.Config.MasterDB, nil); err != nil {
 		panic(err)
 	}
 }

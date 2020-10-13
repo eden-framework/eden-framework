@@ -7,9 +7,9 @@ import (
 	"go/ast"
 	"reflect"
 
-	"github.com/eden-framework/eden-framework/pkg/reflectx"
-	"github.com/eden-framework/eden-framework/pkg/strings"
 	"github.com/eden-framework/eden-framework/pkg/validate"
+	"github.com/eden-framework/reflectx"
+	"github.com/eden-framework/strings"
 )
 
 type Validator func() (isValid bool, msg string)

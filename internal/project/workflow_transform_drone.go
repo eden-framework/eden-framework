@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/eden-framework/eden-framework/internal/project/drone"
 	"github.com/eden-framework/eden-framework/pkg/executil"
-	str "github.com/eden-framework/eden-framework/pkg/strings"
+	str "github.com/eden-framework/strings"
 	"strings"
 )
 

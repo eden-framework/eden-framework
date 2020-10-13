@@ -96,6 +96,7 @@ func (s *ServeHTTP) convertRouterToHttpRouter(router *courier.Router) *httproute
 	}
 
 	r := httprouter.New()
+	r.Handler(http.MethodGet, "/debug/pprof/", http.DefaultServeMux)
 	r.Handler(http.MethodGet, "/debug/pprof/:item", http.DefaultServeMux)
 
 	sort.Slice(routes, func(i, j int) bool {

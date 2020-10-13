@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 
-	"github.com/eden-framework/eden-framework/pkg/strings"
+	"github.com/eden-framework/strings"
 )
 
 type IWebSocket interface {

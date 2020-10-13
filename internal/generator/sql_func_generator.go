@@ -1,9 +1,9 @@
 package generator
 
 import (
-	"github.com/eden-framework/eden-framework/internal/generator"
-	"github.com/eden-framework/eden-framework/pkg/codegen"
-	"github.com/eden-framework/eden-framework/pkg/packagex"
+	"github.com/eden-framework/codegen"
+	"github.com/eden-framework/packagex"
+	"github.com/eden-framework/sqlx/generator"
 	"github.com/sirupsen/logrus"
 	"go/types"
 	"os"
@@ -16,9 +16,9 @@ func NewSqlFuncGenerator() *SqlFuncGenerator {
 }
 
 type SqlFuncGenerator struct {
-	Config
+	generator.Config
 	pkg   *packagex.Package
-	model *Model
+	model *generator.Model
 }
 
 func (g *SqlFuncGenerator) Load(cwd string) {
@@ -49,14 +49,14 @@ func (g *SqlFuncGenerator) Pick() {
 		if typeName, ok := obj.(*types.TypeName); ok {
 			if typeName.Name() == g.StructName {
 				if _, ok := typeName.Type().Underlying().(*types.Struct); ok {
-					g.model = NewModel(g.pkg, typeName, g.pkg.CommentsOf(ident), &g.Config)
+					g.model = generator.NewModel(g.pkg, typeName, g.pkg.CommentsOf(ident), &g.Config)
 				}
 			}
 		}
 	}
 }
 
-func (g *SqlFuncGenerator) Output(outputPath string) generator.Outputs {
+func (g *SqlFuncGenerator) Output(outputPath string) Outputs {
 	if g.model == nil {
 		return nil
 	}
@@ -67,7 +67,7 @@ func (g *SqlFuncGenerator) Output(outputPath string) generator.Outputs {
 	file := codegen.NewFile(g.pkg.Name, filename)
 	g.model.WriteTo(file)
 
-	return generator.Outputs{
+	return Outputs{
 		path.Join(dir, filename): string(file.Bytes()),
 	}
 }

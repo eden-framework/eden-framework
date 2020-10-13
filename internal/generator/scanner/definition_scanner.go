@@ -2,9 +2,9 @@ package scanner
 
 import (
 	"fmt"
-	"github.com/eden-framework/eden-framework/pkg/packagex"
-	"github.com/eden-framework/eden-framework/pkg/reflectx"
-	str "github.com/eden-framework/eden-framework/pkg/strings"
+	"github.com/eden-framework/packagex"
+	"github.com/eden-framework/reflectx"
+	str "github.com/eden-framework/strings"
 	"go/types"
 	"reflect"
 	"regexp"

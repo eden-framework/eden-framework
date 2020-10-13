@@ -3,8 +3,8 @@ package importer
 import (
 	"bytes"
 	"fmt"
-	"github.com/eden-framework/eden-framework/pkg/packagex"
-	str "github.com/eden-framework/eden-framework/pkg/strings"
+	"github.com/eden-framework/packagex"
+	str "github.com/eden-framework/strings"
 	"github.com/sirupsen/logrus"
 	"io"
 	"strings"
