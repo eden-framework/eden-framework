@@ -2,8 +2,8 @@ package project
 
 import (
 	"fmt"
+	"github.com/eden-framework/context"
 	"github.com/eden-framework/eden-framework/internal/project/drone"
-	"github.com/eden-framework/eden-framework/pkg/executil"
 	str "github.com/eden-framework/strings"
 	"strings"
 )
@@ -25,7 +25,7 @@ func (w *Workflow) ToDroneConfig(p *Project) *drone.CIDronePipelineDocker {
 				continue
 			}
 
-			envVars := executil.EnvVars{}
+			envVars := context.EnvVars{}
 			envVars.LoadFromEnviron()
 
 			vol := drone.NewPipelineStepVolume().

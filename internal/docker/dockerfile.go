@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/eden-framework/eden-framework/pkg/executil"
+	"github.com/eden-framework/context"
 	str "github.com/eden-framework/strings"
 )
 
@@ -34,7 +34,7 @@ type Dockerfile struct {
 }
 
 func (d *Dockerfile) String() string {
-	envVars := executil.EnvVars{}
+	envVars := context.EnvVars{}
 	envVars.LoadFromEnviron()
 	return envVars.Parse(GetDockerfileTemplate(*d))
 }

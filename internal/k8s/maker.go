@@ -3,7 +3,7 @@ package k8s
 import (
 	"bytes"
 	"fmt"
-	"github.com/eden-framework/eden-framework/pkg/executil"
+	"github.com/eden-framework/context"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	appsv1 "k8s.io/api/apps/v1"
@@ -23,7 +23,7 @@ func MakeDeployment(pathToYaml string) (*appsv1.Deployment, map[string]interface
 		return nil, nil, err
 	}
 
-	envVars := executil.EnvVars{}
+	envVars := context.EnvVars{}
 	envVars.LoadFromEnviron()
 	manifestData = []byte(envVars.Parse(string(manifestData)))
 	reader := bytes.NewReader(manifestData)
@@ -53,7 +53,7 @@ func MakeService(pathToYaml string) (*apiv1.Service, map[string]interface{}, err
 		return nil, nil, err
 	}
 
-	envVars := executil.EnvVars{}
+	envVars := context.EnvVars{}
 	envVars.LoadFromEnviron()
 	manifestData = []byte(envVars.Parse(string(manifestData)))
 	reader := bytes.NewReader(manifestData)

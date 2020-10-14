@@ -2,7 +2,7 @@ package repo
 
 import (
 	"fmt"
-	"github.com/eden-framework/eden-framework/pkg/courier/client"
+	"github.com/eden-framework/courier/client"
 	"net/http"
 	"strings"
 	"time"

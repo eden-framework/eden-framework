@@ -3,10 +3,10 @@ package application
 import (
 	"github.com/eden-framework/apollo"
 	"github.com/eden-framework/autoconf"
+	"github.com/eden-framework/context"
 	"github.com/eden-framework/eden-framework/internal"
 	"github.com/eden-framework/eden-framework/internal/generator"
 	"github.com/eden-framework/eden-framework/internal/project"
-	"github.com/eden-framework/eden-framework/pkg/context"
 	str "github.com/eden-framework/strings"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"

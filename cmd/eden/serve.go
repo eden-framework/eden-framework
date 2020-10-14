@@ -16,10 +16,10 @@ limitations under the License.
 package main
 
 import (
-	"github.com/eden-framework/eden-framework/pkg/context"
-	"github.com/eden-framework/eden-framework/pkg/courier"
-	"github.com/eden-framework/eden-framework/pkg/courier/swagger"
-	"github.com/eden-framework/eden-framework/pkg/courier/transport_http"
+	"github.com/eden-framework/context"
+	"github.com/eden-framework/courier"
+	"github.com/eden-framework/courier/swagger"
+	"github.com/eden-framework/courier/transport_http"
 	"github.com/spf13/cobra"
 	"os"
 	"os/signal"

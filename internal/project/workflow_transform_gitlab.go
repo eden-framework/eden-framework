@@ -2,7 +2,7 @@ package project
 
 import (
 	"fmt"
-	"github.com/eden-framework/eden-framework/pkg/executil"
+	"github.com/eden-framework/context"
 	str "github.com/eden-framework/strings"
 	"strings"
 )
@@ -21,7 +21,7 @@ func (w *Workflow) ToCIConfig(project *Project) *CIConfig {
 		if !branchFlow.Skip {
 			for _, job := range branchFlow.Jobs {
 				if !job.Skip {
-					envVars := executil.EnvVars{}
+					envVars := context.EnvVars{}
 					envVars.LoadFromEnviron()
 
 					ciJob := NewCIJob(job.Stage).

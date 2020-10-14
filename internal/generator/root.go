@@ -3,7 +3,7 @@ package generator
 import (
 	"fmt"
 	"github.com/eden-framework/eden-framework/internal/generator/format"
-	"github.com/eden-framework/eden-framework/pkg/duration"
+	"github.com/eden-framework/timex"
 	"golang.org/x/tools/imports"
 	"reflect"
 	"strings"
@@ -54,7 +54,7 @@ func (outputs Outputs) WriteFiles() {
 }
 
 func Generate(generator Generator, inputPath, outputPath string) {
-	cost := duration.NewDuration()
+	cost := timex.NewDuration()
 	defer func() {
 		cost.ToLogger().Infof("generate by %s done", reflect.TypeOf(generator).String())
 	}()

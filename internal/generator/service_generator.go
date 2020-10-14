@@ -233,8 +233,8 @@ var Config = struct {
 	}
 	file.WithBlock(`
 	// administrator
-	GRPCServer *{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier/transport_grpc" "" }}.ServeGRPC
-	HTTPServer *{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier/transport_http" "" }}.ServeHTTP
+	GRPCServer *{{ .UseWithoutAlias "github.com/eden-framework/courier/transport_grpc" "" }}.ServeGRPC
+	HTTPServer *{{ .UseWithoutAlias "github.com/eden-framework/courier/transport_http" "" }}.ServeHTTP
 }{
 	LogLevel: {{ .UseWithoutAlias "github.com/sirupsen/logrus" "" }}.DebugLevel,
 `)
@@ -247,10 +247,10 @@ var Config = struct {
 `, dbUse, dbPath, dbUse, dbPath))
 	}
 	file.WithBlock(`
-	GRPCServer: &{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier/transport_grpc" "" }}.ServeGRPC{
+	GRPCServer: &{{ .UseWithoutAlias "github.com/eden-framework/courier/transport_grpc" "" }}.ServeGRPC{
 		Port: 8900,
 	},
-	HTTPServer: &{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier/transport_http" "" }}.ServeHTTP{
+	HTTPServer: &{{ .UseWithoutAlias "github.com/eden-framework/courier/transport_http" "" }}.ServeHTTP{
 		Port:     8800,
 		WithCORS: true,
 	},
@@ -263,10 +263,10 @@ var Config = struct {
 func (s *ServiceGenerator) createRouterV0RootFile(cwd string) *files.GoFile {
 	file := files.NewGoFile("v0", path.Join(cwd, "internal/routers/v0/root.go"))
 	file.WithBlock(`
-var Router = {{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier" "" }}.NewRouter(V0Router{})
+var Router = {{ .UseWithoutAlias "github.com/eden-framework/courier" "" }}.NewRouter(V0Router{})
 
 type V0Router struct {
-	{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier" "" }}.EmptyOperator
+	{{ .UseWithoutAlias "github.com/eden-framework/courier" "" }}.EmptyOperator
 }
 
 func (V0Router) Path() string {
@@ -283,14 +283,14 @@ func (s *ServiceGenerator) createRouterRootFile(cwd string) *files.GoFile {
 
 	file := files.NewGoFile("routers", path.Join(cwd, "internal/routers/root.go"))
 	file.WithBlock(fmt.Sprintf(`
-var Router = {{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier" "" }}.NewRouter(RootRouter{})
+var Router = {{ .UseWithoutAlias "github.com/eden-framework/courier" "" }}.NewRouter(RootRouter{})
 
 func init() {
 	Router.Register({{ .UseWithoutAlias "%s" "%s" }}.Router)
 }
 
 type RootRouter struct {
-	{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/courier" "" }}.EmptyOperator
+	{{ .UseWithoutAlias "github.com/eden-framework/courier" "" }}.EmptyOperator
 }
 
 func (RootRouter) Path() string {
@@ -342,7 +342,7 @@ func main() {
 	routerFilePath := path.Join(cwd, "internal/routers")
 
 	file.WithBlock(fmt.Sprintf(`
-func runner(ctx *{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/context" "" }}.WaitStopContext) error {
+func runner(ctx *{{ .UseWithoutAlias "github.com/eden-framework/context" "" }}.WaitStopContext) error {
 	{{ .UseWithoutAlias "github.com/sirupsen/logrus" "" }}.SetLevel({{ .UseWithoutAlias "%s" "%s" }}.Config.LogLevel)
 	go {{ .UseWithoutAlias "%s" "%s" }}.Config.GRPCServer.Serve(ctx, {{ .UseWithoutAlias "%s" "%s" }}.Router)
 	return {{ .UseWithoutAlias "%s" "%s" }}.Config.HTTPServer.Serve(ctx, {{ .UseWithoutAlias "%s" "%s" }}.Router)

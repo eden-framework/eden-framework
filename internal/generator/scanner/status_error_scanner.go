@@ -2,7 +2,7 @@ package scanner
 
 import (
 	"fmt"
-	"github.com/eden-framework/eden-framework/pkg/courier/status_error"
+	"github.com/eden-framework/courier/status_error"
 	"github.com/eden-framework/packagex"
 	"github.com/eden-framework/reflectx"
 	"go/ast"

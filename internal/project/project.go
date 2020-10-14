@@ -2,7 +2,7 @@ package project
 
 import (
 	"fmt"
-	"github.com/eden-framework/eden-framework/pkg/executil"
+	"github.com/eden-framework/context"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
@@ -144,7 +144,7 @@ func (p *Project) Command(args ...string) *exec.Cmd {
 		sh = "bash"
 	}
 
-	envVars := executil.EnvVars{}
+	envVars := context.EnvVars{}
 	envVars.LoadFromEnviron()
 
 	return exec.Command(sh, "-c", envVars.Parse(strings.Join(args, " ")))
@@ -153,7 +153,7 @@ func (p *Project) Command(args ...string) *exec.Cmd {
 func (p *Project) Run(commands ...*exec.Cmd) {
 	for _, cmd := range commands {
 		if cmd != nil {
-			executil.StdRun(cmd)
+			context.StdRun(cmd)
 		}
 	}
 }

@@ -1,9 +1,9 @@
 package scanner
 
 import (
-	"github.com/eden-framework/eden-framework/pkg/courier"
-	"github.com/eden-framework/eden-framework/pkg/courier/httpx"
-	"github.com/eden-framework/eden-framework/pkg/courier/transport_http"
+	"github.com/eden-framework/courier"
+	"github.com/eden-framework/courier/httpx"
+	"github.com/eden-framework/courier/transport_http"
 	"github.com/eden-framework/reflectx"
 	"github.com/go-courier/oas"
 	"go/ast"
