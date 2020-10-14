@@ -307,6 +307,8 @@ func (s *ServiceGenerator) createMainFile(cwd string) *files.GoFile {
 
 	file := files.NewGoFile("main", path.Join(cwd, "cmd/main.go"))
 	file.WithBlock(fmt.Sprintf(`
+var cmdMigrationDryRun bool
+
 func main() {
 	app := application.NewApplication(runner,
 		{{ .UseWithoutAlias "github.com/eden-framework/eden-framework/pkg/application" "" }}.WithConfig(&{{ .UseWithoutAlias "%s" "%s" }}.Config)`, globalPkgPath, globalFilePath))
@@ -327,12 +329,16 @@ func main() {
 
 	file.WithBlock(`)
 
-	app.AddCommand(&{{ .UseWithoutAlias "github.com/spf13/cobra" "" }}.Command{
+	cmdMigrate := &{{ .UseWithoutAlias "github.com/spf13/cobra" "" }}.Command{
 		Use: "migrate",
 		Run: func(cmd *{{ .UseWithoutAlias "github.com/spf13/cobra" "" }}.Command, args []string) {
-			migrate(args)
+			migrate(&{{ .UseWithoutAlias "github.com/eden-framework/sqlx/migration" "" }}.MigrationOpts{
+				DryRun: cmdMigrationDryRun,
+			})
 		},
-	})
+	}
+	cmdMigrate.Flags().BoolVarP(&cmdMigrationDryRun, "dry", "d", false, "migrate --dry")
+	app.AddCommand(cmdMigrate)
 
 	app.Start()
 }
@@ -350,8 +356,8 @@ func runner(ctx *{{ .UseWithoutAlias "github.com/eden-framework/context" "" }}.W
 `, globalPkgPath, globalFilePath, globalPkgPath, globalFilePath, routerPkgPath, routerFilePath, globalPkgPath, globalFilePath, routerPkgPath, routerFilePath))
 
 	file.WithBlock(fmt.Sprintf(`
-func migrate(args []string) {
-	if err := {{ .UseWithoutAlias "github.com/eden-framework/sqlx/migration" "" }}.Migrate({{ .UseWithoutAlias "%s" "%s" }}.Config.MasterDB, nil); err != nil {
+func migrate(opts *{{ .UseWithoutAlias "github.com/eden-framework/sqlx/migration" "" }}.MigrationOpts) {
+	if err := {{ .UseWithoutAlias "github.com/eden-framework/sqlx/migration" "" }}.Migrate({{ .UseWithoutAlias "%s" "%s" }}.Config.MasterDB, opts); err != nil {
 		panic(err)
 	}
 }
