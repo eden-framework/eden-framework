@@ -3,6 +3,7 @@ package repo
 import (
 	"fmt"
 	"github.com/eden-framework/courier/client"
+	"github.com/profzone/envconfig"
 	"net/http"
 	"strings"
 	"time"
@@ -23,7 +24,7 @@ func NewClient(mode, host string, port int16) *Client {
 			Host:    host,
 			Mode:    mode,
 			Port:    port,
-			Timeout: time.Minute,
+			Timeout: envconfig.Duration(time.Minute),
 		},
 	}
 	cli.MarshalDefaults(cli.Client)
