@@ -2,6 +2,7 @@ package scanner
 
 import (
 	"github.com/eden-framework/courier"
+	"github.com/eden-framework/courier/client"
 	"github.com/eden-framework/courier/httpx"
 	"github.com/eden-framework/courier/transport_http"
 	"github.com/eden-framework/reflectx"
@@ -35,6 +36,10 @@ var (
 	pkgImportPathHttpTransport = reflectx.ImportGoPath(reflect.TypeOf(transport_http.HttpRouteMeta{}).PkgPath())
 	pkgImportPathHttpx         = reflectx.ImportGoPath(reflect.TypeOf(httpx.MethodGet{}).PkgPath())
 	pkgImportPathCourier       = reflectx.ImportGoPath(reflect.TypeOf(courier.Router{}).PkgPath())
+)
+
+var (
+	PkgImportPathClient = reflectx.ImportGoPath(reflect.TypeOf(client.Client{}).PkgPath())
 )
 
 var (

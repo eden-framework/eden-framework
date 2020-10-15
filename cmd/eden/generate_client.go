@@ -42,7 +42,7 @@ var clientCmd = &cobra.Command{
 
 func init() {
 	generateCmd.AddCommand(clientCmd)
-	clientCmd.Flags().StringVarP(&clientCmdApiPath, "api-path", "f", "", "eden generate api --api-path=/go/src/eden-server/api.json")
+	clientCmd.Flags().StringVarP(&clientCmdApiPath, "api-path", "p", "", "eden generate api --api-path=/go/src/eden-server/api.json")
 	clientCmd.Flags().StringVarP(&clientCmdOutputPath, "output-path", "o", "", "eden generate api --output-path=/go/src/eden-server/")
-	clientCmd.Flags().StringVarP(&clientCmdPackageName, "package-name", "p", "", "eden generate api --package-name=client_account")
+	clientCmd.Flags().StringVarP(&clientCmdPackageName, "service-name", "n", "", "eden generate api --service-name=account")
 }

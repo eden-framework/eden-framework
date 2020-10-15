@@ -3,29 +3,198 @@ package files
 import (
 	"bytes"
 	"fmt"
-	"github.com/eden-framework/eden-framework/internal/generator/api"
+	"github.com/eden-framework/courier/httpx"
+	"github.com/eden-framework/courier/transport_http/transform"
 	"github.com/eden-framework/eden-framework/internal/generator/importer"
+	"github.com/eden-framework/eden-framework/internal/generator/scanner"
 	str "github.com/eden-framework/strings"
+	"github.com/go-courier/oas"
 	"github.com/sirupsen/logrus"
 	"io"
+	"sort"
 	"strings"
 )
+
+type Op interface {
+	ID() string
+	Method() string
+	Path() string
+	HasRequest() bool
+	WriteReqType(w io.Writer, ipt *importer.PackageImporter) error
+	WriteRespBodyType(w io.Writer, ipt *importer.PackageImporter) error
+}
+
+type Operation struct {
+	serviceName string
+	method      string
+	path        string
+	*oas.Operation
+	components oas.Components
+}
+
+func NewOperation(serviceName string, method string, path string, operation *oas.Operation, components oas.Components) *Operation {
+	return &Operation{
+		serviceName: serviceName,
+		method:      method,
+		path:        path,
+		Operation:   operation,
+		components:  components,
+	}
+}
+
+func (o *Operation) ID() string {
+	return o.Operation.OperationId
+}
+
+func (o *Operation) Method() string {
+	return o.method
+}
+
+func (o *Operation) Path() string {
+	return PathFromSwaggerPath(o.path)
+}
+
+func (o *Operation) HasRequest() bool {
+	return len(o.Operation.Parameters) > 0 || o.RequestBody != nil
+}
+
+func (o *Operation) WriteReqType(w io.Writer, ipt *importer.PackageImporter) error {
+	_, err := io.WriteString(w, `struct {
+`)
+
+	for _, parameter := range o.Parameters {
+		schema := mayComposedFieldSchema(parameter.Schema)
+
+		fieldName := str.ToUpperCamelCase(parameter.Name)
+		if parameter.Extensions[scanner.XGoFieldName] != nil {
+			fieldName = parameter.Extensions[scanner.XGoFieldName].(string)
+		}
+
+		field := NewField(fieldName)
+		field.AddTag("in", string(parameter.In))
+		field.AddTag("name", parameter.Name)
+
+		field.Comment = parameter.Description
+
+		if parameter.Extensions[scanner.XTagValidate] != nil {
+			field.AddTag("validate", fmt.Sprintf("%s", parameter.Extensions[scanner.XTagValidate]))
+		}
+
+		if !parameter.Required {
+			if schema != nil {
+				d := fmt.Sprintf("%v", schema.Default)
+				if schema.Default != nil && d != "" {
+					field.AddTag("default", d)
+				}
+			}
+			field.AddTag("name", parameter.Name, "omitempty")
+		}
+
+		if schema != nil {
+			field.Type, _ = NewTypeGenerator(o.serviceName, ipt).Type(schema)
+		}
+
+		_, err = io.WriteString(w, field.String())
+		if err != nil {
+			return err
+		}
+	}
+
+	if o.RequestBody != nil {
+		field := NewField("Body")
+		if jsonMedia, ok := o.RequestBody.Content[httpx.MIME_JSON]; ok && jsonMedia.Schema != nil {
+			field.Type, _ = NewTypeGenerator(o.serviceName, ipt).Type(jsonMedia.Schema)
+			field.Comment = jsonMedia.Schema.Description
+			field.AddTag("in", "body")
+			field.AddTag("fmt", transform.GetContentTransformer(httpx.MIME_JSON).Key)
+		}
+		if formMedia, ok := o.RequestBody.Content[httpx.MIME_MULTIPART_FORM_DATA]; ok && formMedia.Schema != nil {
+			field.Type, _ = NewTypeGenerator(o.serviceName, ipt).Type(formMedia.Schema)
+			field.Comment = formMedia.Schema.Description
+			field.AddTag("in", "formData,multipart")
+		}
+		if formMedia, ok := o.RequestBody.Content[httpx.MIME_POST_URLENCODED]; ok && formMedia.Schema != nil {
+			field.Type, _ = NewTypeGenerator(o.serviceName, ipt).Type(formMedia.Schema)
+			field.Comment = formMedia.Schema.Description
+			field.AddTag("in", "formData")
+		}
+		_, err = io.WriteString(w, field.String())
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = io.WriteString(w, `
+}
+`)
+	return err
+}
+
+func (o *Operation) WriteRespBodyType(w io.Writer, ipt *importer.PackageImporter) error {
+	respBodySchema := o.respBodySchema()
+	if respBodySchema == nil {
+		_, err := io.WriteString(w, `[]byte`)
+		return err
+	}
+	tpe, _ := NewTypeGenerator(o.serviceName, ipt).Type(respBodySchema)
+	_, err := io.WriteString(w, tpe)
+	return err
+}
+
+func (o *Operation) respBodySchema() (schema *oas.Schema) {
+	if o.Responses.Responses == nil {
+		return nil
+	}
+
+	for code, resp := range o.Responses.Responses {
+		if resp.Refer != nil && o.components.Responses != nil {
+			if presetResponse, ok := o.components.Responses[RefName(resp.Refer)]; ok {
+				resp = presetResponse
+			}
+		}
+
+		if code >= 200 && code < 300 {
+			if resp.Content[httpx.MIME_JSON] != nil {
+				schema = resp.Content[httpx.MIME_JSON].Schema
+				return
+			}
+		}
+	}
+
+	return
+}
 
 type ClientFile struct {
 	ClientName  string
 	PackageName string
 	Name        string
 	Importer    *importer.PackageImporter
-	a           *api.Api
+	a           *oas.OpenAPI
+	ops         map[string]Op
 }
 
-func NewClientFile(name string, a *api.Api) *ClientFile {
-	return &ClientFile{
+func NewClientFile(name string, a *oas.OpenAPI) *ClientFile {
+	f := &ClientFile{
 		Name:        str.ToLowerLinkCase(name),
 		PackageName: str.ToLowerSnakeCase("client-" + name),
 		ClientName:  str.ToUpperCamelCase("client-" + name),
 		Importer:    importer.NewPackageImporter(""),
 		a:           a,
+		ops:         make(map[string]Op),
+	}
+
+	for path, pathItem := range a.Paths.Paths {
+		for method, op := range pathItem.Operations.Operations {
+			f.AddOp(NewOperation(name, strings.ToUpper(string(method)), path, op, a.Components))
+		}
+	}
+
+	return f
+}
+
+func (c *ClientFile) AddOp(op Op) {
+	if op != nil {
+		c.ops[op.ID()] = op
 	}
 }
 
@@ -40,151 +209,152 @@ func (c *ClientFile) WriteImports(w io.Writer) (err error) {
 }
 
 func (c *ClientFile) WriteTypeInterface(w io.Writer) (err error) {
-	_, err = io.WriteString(w, fmt.Sprintf("type %sInterface interface {\n", c.ClientName))
-	if err != nil {
-		return err
+	keys := make([]string, 0)
+	for key := range c.ops {
+		if key == "Swagger" {
+			continue
+		}
+		keys = append(keys, key)
 	}
-	for groupName, group := range c.a.Operators {
-		for methodName, method := range group.Methods {
-			req, resp := make([]string, 0), make([]string, 0)
-			var typeName string
-			for _, modelName := range method.Inputs {
-				model, ok := c.a.Models[modelName]
-				if !ok {
-					logrus.Panic(fmt.Errorf("%s not exist in model definations", modelName))
-				}
-				if model.NeedAlias {
-					typeName = c.Importer.Use(modelName)
-				} else {
-					typeName = model.Name
-				}
-				req = append(req, fmt.Sprintf("%s *%s", str.ToLowerCamelCase(model.Name), typeName))
-			}
-			for _, modelName := range method.Outputs {
-				model, ok := c.a.Models[modelName]
-				if !ok {
-					logrus.Panic(fmt.Errorf("%s not exist in model definations", modelName))
-				}
-				if model.NeedAlias {
-					typeName = c.Importer.Use(modelName)
-				} else {
-					typeName = model.Name
-				}
-				resp = append(resp, fmt.Sprintf("%s *%s", str.ToLowerCamelCase(model.Name), typeName))
-			}
-			resp = append(resp, "err error")
-			methodString := fmt.Sprintf("%s(%s) (%s)\n", str.ToUpperCamelCase(groupName+methodName), strings.Join(req, ", "), strings.Join(resp, ", "))
-			_, err = io.WriteString(w, methodString)
-			if err != nil {
-				return err
-			}
+	sort.Strings(keys)
+
+	_, err = io.WriteString(w, `type `+c.ClientName+`Interface interface {
+`)
+	if err != nil {
+		return
+	}
+
+	for _, key := range keys {
+		op := c.ops[key]
+
+		reqVar := ""
+		reqType := ""
+		reqTypeInParams := ""
+
+		if op.HasRequest() {
+			reqVar = "req"
+			reqType = RequestOf(op.ID())
+			reqTypeInParams = reqType + ", "
+		}
+
+		interfaceMethod := op.ID() + `(` + reqVar + ` ` + reqTypeInParams + `metas... ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `) (resp *` + ResponseOf(op.ID()) + `, err error)
+`
+
+		_, err = io.WriteString(w, interfaceMethod)
+		if err != nil {
+			return
 		}
 	}
 
-	_, err = io.WriteString(w, "}\n")
+	_, err = io.WriteString(w, `}
+`)
 	return
 }
 
-func (c *ClientFile) WriteClientGeneral(w io.Writer) (err error) {
-	typeDef := `type ` + c.ClientName + ` struct {
-	` + c.Importer.Use("github.com/henrylee2cn/erpc/v6.PeerConfig") + `
-	peer       ` + c.Importer.Use("github.com/henrylee2cn/erpc/v6.Peer") + `
-	session    ` + c.Importer.Use("github.com/henrylee2cn/erpc/v6.Session") + `
-	RemoteAddr string` + " `yaml:\"remoteAddr\" ini:\"remoteAddr\" comment:\"Remote address with port\"`" + `
+func (c *ClientFile) WriteTypeInstance(w io.Writer) (err error) {
+	_, err = io.WriteString(w, `
+type `+c.ClientName+` struct {
+	`+c.Importer.Use(scanner.PkgImportPathClient+".Client")+`
 }
 
-func (c *` + c.ClientName + `) Init() {
-	c.peer = ` + c.Importer.Use("github.com/henrylee2cn/erpc/v6.NewPeer") + `(c.PeerConfig)
-
-	var stat *` + c.Importer.Use("github.com/henrylee2cn/erpc/v6.Status") + `
-	c.session, stat = c.peer.Dial(c.RemoteAddr)
-	if !stat.OK() {
-		panic(` + c.Importer.Use("fmt.Errorf") + `("connection err, status: %v", stat.String()))
+func (`+c.ClientName+`) MarshalDefaults(v interface{}) {
+	if cl, ok := v.(* `+c.ClientName+`); ok {
+		cl.Name = "`+c.Name+`"
+		cl.Client.MarshalDefaults(&cl.Client)
 	}
 }
 
-func (c *` + c.ClientName + `) DockerDefaults() map[string]string {
-	return map[string]string{}
+func (c  `+c.ClientName+`) Init() {
+	c.CheckService()
 }
 
-func (c *` + c.ClientName + `) RegisterCallRouter(route interface{}, plugins ...` + c.Importer.Use("github.com/henrylee2cn/erpc/v6.Plugin") + `) []string {
-	return c.peer.RouteCall(route, plugins...)
+func (c  `+c.ClientName+`) CheckService() {
+	err := c.Request(c.Name+".Check", "HEAD", "/", nil).
+		Do().
+		Into(nil)
+	statusErr := `+c.Importer.Use("github.com/eden-framework/courier/status_error.FromError")+`(err)
+	if statusErr.Code == int64(`+c.Importer.Use("github.com/eden-framework/courier/status_error.RequestTimeout")+`) {
+		panic(fmt.Errorf("service %s have some error %s", c.Name, statusErr))
+	}
 }
-
-func (c *` + c.ClientName + `) RegisterPushRouter(route interface{}, plugins ...` + c.Importer.Use("github.com/henrylee2cn/erpc/v6.Plugin") + `) []string {
-	return c.peer.RoutePush(route, plugins...)
-}
-
-`
-
-	_, err = io.WriteString(w, typeDef)
+`)
 	return
 }
 
-func (c *ClientFile) WriteMethods(w io.Writer) (err error) {
-	var methodsDef string
-	c.a.WalkOperators(func(g *api.OperatorGroup) {
-		g.WalkMethods(func(m *api.OperatorMethod) {
-			req, resp := make([][]string, 0), make([][]string, 0)
-			var typeName string
-			m.WalkInputs(func(i string) {
-				model, ok := c.a.Models[i]
-				if !ok {
-					logrus.Panic(fmt.Errorf("%s not exist in model definations", i))
-				}
-				if model.NeedAlias {
-					typeName = c.Importer.Use(i)
-				} else {
-					typeName = model.Name
-				}
-				req = append(req, []string{str.ToLowerCamelCase(model.Name), "*" + typeName})
-			})
-			m.WalkOutputs(func(i string) {
-				model, ok := c.a.Models[i]
-				if !ok {
-					logrus.Panic(fmt.Errorf("%s not exist in model definations", i))
-				}
-				if model.NeedAlias {
-					typeName = c.Importer.Use(i)
-				} else {
-					typeName = model.Name
-				}
-				resp = append(resp, []string{str.ToLowerCamelCase(model.Name), "*" + typeName})
-			})
-			resp = append(resp, []string{"err", "error"})
+func (c *ClientFile) WriteOperations(w io.Writer) (err error) {
+	keys := make([]string, 0)
+	for key := range c.ops {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
 
-			var requestStr string
-			if len(req) == 0 {
-				requestStr = "nil"
-			} else {
-				requestStr = req[0][0]
+	for _, key := range keys {
+		op := c.ops[key]
+
+		reqVar := ""
+		reqType := ""
+		reqTypeInParams := ""
+		reqVarInUse := "nil"
+
+		if op.HasRequest() {
+			reqVar = "req"
+			reqVarInUse = reqVar
+			reqType = RequestOf(op.ID())
+			reqTypeInParams = reqType + ", "
+
+			_, err = io.WriteString(w, `
+type `+reqType+" ")
+			if err != nil {
+				return
 			}
-			if !g.IsPush {
-				methodsDef += `func (c *` + c.ClientName + `) ` + strings.Join([]string{g.Name, m.Name}, "") + `(` + str.RecursiveJoin(req, " ", ", ") + `) (` + str.RecursiveJoin(resp, " ", ", ") + `) {
-	stat := c.session.Call("` + strings.Join([]string{g.Path, m.Path}, "") + `", ` + requestStr + `, &` + resp[0][0] + `).Status()
-	if !stat.OK() {
-		err = stat.Cause()
-	}
-	return
-}
 
-`
-			} else {
-				methodsDef += `func (c *` + c.ClientName + `) ` + strings.Join([]string{g.Name, m.Name}, "") + `(` + str.RecursiveJoin(req, " ", ", ") + `) (err error) {
-	stat := c.session.Push("` + strings.Join([]string{g.Path, m.Path}, "") + `", ` + requestStr + `)
-	if !stat.OK() {
-		err = stat.Cause()
-	}
-	return
-}
-
-`
+			err = op.WriteReqType(w, c.Importer)
+			if err != nil {
+				return
 			}
-		})
-	})
+		}
 
-	_, err = io.WriteString(w, methodsDef)
+		interfaceMethod := op.ID() + `(` + reqVar + ` ` + reqTypeInParams + `metas... ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `) (resp *` + ResponseOf(op.ID()) + `, err error)`
+
+		_, err = io.WriteString(w, `
+func (c `+c.ClientName+`) `+interfaceMethod+` {
+	resp = &`+ResponseOf(op.ID())+`{}
+	resp.Meta = `+c.Importer.Use("github.com/eden-framework/courier.Metadata")+`{}
+
+	err = c.Request(c.Name + ".`+op.ID()+`", "`+op.Method()+`", "`+op.Path()+`", `+reqVarInUse+`, metas...).
+		Do().
+		BindMeta(resp.Meta).
+		Into(&resp.Body)
+
 	return
+}
+`)
+		if err != nil {
+			return
+		}
+
+		_, err = io.WriteString(w, `
+type `+ResponseOf(op.ID())+`  struct {
+	Meta `+c.Importer.Use("github.com/eden-framework/courier.Metadata")+`
+	Body `)
+		if err != nil {
+			return
+		}
+
+		err = op.WriteRespBodyType(w, c.Importer)
+		if err != nil {
+			return
+		}
+
+		_, err = io.WriteString(w, `
+}
+`)
+		if err != nil {
+			return
+		}
+	}
+
+	return nil
 }
 
 func (c *ClientFile) WriteAll() string {
@@ -194,12 +364,12 @@ func (c *ClientFile) WriteAll() string {
 		logrus.Panic(err)
 	}
 
-	err = c.WriteClientGeneral(w)
+	err = c.WriteTypeInstance(w)
 	if err != nil {
 		logrus.Panic(err)
 	}
 
-	err = c.WriteMethods(w)
+	err = c.WriteOperations(w)
 	if err != nil {
 		logrus.Panic(err)
 	}
