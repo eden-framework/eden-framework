@@ -55,6 +55,9 @@ func (a *OpenApiGenerator) Pick() {
 	}
 
 	router := a.routerScanner.Router(routerVar)
+	if router == nil {
+		panic(fmt.Sprintf("cannot find root router from routerScanner where the routerVar is [%s]", routerVar.String()))
+	}
 	routes := router.Routes()
 	operationIDs := map[string]*scanner.Route{}
 	for _, r := range routes {
@@ -146,12 +149,14 @@ func rootRouter(node ast.Node, p *packagex.Package) *types.Var {
 	case *ast.CallExpr:
 		if len(n.Args) > 0 {
 			if selectorExpr, ok := n.Fun.(*ast.SelectorExpr); ok {
-				if selectorExpr.Sel.Name == "Serve" {
-					switch node := n.Args[0].(type) {
-					case *ast.SelectorExpr:
-						return p.TypesInfo.ObjectOf(node.Sel).(*types.Var)
-					case *ast.Ident:
-						return p.TypesInfo.ObjectOf(node).(*types.Var)
+				if serverExpr, ok := selectorExpr.X.(*ast.SelectorExpr); ok {
+					if serverExpr.Sel.Name == "HTTPServer" {
+						switch node := n.Args[1].(type) {
+						case *ast.SelectorExpr:
+							return p.TypesInfo.ObjectOf(node.Sel).(*types.Var)
+						case *ast.Ident:
+							return p.TypesInfo.ObjectOf(node).(*types.Var)
+						}
 					}
 				}
 			}
