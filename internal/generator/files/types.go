@@ -82,7 +82,7 @@ func (g *TypeGenerator) TypeIndirect(schema *oas.Schema) (string, bool) {
 				isInCommonLib = true
 			}
 
-			return g.Importer.UseWithoutAlias(fmt.Sprintf("%s.%s", pkgImportName, typeName), ""), true
+			return g.Importer.Use(fmt.Sprintf("%s.%s", pkgImportName, typeName)), true
 		}
 	}
 

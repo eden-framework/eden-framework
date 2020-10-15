@@ -130,7 +130,7 @@ func (scanner *DefinitionScanner) Def(typeName *types.TypeName) *oas.Schema {
 }
 
 func (scanner *DefinitionScanner) isInternal(typeName *types.TypeName) bool {
-	return strings.HasPrefix(typeName.Pkg().Path(), scanner.pkg.PkgPath)
+	return strings.HasPrefix(typeName.Pkg().Path(), strings.TrimSuffix(scanner.pkg.PkgPath, "/cmd"))
 }
 
 func (scanner *DefinitionScanner) typeUniqueName(typeName *types.TypeName, isExist func(name string) bool) (string, bool) {
@@ -165,16 +165,14 @@ func (scanner *DefinitionScanner) reformatSchemas() {
 	schemas := map[string]*oas.Schema{}
 
 	for _, typeName := range typeNameList {
-		name, isInternal := scanner.typeUniqueName(typeName, func(name string) bool {
+		name, _ := scanner.typeUniqueName(typeName, func(name string) bool {
 			_, exists := schemas[name]
 			return exists
 		})
 
 		s := scanner.definitions[typeName]
 		addExtension(s, XID, name)
-		if !isInternal {
-			addExtension(s, XGoVendorType, fullTypeName(typeName))
-		}
+		addExtension(s, XGoVendorType, fullTypeName(typeName))
 		schemas[name] = s
 	}
 

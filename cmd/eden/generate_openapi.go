@@ -39,14 +39,7 @@ var openApiCmd = &cobra.Command{
 			openApiCmdOutputPath, _ = os.Getwd()
 			openApiCmdOutputPath = path.Join(openApiCmdOutputPath, "api")
 		}
-		//enumScanner := scanner.NewEnumScanner()
-		//modelScanner := scanner.NewModelScanner(enumScanner)
-		//operatorScanner := scanner.NewOperatorScanner(modelScanner)
 		gen := generator.NewOpenApiGenerator()
-
-		//modelScanner.Api = &gen.Api
-		//operatorScanner.Api = &gen.Api
-
 		generator.Generate(gen, openApiCmdInputPath, openApiCmdOutputPath)
 	},
 }
