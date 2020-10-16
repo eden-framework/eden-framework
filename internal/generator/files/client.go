@@ -3,9 +3,8 @@ package files
 import (
 	"bytes"
 	"fmt"
-	"github.com/eden-framework/courier/httpx"
-	"github.com/eden-framework/courier/transport_http/transform"
 	"github.com/eden-framework/eden-framework/internal/generator/importer"
+	"github.com/eden-framework/eden-framework/internal/generator/operator"
 	"github.com/eden-framework/eden-framework/internal/generator/scanner"
 	str "github.com/eden-framework/strings"
 	"github.com/go-courier/oas"
@@ -15,162 +14,13 @@ import (
 	"strings"
 )
 
-type Op interface {
-	ID() string
-	Method() string
-	Path() string
-	HasRequest() bool
-	WriteReqType(w io.Writer, ipt *importer.PackageImporter) error
-	WriteRespBodyType(w io.Writer, ipt *importer.PackageImporter) error
-}
-
-type Operation struct {
-	serviceName string
-	method      string
-	path        string
-	*oas.Operation
-	components oas.Components
-}
-
-func NewOperation(serviceName string, method string, path string, operation *oas.Operation, components oas.Components) *Operation {
-	return &Operation{
-		serviceName: serviceName,
-		method:      method,
-		path:        path,
-		Operation:   operation,
-		components:  components,
-	}
-}
-
-func (o *Operation) ID() string {
-	return o.Operation.OperationId
-}
-
-func (o *Operation) Method() string {
-	return o.method
-}
-
-func (o *Operation) Path() string {
-	return PathFromSwaggerPath(o.path)
-}
-
-func (o *Operation) HasRequest() bool {
-	return len(o.Operation.Parameters) > 0 || o.RequestBody != nil
-}
-
-func (o *Operation) WriteReqType(w io.Writer, ipt *importer.PackageImporter) error {
-	_, err := io.WriteString(w, `struct {
-`)
-
-	for _, parameter := range o.Parameters {
-		schema := mayComposedFieldSchema(parameter.Schema)
-
-		fieldName := str.ToUpperCamelCase(parameter.Name)
-		if parameter.Extensions[scanner.XGoFieldName] != nil {
-			fieldName = parameter.Extensions[scanner.XGoFieldName].(string)
-		}
-
-		field := NewField(fieldName)
-		field.AddTag("in", string(parameter.In))
-		field.AddTag("name", parameter.Name)
-
-		field.Comment = parameter.Description
-
-		if parameter.Extensions[scanner.XTagValidate] != nil {
-			field.AddTag("validate", fmt.Sprintf("%s", parameter.Extensions[scanner.XTagValidate]))
-		}
-
-		if !parameter.Required {
-			if schema != nil {
-				d := fmt.Sprintf("%v", schema.Default)
-				if schema.Default != nil && d != "" {
-					field.AddTag("default", d)
-				}
-			}
-			field.AddTag("name", parameter.Name, "omitempty")
-		}
-
-		if schema != nil {
-			field.Type, _ = NewTypeGenerator(o.serviceName, ipt).Type(schema)
-		}
-
-		_, err = io.WriteString(w, field.String())
-		if err != nil {
-			return err
-		}
-	}
-
-	if o.RequestBody != nil {
-		field := NewField("Body")
-		if jsonMedia, ok := o.RequestBody.Content[httpx.MIME_JSON]; ok && jsonMedia.Schema != nil {
-			field.Type, _ = NewTypeGenerator(o.serviceName, ipt).Type(jsonMedia.Schema)
-			field.Comment = jsonMedia.Schema.Description
-			field.AddTag("in", "body")
-			field.AddTag("fmt", transform.GetContentTransformer(httpx.MIME_JSON).Key)
-		}
-		if formMedia, ok := o.RequestBody.Content[httpx.MIME_MULTIPART_FORM_DATA]; ok && formMedia.Schema != nil {
-			field.Type, _ = NewTypeGenerator(o.serviceName, ipt).Type(formMedia.Schema)
-			field.Comment = formMedia.Schema.Description
-			field.AddTag("in", "formData,multipart")
-		}
-		if formMedia, ok := o.RequestBody.Content[httpx.MIME_POST_URLENCODED]; ok && formMedia.Schema != nil {
-			field.Type, _ = NewTypeGenerator(o.serviceName, ipt).Type(formMedia.Schema)
-			field.Comment = formMedia.Schema.Description
-			field.AddTag("in", "formData")
-		}
-		_, err = io.WriteString(w, field.String())
-		if err != nil {
-			return err
-		}
-	}
-
-	_, err = io.WriteString(w, `
-}
-`)
-	return err
-}
-
-func (o *Operation) WriteRespBodyType(w io.Writer, ipt *importer.PackageImporter) error {
-	respBodySchema := o.respBodySchema()
-	if respBodySchema == nil {
-		_, err := io.WriteString(w, `[]byte`)
-		return err
-	}
-	tpe, _ := NewTypeGenerator(o.serviceName, ipt).Type(respBodySchema)
-	_, err := io.WriteString(w, tpe)
-	return err
-}
-
-func (o *Operation) respBodySchema() (schema *oas.Schema) {
-	if o.Responses.Responses == nil {
-		return nil
-	}
-
-	for code, resp := range o.Responses.Responses {
-		if resp.Refer != nil && o.components.Responses != nil {
-			if presetResponse, ok := o.components.Responses[RefName(resp.Refer)]; ok {
-				resp = presetResponse
-			}
-		}
-
-		if code >= 200 && code < 300 {
-			if resp.Content[httpx.MIME_JSON] != nil {
-				schema = resp.Content[httpx.MIME_JSON].Schema
-				return
-			}
-		}
-	}
-
-	return
-}
-
 type ClientFile struct {
 	ClientName  string
 	PackageName string
 	Name        string
 	Importer    *importer.PackageImporter
 	a           *oas.OpenAPI
-	ops         map[string]Op
+	ops         map[string]operator.Op
 }
 
 func NewClientFile(name string, a *oas.OpenAPI) *ClientFile {
@@ -180,19 +30,19 @@ func NewClientFile(name string, a *oas.OpenAPI) *ClientFile {
 		ClientName:  str.ToUpperCamelCase("client-" + name),
 		Importer:    importer.NewPackageImporter(""),
 		a:           a,
-		ops:         make(map[string]Op),
+		ops:         make(map[string]operator.Op),
 	}
 
 	for path, pathItem := range a.Paths.Paths {
 		for method, op := range pathItem.Operations.Operations {
-			f.AddOp(NewOperation(name, strings.ToUpper(string(method)), path, op, a.Components))
+			f.AddOp(operator.NewOperation(name, strings.ToUpper(string(method)), path, op, a.Components, op.Extensions))
 		}
 	}
 
 	return f
 }
 
-func (c *ClientFile) AddOp(op Op) {
+func (c *ClientFile) AddOp(op operator.Op) {
 	if op != nil {
 		c.ops[op.ID()] = op
 	}
@@ -227,18 +77,20 @@ func (c *ClientFile) WriteTypeInterface(w io.Writer) (err error) {
 	for _, key := range keys {
 		op := c.ops[key]
 
-		reqVar := ""
-		reqType := ""
-		reqTypeInParams := ""
-
+		var interfaceMethod string
 		if op.HasRequest() {
-			reqVar = "req"
-			reqType = RequestOf(op.ID())
-			reqTypeInParams = reqType + ", "
-		}
-
-		interfaceMethod := op.ID() + `(` + reqVar + ` ` + reqTypeInParams + `metas... ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `) (resp *` + ResponseOf(op.ID()) + `, err error)
+			if annotate := op.Annotation(); annotate[scanner.XAnnotationRevert] != nil && op.CanRevert() {
+				interfaceMethod = annotate[scanner.XAnnotationRevert].Run(operator.CmdGenerateInterface, op) + "\n"
+				c.Importer.Merge(annotate[scanner.XAnnotationRevert].Importer())
+			} else {
+				requestStr := fmt.Sprintf("%s %s, ", "req", operator.RequestOf(op.ID()))
+				interfaceMethod = op.ID() + `(` + requestStr + `metas... ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `) (resp *` + operator.ResponseOf(op.ID()) + `, err error)
 `
+			}
+		} else {
+			interfaceMethod = op.ID() + `(metas... ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `) (resp *` + operator.ResponseOf(op.ID()) + `, err error)
+`
+		}
 
 		_, err = io.WriteString(w, interfaceMethod)
 		if err != nil {
@@ -290,19 +142,11 @@ func (c *ClientFile) WriteOperations(w io.Writer) (err error) {
 	for _, key := range keys {
 		op := c.ops[key]
 
-		reqVar := ""
-		reqType := ""
-		reqTypeInParams := ""
-		reqVarInUse := "nil"
-
+		var operationBody string
+		var extensionBody string
 		if op.HasRequest() {
-			reqVar = "req"
-			reqVarInUse = reqVar
-			reqType = RequestOf(op.ID())
-			reqTypeInParams = reqType + ", "
-
 			_, err = io.WriteString(w, `
-type `+reqType+" ")
+type `+operator.RequestOf(op.ID())+" ")
 			if err != nil {
 				return
 			}
@@ -311,29 +155,63 @@ type `+reqType+" ")
 			if err != nil {
 				return
 			}
-		}
 
-		interfaceMethod := op.ID() + `(` + reqVar + ` ` + reqTypeInParams + `metas... ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `) (resp *` + ResponseOf(op.ID()) + `, err error)`
+			if annotate := op.Annotation(); annotate[scanner.XAnnotationRevert] != nil && op.CanRevert() {
+				operationBody = annotate[scanner.XAnnotationRevert].Run(operator.CmdGenerateImplement, op)
+				if target := op.RevertTarget(); target != "" {
+					targetOp := c.ops[target]
+					if targetOp != nil {
+						extensionBody = annotate[scanner.XAnnotationRevert].Run(operator.CmdGenerateGetRevertID, targetOp)
+					}
+				}
 
-		_, err = io.WriteString(w, `
-func (c `+c.ClientName+`) `+interfaceMethod+` {
-	resp = &`+ResponseOf(op.ID())+`{}
-	resp.Meta = `+c.Importer.Use("github.com/eden-framework/courier.Metadata")+`{}
+				c.Importer.Merge(annotate[scanner.XAnnotationRevert].Importer())
+			} else {
+				requestStr := fmt.Sprintf("%s %s, ", "req", operator.RequestOf(op.ID()))
+				interfaceMethod := op.ID() + `(` + requestStr + `metas... ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `) (resp *` + operator.ResponseOf(op.ID()) + `, err error)`
+				operationBody = `
+func (c ` + c.ClientName + `) ` + interfaceMethod + ` {
+	resp = &` + operator.ResponseOf(op.ID()) + `{}
+	resp.Meta = ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `{}
 
-	err = c.Request(c.Name + ".`+op.ID()+`", "`+op.Method()+`", "`+op.Path()+`", `+reqVarInUse+`, metas...).
+	err = c.Request(c.Name + ".` + op.ID() + `", "` + op.Method() + `", "` + op.Path() + `", req, metas...).
 		Do().
 		BindMeta(resp.Meta).
 		Into(&resp.Body)
 
 	return
 }
-`)
+`
+			}
+		} else {
+			interfaceMethod := op.ID() + `(metas... ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `) (resp *` + operator.ResponseOf(op.ID()) + `, err error)`
+			operationBody = `
+func (c ` + c.ClientName + `) ` + interfaceMethod + ` {
+	resp = &` + operator.ResponseOf(op.ID()) + `{}
+	resp.Meta = ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `{}
+
+	err = c.Request(c.Name + ".` + op.ID() + `", "` + op.Method() + `", "` + op.Path() + `", nil, metas...).
+		Do().
+		BindMeta(resp.Meta).
+		Into(&resp.Body)
+
+	return
+}
+`
+		}
+
+		_, err = io.WriteString(w, operationBody)
+		if err != nil {
+			return
+		}
+
+		_, err = io.WriteString(w, extensionBody)
 		if err != nil {
 			return
 		}
 
 		_, err = io.WriteString(w, `
-type `+ResponseOf(op.ID())+`  struct {
+type `+operator.ResponseOf(op.ID())+`  struct {
 	Meta `+c.Importer.Use("github.com/eden-framework/courier.Metadata")+`
 	Body `)
 		if err != nil {

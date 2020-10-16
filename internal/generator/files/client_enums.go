@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/eden-framework/eden-framework/internal/generator/importer"
+	"github.com/eden-framework/eden-framework/internal/generator/operator"
 	"github.com/eden-framework/eden-framework/internal/generator/scanner"
 	"github.com/eden-framework/enumeration"
 	str "github.com/eden-framework/strings"
@@ -11,26 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"sort"
-	"strings"
 )
-
-var serviceEnumMap = map[string]map[string]enumeration.Enum{}
-
-func RegisterEnum(serviceName string, tpe string, options ...enumeration.EnumOption) {
-	serviceName = strings.ToLower(str.ToUpperCamelCase(serviceName))
-	if serviceEnumMap[serviceName] == nil {
-		serviceEnumMap[serviceName] = map[string]enumeration.Enum{}
-	}
-	serviceEnumMap[serviceName][tpe] = options
-}
-
-func GetEnumByServiceName(serviceName string) map[string]enumeration.Enum {
-	serviceName = strings.ToLower(str.ToUpperCamelCase(serviceName))
-	if serviceEnumMap[serviceName] == nil {
-		serviceEnumMap[serviceName] = map[string]enumeration.Enum{}
-	}
-	return serviceEnumMap[serviceName]
-}
 
 type ClientEnumsFile struct {
 	PackageName string
@@ -64,7 +46,7 @@ func (f *ClientEnumsFile) WriteImports(w io.Writer) (err error) {
 
 func (f *ClientEnumsFile) WriteAll() string {
 	names := make([]string, 0)
-	enumMap := GetEnumByServiceName(f.serviceName)
+	enumMap := operator.GetEnumByServiceName(f.serviceName)
 	for name := range enumMap {
 		names = append(names, name)
 	}

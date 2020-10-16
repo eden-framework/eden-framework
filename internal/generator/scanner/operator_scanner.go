@@ -13,6 +13,7 @@ import (
 	"go/types"
 	"net/http"
 	"reflect"
+	"regexp"
 	"runtime/debug"
 	"sort"
 	"strconv"
@@ -154,7 +155,11 @@ func (scanner *OperatorScanner) scanRouteMeta(op *Operator, typeName *types.Type
 			op.Deprecated = true
 		}
 		if strings.Index(comments[i], "@Revert") != -1 {
-			op.Annotation[XAnnotationRevert] = comments[i]
+			revertRegExp := regexp.MustCompile(`@Revert\((.+)\)`)
+			targets := revertRegExp.FindAllStringSubmatch(comments[i], -1)
+			if len(targets) > 0 {
+				op.Annotation[XAnnotationRevert] = targets[0][1]
+			}
 		}
 	}
 
