@@ -52,7 +52,9 @@ func (scanner *OperatorScanner) Operator(typeName *types.TypeName) *Operator {
 	}()
 
 	if typeStruct, ok := typeName.Type().Underlying().(*types.Struct); ok {
-		operator := &Operator{}
+		operator := &Operator{
+			Annotation: map[string]string{},
+		}
 
 		operator.Tag = scanner.tagFrom(typeName.Pkg().Path())
 
@@ -151,12 +153,15 @@ func (scanner *OperatorScanner) scanRouteMeta(op *Operator, typeName *types.Type
 		if strings.Index(comments[i], "@deprecated") != -1 {
 			op.Deprecated = true
 		}
+		if strings.Index(comments[i], "@Revert") != -1 {
+			op.Annotation[XAnnotationRevert] = comments[i]
+		}
 	}
 
 	if op.Summary == "" {
 		comments = filterMarkedLines(comments)
 
-		if comments[0] != "" {
+		if len(comments) > 0 && comments[0] != "" {
 			op.Summary = comments[0]
 			if len(comments) > 1 {
 				op.Description = strings.Join(comments[1:], "\n")
@@ -316,6 +321,7 @@ type Operator struct {
 
 	Tag         string
 	Description string
+	Annotation  map[string]string
 
 	NonBodyParameters map[string]*oas.Parameter
 	RequestBody       *oas.RequestBody
@@ -348,6 +354,12 @@ func (operator *Operator) BindOperation(method string, operation *oas.Operation,
 	for _, parameter := range operator.NonBodyParameters {
 		if !parameterNames[parameter.Name] {
 			operation.Parameters = append(operation.Parameters, parameter)
+		}
+	}
+
+	if len(operator.Annotation) > 0 {
+		for extName, annotation := range operator.Annotation {
+			operation.AddExtension(extName, annotation)
 		}
 	}
 

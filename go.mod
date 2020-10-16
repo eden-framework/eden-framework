@@ -10,7 +10,7 @@ require (
 	github.com/eden-framework/autoconf v0.0.1
 	github.com/eden-framework/codegen v0.0.1
 	github.com/eden-framework/context v0.0.2
-	github.com/eden-framework/courier v1.0.2
+	github.com/eden-framework/courier v1.0.3
 	github.com/eden-framework/enumeration v1.0.0
 	github.com/eden-framework/packagex v0.0.1
 	github.com/eden-framework/plugins v0.0.6

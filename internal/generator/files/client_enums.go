@@ -24,6 +24,14 @@ func RegisterEnum(serviceName string, tpe string, options ...enumeration.EnumOpt
 	serviceEnumMap[serviceName][tpe] = options
 }
 
+func GetEnumByServiceName(serviceName string) map[string]enumeration.Enum {
+	serviceName = strings.ToLower(str.ToUpperCamelCase(serviceName))
+	if serviceEnumMap[serviceName] == nil {
+		serviceEnumMap[serviceName] = map[string]enumeration.Enum{}
+	}
+	return serviceEnumMap[serviceName]
+}
+
 type ClientEnumsFile struct {
 	PackageName string
 	Importer    *importer.PackageImporter
@@ -56,7 +64,8 @@ func (f *ClientEnumsFile) WriteImports(w io.Writer) (err error) {
 
 func (f *ClientEnumsFile) WriteAll() string {
 	names := make([]string, 0)
-	for name := range serviceEnumMap[f.serviceName] {
+	enumMap := GetEnumByServiceName(f.serviceName)
+	for name := range enumMap {
 		names = append(names, name)
 	}
 	sort.Strings(names)
@@ -67,7 +76,7 @@ func (f *ClientEnumsFile) WriteAll() string {
 		if name == "Bool" {
 			continue
 		}
-		enum := serviceEnumMap[f.serviceName][name]
+		enum := enumMap[name]
 		buf.Write(ToEnumDefines(name, enum))
 	}
 
@@ -75,7 +84,7 @@ func (f *ClientEnumsFile) WriteAll() string {
 		if name == "Bool" {
 			continue
 		}
-		enum := serviceEnumMap[f.serviceName][name]
+		enum := enumMap[name]
 		generatedEnum := NewEnum("", f.PackageName, name, scanner.Enum(enum), false)
 		buf.WriteString(generatedEnum.WriteAll())
 		f.Importer.Merge(generatedEnum.Importer)

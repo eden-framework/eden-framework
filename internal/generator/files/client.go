@@ -257,14 +257,13 @@ type `+c.ClientName+` struct {
 	`+c.Importer.Use(scanner.PkgImportPathClient+".Client")+`
 }
 
-func (`+c.ClientName+`) MarshalDefaults(v interface{}) {
-	if cl, ok := v.(* `+c.ClientName+`); ok {
-		cl.Name = "`+c.Name+`"
-		cl.Client.MarshalDefaults(&cl.Client)
-	}
+func (c *`+c.ClientName+`) MarshalDefaults() {
+	c.Name = "`+c.Name+`"
+	c.Client.MarshalDefaults(&c.Client)
 }
 
-func (c  `+c.ClientName+`) Init() {
+func (c  *`+c.ClientName+`) Init() {
+	c.MarshalDefaults()
 	c.CheckService()
 }
 

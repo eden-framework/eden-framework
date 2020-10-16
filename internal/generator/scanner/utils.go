@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	XID           = "x-id"
+	XID           = `x-id`
 	XGoVendorType = `x-go-vendor-type`
 	XGoStarLevel  = `x-go-star-level`
 	XGoFieldName  = `x-go-field-name`
@@ -30,6 +30,8 @@ const (
 
 	XEnumOptions = `x-enum-options`
 	XStatusErrs  = `x-status-errors`
+
+	XAnnotationRevert = `x-annotation-revert`
 )
 
 var (
