@@ -104,20 +104,43 @@ func (c *ClientFile) WriteTypeInterface(w io.Writer) (err error) {
 }
 
 func (c *ClientFile) WriteTypeInstance(w io.Writer) (err error) {
+	keys := make([]string, 0)
+	for key := range c.ops {
+		if key == "Swagger" {
+			continue
+		}
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
 	_, err = io.WriteString(w, `
 type `+c.ClientName+` struct {
-	`+c.Importer.Use(scanner.PkgImportPathClient+".Client")+`
+	*`+c.Importer.Use(scanner.PkgImportPathClient+".Client")+`
 }
 
 func (c *`+c.ClientName+`) MarshalDefaults() {
 	c.Name = "`+c.Name+`"
-	c.Client.MarshalDefaults(&c.Client)
+	c.Client.MarshalDefaults(c.Client)
 }
 
 func (c  *`+c.ClientName+`) Init() {
 	c.MarshalDefaults()
 	c.CheckService()
-}
+`)
+	if err != nil {
+		return
+	}
+
+	for _, key := range keys {
+		op := c.ops[key]
+		if annotate := op.Annotation(); annotate[scanner.XAnnotationRevert] != nil && op.CanRevert() {
+			if target := op.RevertTarget(); target != "" {
+				_, err = io.WriteString(w, c.Importer.Use("github.com/eden-framework/revert.RegisterRevertFunc")+`("`+target+`", c.`+op.ID()+`)
+`)
+			}
+		}
+	}
+	_, err = io.WriteString(w, `}
 
 func (c  `+c.ClientName+`) CheckService() {
 	err := c.Request(c.Name+".Check", "HEAD", "/", nil).
@@ -135,6 +158,9 @@ func (c  `+c.ClientName+`) CheckService() {
 func (c *ClientFile) WriteOperations(w io.Writer) (err error) {
 	keys := make([]string, 0)
 	for key := range c.ops {
+		if key == "Swagger" {
+			continue
+		}
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
@@ -236,6 +262,7 @@ type `+operator.ResponseOf(op.ID())+`  struct {
 
 func (c *ClientFile) WriteAll() string {
 	w := bytes.NewBuffer([]byte{})
+
 	err := c.WriteTypeInterface(w)
 	if err != nil {
 		logrus.Panic(err)

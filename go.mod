@@ -10,7 +10,7 @@ require (
 	github.com/eden-framework/autoconf v0.0.1
 	github.com/eden-framework/codegen v0.0.1
 	github.com/eden-framework/context v0.0.2
-	github.com/eden-framework/courier v1.0.3
+	github.com/eden-framework/courier v1.0.4
 	github.com/eden-framework/enumeration v1.0.0
 	github.com/eden-framework/packagex v0.0.1
 	github.com/eden-framework/plugins v0.0.6
@@ -36,7 +36,7 @@ require (
 	github.com/spf13/viper v1.5.0
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6 // indirect
-	golang.org/x/sys v0.0.0-20201015000850-e3ed0017c211 // indirect
+	golang.org/x/sys v0.0.0-20201017003518-b09fb700fbb7 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.0.0-20201013053347-2db1cd791039
 	gopkg.in/yaml.v2 v2.2.8
