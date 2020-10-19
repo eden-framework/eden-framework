@@ -1,2 +1,4 @@
 go.sum
 .idea
+scripts/eden
+scripts/kube_config

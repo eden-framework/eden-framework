@@ -16,3 +16,5 @@ ENV GOPROXY https://goproxy.cn
 
 COPY ./ /go/src/eden/eden-framework
 RUN cd /go/src/eden/eden-framework/cmd/eden && go install
+
+ADD ./scripts/eden/.eden.yaml /root/.eden.yaml

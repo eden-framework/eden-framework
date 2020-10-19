@@ -12,3 +12,5 @@ RUN apk add --no-cache curl git openssh wget unzip \
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.18.0/bin/linux/amd64/kubectl \
 	&& mv ./kubectl /bin/kubectl \
 	&& chmod +x /bin/kubectl
+
+ADD ./scripts/kube_config/config /root/.kube/config
