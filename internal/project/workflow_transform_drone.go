@@ -15,6 +15,11 @@ func (w *Workflow) ToDroneConfig(p *Project) *drone.CIDronePipelineDocker {
 		WithTemp()
 	config.Volumes = append(config.Volumes, *vol)
 
+	hostVol := drone.NewPipelineVolume().WithName("host").WithHost(&drone.PipelineVolumeHost{
+		Path: "/var/run/docker.sock",
+	})
+	config.Volumes = append(config.Volumes, *hostVol)
+
 	for branch, branchFlow := range w.BranchFlows {
 		if branchFlow.Skip {
 			continue
@@ -31,6 +36,7 @@ func (w *Workflow) ToDroneConfig(p *Project) *drone.CIDronePipelineDocker {
 			vol := drone.NewPipelineStepVolume().
 				WithName("temp").
 				WithPath("/go")
+			volHost := drone.NewPipelineStepVolume().WithName("host").WithPath("/var/run/docker.sock")
 
 			image := fmt.Sprintf("${%s}/${%s}", EnvKeyDockerRegistryKey, strings.ToUpper(envVars.Parse(job.Builder)))
 			image = envVars.Parse(image)
@@ -38,7 +44,7 @@ func (w *Workflow) ToDroneConfig(p *Project) *drone.CIDronePipelineDocker {
 				WithName(fmt.Sprintf("%s_%s", str.ToLowerCamelCase(branch), job.Stage)).
 				WithEnvs(branchFlow.Env).
 				WithImage(image).
-				WithVolume(*vol).
+				WithVolume(*vol, *volHost).
 				WithCommands(job.Run...)
 
 			if branch != "*" {
