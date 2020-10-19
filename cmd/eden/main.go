@@ -30,7 +30,7 @@ func main() {
 
 const CommandHelpHeader = `
 
-   _______  _____  __  ____                                   __  
+   _______  _____  __  ____                                   __
   / __/ _ \/ __/ |/ / / __/______ ___ _  ___ _    _____  ____/ /__
  / _// // / _//    / / _// __/ _ '/  ' \/ -_) |/|/ / _ \/ __/  '_/
 /___/____/___/_/|_/ /_/ /_/  \_,_/_/_/_/\__/|__,__/\___/_/ /_/\_\
@@ -64,7 +64,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.eden-framework.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.eden.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -86,7 +86,7 @@ func initConfig() {
 
 		// Search config in home directory with name ".eden-framework" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".eden-framework")
+		viper.SetConfigName(".eden")
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match

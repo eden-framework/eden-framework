@@ -19,11 +19,11 @@ import (
 	"github.com/eden-framework/eden-framework/internal/project"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
 	ciDeployCmdEnv               string
-	ciDeployCmdConfigFile        string
 	ciDeployCmdDeployConfigFile  string
 	ciDeployCmdServiceConfigFile string
 )
@@ -33,7 +33,11 @@ var ciDeployCmd = &cobra.Command{
 	Use:   "deploy",
 	Short: "ci ship a project as a image",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := project.ProcessDeployment(currentProject, ciDeployCmdEnv, ciDeployCmdConfigFile, ciDeployCmdDeployConfigFile, ciDeployCmdServiceConfigFile)
+		kubeConfig := viper.GetString("KUBE_CONFIG")
+		if len(kubeConfig) == 0 {
+			panic("cannot find kube config file path from .eden.yaml")
+		}
+		err := project.ProcessDeployment(currentProject, ciDeployCmdEnv, kubeConfig, ciDeployCmdDeployConfigFile, ciDeployCmdServiceConfigFile)
 		if err != nil {
 			logrus.Panic(err)
 		}
@@ -42,7 +46,6 @@ var ciDeployCmd = &cobra.Command{
 
 func init() {
 	ciDeployCmd.Flags().StringVarP(&ciDeployCmdEnv, "env", "e", "", "deploy environment name")
-	ciDeployCmd.Flags().StringVarP(&ciDeployCmdConfigFile, "config", "c", "", "kubeconfig file path")
 	ciDeployCmd.Flags().StringVarP(&ciDeployCmdDeployConfigFile, "deploy", "d", "./build/deploy.default.yml", "deploy yaml file path")
 	ciDeployCmd.Flags().StringVarP(&ciDeployCmdServiceConfigFile, "service", "s", "./build/service.default.yml", "service yaml file path")
 	ciCmd.AddCommand(ciDeployCmd)

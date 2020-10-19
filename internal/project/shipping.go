@@ -1,7 +1,9 @@
 package project
 
 import (
+	"fmt"
 	"github.com/eden-framework/eden-framework/internal/docker"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
@@ -43,7 +45,14 @@ func CommandsForShipping(p *Project, push bool) (commands []*exec.Cmd) {
 
 	commands = append(commands, p.Command("docker", "build", "-f", tmpDockerfile, "-t", dockerfile.Image, "."))
 	if push {
-		commands = append(commands, p.Command("docker", "push", dockerfile.Image))
+		processor := viper.GetString("SHIPPING_PROCESSOR")
+		typ, err := ParseShippingProcessorTypeFromString(processor)
+		if err != nil {
+			panic(fmt.Sprintf("cannot parse shipping processor type from env: SHIPPING_PROCESSOR=%s", processor))
+		}
+		shipping := NewShippingProcessor(typ)
+		commands = append(commands, shipping.Login(p)...)
+		commands = append(commands, shipping.Push(p, dockerfile.Image)...)
 	}
 	return
 }
