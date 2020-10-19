@@ -33,7 +33,7 @@ func init() {
 				Use:   scriptCmd,
 				Short: script.String(),
 				Run: func(cmd *cobra.Command, args []string) {
-					err := currentProject.RunScript(scriptCmd, ciRunCmdInDocker)
+					err := currentProject.RunScript(cmd.Use, ciRunCmdInDocker)
 					if err != nil {
 						logrus.Error(err)
 					}
