@@ -135,7 +135,7 @@ func GetDockerfileTemplate(d Dockerfile) string {
 					} else {
 						appendDockerConfig(
 							dockerKey,
-							strings.Join(slice, ""),
+							strings.Join(slice, " "),
 						)
 					}
 				}
