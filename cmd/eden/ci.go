@@ -41,7 +41,7 @@ var ciCmd = &cobra.Command{
 			currentProject.Version.Prefix = currentProject.Feature
 		}
 		currentProject.Version.Suffix = getSha()
-		currentProject.Selector = fmt.Sprintf("deployment-%s-%s", currentProject.Group, currentProject.Version)
+		currentProject.Selector = fmt.Sprintf("deployment-%s-%s", currentProject.Group, currentProject.Name)
 		currentProject.SetEnviron()
 	},
 }
