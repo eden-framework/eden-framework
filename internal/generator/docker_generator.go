@@ -47,7 +47,6 @@ func (d *DockerGenerator) Output(outputPath string) Outputs {
 
 	dockerFile = dockerFile.WithWorkDir("/go/bin")
 	dockerFile = dockerFile.WithCmd("./" + d.ServiceName)
-	dockerFile = dockerFile.WithExpose("8800", "8900")
 
 	dockerFile = dockerFile.AddContent("./build/configs", "./configs")
 	dockerFile = dockerFile.AddContent("./build/"+d.ServiceName, "./")
