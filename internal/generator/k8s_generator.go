@@ -49,7 +49,7 @@ func (d *K8sGenerator) Output(outputPath string) Outputs {
 			APIVersion: "apps/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-%s", files.EnvVar(project.EnvKeyProjectName), files.EnvVar(project.EnvKeyProjectVersion)),
+			Name:      files.EnvVar(project.EnvKeyProjectName),
 			Namespace: files.EnvVar(project.EnvKeyProjectGroup),
 		},
 		Spec: appsv1.DeploymentSpec{
