@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/eden-framework/context"
 	"github.com/eden-framework/eden-framework/internal/project/drone"
+	"github.com/eden-framework/eden-framework/internal/project/drone/enums"
 	str "github.com/eden-framework/strings"
 	"strings"
 )
@@ -46,6 +47,7 @@ func (w *Workflow) ToDroneConfig(p *Project) *drone.CIDronePipelineDocker {
 				WithImage(image).
 				WithVolume(*vol, *volHost).
 				WithCommands(job.Run...)
+			step.Pull = enums.DRONE_CI_STEP_PULL__always
 
 			if branch != "*" {
 				step.WithBranchInclude(branch)

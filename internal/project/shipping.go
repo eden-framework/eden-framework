@@ -28,20 +28,23 @@ func CommandsForShipping(p *Project, push bool) (commands []*exec.Cmd) {
 			mayReadFileAndUnmarshal(dockerfileYml, dockerfile)
 		}
 	}
+	if !hasDockerfileYaml {
+		panic("there has no dockerfile.yml file in project workspace")
+	}
 
 	if dockerfile.Image == "" {
 		dockerfile.Image = "${PROFZONE_DOCKER_REGISTRY}/${PROJECT_OWNER}/${PROJECT_NAME}:${PROJECT_VERSION}"
 	}
 
-	if hasDockerfileYaml {
-		dockerfile.AddEnv(EnvKeyProjectVersion, p.Version.String())
-		dockerfile.AddEnv(EnvKeyProjectOwner, p.Owner)
-		dockerfile.AddEnv(EnvKeyProjectGroup, p.Group)
-		dockerfile.AddEnv(EnvKeyProjectName, p.Name)
-		dockerfile.AddEnv(EnvKeyProjectFeature, p.Feature)
+	dockerfile.AddEnv(EnvKeyProjectVersion, p.Version.String())
+	dockerfile.AddEnv(EnvKeyProjectOwner, p.Owner)
+	dockerfile.AddEnv(EnvKeyProjectGroup, p.Group)
+	dockerfile.AddEnv(EnvKeyProjectName, p.Name)
+	dockerfile.AddEnv(EnvKeyProjectFeature, p.Feature)
 
-		ioutil.WriteFile(tmpDockerfile, []byte(dockerfile.String()), os.ModePerm)
-	}
+	dockerfileContent := dockerfile.String()
+	fmt.Println(dockerfileContent)
+	ioutil.WriteFile(tmpDockerfile, []byte(dockerfileContent), os.ModePerm)
 
 	commands = append(commands, p.Command("docker", "build", "-f", tmpDockerfile, "-t", dockerfile.Image, "."))
 	if push {
