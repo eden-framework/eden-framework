@@ -6,8 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/eden-framework/eden-framework/internal/k8s"
+	str "github.com/eden-framework/strings"
 	"github.com/fatih/color"
 	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	apiv1 "k8s.io/api/core/v1"
@@ -18,11 +20,17 @@ import (
 	"strings"
 )
 
-func ProcessDeployment(p *Project, env, kubeConfig, deployConfig, serviceConfig string) error {
+func ProcessDeployment(p *Project, env, deployConfig, serviceConfig string) error {
 	if env == "" {
 		return errors.New("deployment must specify a environment name")
 	}
 	envVars := LoadEnv(env, p.Feature)
+
+	kubeConfigKey := str.ToUpperSnakeCase("KubeConfig" + env)
+	kubeConfig := viper.GetString(kubeConfigKey)
+	if len(kubeConfig) == 0 {
+		panic("cannot find kube config file path from .eden.yaml, the key is " + kubeConfigKey)
+	}
 
 	ctx, _ := context.WithCancel(context.Background())
 	config, err := clientcmd.BuildConfigFromFlags("", kubeConfig)

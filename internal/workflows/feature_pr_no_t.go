@@ -33,11 +33,7 @@ var FeaturePRNoTest = &project.Workflow{
 			Jobs: project.Jobs{
 				DefaultJobForBuild,
 				DefaultJobForShip,
-				DefaultJobForDeploy.Merge(&project.Job{
-					Run: project.Script{
-						"eden ci deploy",
-					},
-				}),
+				DefaultJobForDeploy,
 			},
 		},
 		"test/feature/*": {

@@ -6,7 +6,7 @@ import (
 
 var (
 	BaseShipScript   = "eden ci ship --push"
-	BaseDeployScript = "eden ci deploy --env ${CI_ENVIRONMENT_NAME}"
+	BaseDeployScript = "eden ci deploy --env ${GOENV}"
 )
 
 var DefaultJobForTest = project.Job{

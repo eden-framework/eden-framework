@@ -27,4 +27,6 @@ COPY ./ /go/src/eden-framework/eden-framework
 RUN cd /go/src/eden-framework/eden-framework/cmd/eden && go install
 
 ADD ./scripts/eden/.eden.yaml /root/.eden.yaml
-ADD ./scripts/kube_config/config /root/.kube/config
+ADD ./scripts/kube_config/config_staging /root/.kube/config_staging
+ADD ./scripts/kube_config/config_test /root/.kube/config_test
+ADD ./scripts/kube_config/config_demo /root/.kube/config_demo

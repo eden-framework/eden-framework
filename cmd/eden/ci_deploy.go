@@ -37,7 +37,7 @@ var ciDeployCmd = &cobra.Command{
 		if len(kubeConfig) == 0 {
 			panic("cannot find kube config file path from .eden.yaml")
 		}
-		err := project.ProcessDeployment(currentProject, ciDeployCmdEnv, kubeConfig, ciDeployCmdDeployConfigFile, ciDeployCmdServiceConfigFile)
+		err := project.ProcessDeployment(currentProject, ciDeployCmdEnv, ciDeployCmdDeployConfigFile, ciDeployCmdServiceConfigFile)
 		if err != nil {
 			logrus.Panic(err)
 		}
