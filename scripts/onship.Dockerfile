@@ -69,7 +69,7 @@ RUN cd $(go env GOROOT)/src/runtime \
 
 RUN apk add --no-cache curl git openssh wget unzip
 
-COPY ./ /go/src/eden/eden-framework
-RUN cd /go/src/eden/eden-framework/cmd/eden && go install
+COPY ./ /go/src/eden-framework/eden-framework
+RUN cd /go/src/eden-framework/eden-framework/cmd/eden && go install
 
 ADD ./scripts/eden/.eden.yaml /root/.eden.yaml

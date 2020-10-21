@@ -17,6 +17,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/eden-framework/eden-framework/internal/project"
 	"github.com/spf13/cobra"
 	"os"
 
@@ -95,4 +96,23 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
+
+	initProject()
+}
+
+func initProject() {
+	project.RegisterBuilder("BUILDER_RANCHER", &project.Builder{
+		Image:      getConfigOrDefault("PROJECT_BUILDER_RANCHER", "profzone/golang-ondeploy:2.4.3"),
+		WorkingDir: "/go/src/github.com/${PROJECT_GROUP}/${PROJECT_NAME}",
+	})
+	project.RegisterBuilder("BUILDER_DOCKER", &project.Builder{
+		Image:      getConfigOrDefault("PROJECT_BUILDER_DOCKER", "profzone/golang-onship:1.14"),
+		WorkingDir: "/go/src/github.com/${PROJECT_GROUP}/${PROJECT_NAME}",
+	})
+	project.RegisterBuilder("BUILDER_GOLANG", &project.Builder{
+		ProgramLanguage: "golang",
+		Image:           getConfigOrDefault("PROJECT_BUILDER_GOLANG", "profzone/golang-onbuild:1.14"),
+		WorkingDir:      "/go/src/github.com/${PROJECT_GROUP}/${PROJECT_NAME}",
+	})
+	project.DockerRegistry = getConfigOrDefault("PROJECT_DOCKER_REGISTRY", "registry.cn-hangzhou.aliyuncs.com")
 }

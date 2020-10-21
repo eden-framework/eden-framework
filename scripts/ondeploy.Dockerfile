@@ -23,8 +23,8 @@ ENV CGO_ENABLED 0
 ENV GOSUMDB off
 ENV GOPROXY https://goproxy.cn
 
-COPY ./ /go/src/eden/eden-framework
-RUN cd /go/src/eden/eden-framework/cmd/eden && go install
+COPY ./ /go/src/eden-framework/eden-framework
+RUN cd /go/src/eden-framework/eden-framework/cmd/eden && go install
 
 ADD ./scripts/eden/.eden.yaml /root/.eden.yaml
 ADD ./scripts/kube_config/config /root/.kube/config

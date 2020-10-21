@@ -14,10 +14,9 @@ import (
 	"strings"
 )
 
-const DefaultConfigFile = "project.yml"
-
-const (
-	DockerRegistry = "registry.cn-hangzhou.aliyuncs.com"
+var (
+	DefaultConfigFile = "project.yml"
+	DockerRegistry    string
 )
 
 type Project struct {
