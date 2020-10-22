@@ -165,14 +165,16 @@ func (scanner *DefinitionScanner) reformatSchemas() {
 	schemas := map[string]*oas.Schema{}
 
 	for _, typeName := range typeNameList {
-		name, _ := scanner.typeUniqueName(typeName, func(name string) bool {
+		name, isInternal := scanner.typeUniqueName(typeName, func(name string) bool {
 			_, exists := schemas[name]
 			return exists
 		})
 
 		s := scanner.definitions[typeName]
 		addExtension(s, XID, name)
-		addExtension(s, XGoVendorType, fullTypeName(typeName))
+		if !isInternal {
+			addExtension(s, XGoVendorType, fullTypeName(typeName))
+		}
 		schemas[name] = s
 	}
 
