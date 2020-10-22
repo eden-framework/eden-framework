@@ -15,7 +15,7 @@ steps:
       include:
       - master
 - name: docker
-  image: docker:19.03.12-dind
+  image: docker:19.03.12-dind-rootless
   volumes:
     - name: temp
       path: /var/run/docker.sock
