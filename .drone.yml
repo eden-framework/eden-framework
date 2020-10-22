@@ -1,5 +1,8 @@
 kind: pipeline
 type: docker
+volumes:
+- name: temp
+  temp: {}
 steps:
 - name: test-build
   image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
@@ -13,9 +16,15 @@ steps:
       - master
 - name: docker
   image: docker:19.03.12-dind
+  volumes:
+    - name: temp
+      path: /var/run/docker.sock
 - name: ship
   image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onship:1.14
   pull: always
+  volumes:
+    - name: temp
+      path: /var/run/docker.sock
   commands:
   - eden ci self-build
   when:
