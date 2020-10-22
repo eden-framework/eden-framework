@@ -19,7 +19,6 @@ import (
 	"github.com/eden-framework/eden-framework/internal/project"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var (
@@ -33,10 +32,6 @@ var ciDeployCmd = &cobra.Command{
 	Use:   "deploy",
 	Short: "ci ship a project as a image",
 	Run: func(cmd *cobra.Command, args []string) {
-		kubeConfig := viper.GetString("KUBE_CONFIG")
-		if len(kubeConfig) == 0 {
-			panic("cannot find kube config file path from .eden.yaml")
-		}
 		err := project.ProcessDeployment(currentProject, ciDeployCmdEnv, ciDeployCmdDeployConfigFile, ciDeployCmdServiceConfigFile)
 		if err != nil {
 			logrus.Panic(err)

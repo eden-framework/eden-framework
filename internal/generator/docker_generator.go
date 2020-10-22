@@ -51,7 +51,7 @@ func (d *DockerGenerator) Output(outputPath string) Outputs {
 	dockerFile = dockerFile.AddContent("./build/configs", "./configs")
 	dockerFile = dockerFile.AddContent("./build/"+d.ServiceName, "./")
 	dockerFile = dockerFile.AddContent("./project.yml", "./")
-	dockerFile = dockerFile.AddContent("./api/openapi.json", "./")
+	dockerFile = dockerFile.AddContent("./api/openapi.json", "./api/openapi.json")
 
 	content, err := yaml.Marshal(dockerFile)
 	if err != nil {
