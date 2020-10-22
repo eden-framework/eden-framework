@@ -1,7 +1,7 @@
 kind: pipeline
 type: docker
 steps:
-- name: build
+- name: test-build
   image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
   pull: always
   commands:
@@ -11,16 +11,13 @@ steps:
     branch:
       include:
       - master
+- name: docker
+  image: docker:19.03.12-dind
 - name: ship
   image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onship:1.14
   pull: always
   commands:
-  - docker build -t registry.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14 -f scripts/onbuild.Dockerfile .
-  - docker build -t registry.cn-hangzhou.aliyuncs.com/profzone/golang-onship:1.14 -f scripts/onship.Dockerfile .
-  - docker build -t registry.cn-hangzhou.aliyuncs.com/profzone/golang-ondeploy:2.4.3 -f scripts/ondeploy.Dockerfile .
-  - docker push registry.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
-  - docker push registry.cn-hangzhou.aliyuncs.com/profzone/golang-onship:1.14
-  - docker push registry.cn-hangzhou.aliyuncs.com/profzone/golang-ondeploy:2.4.3
+  - eden ci self-build
   when:
     branch:
       include:
