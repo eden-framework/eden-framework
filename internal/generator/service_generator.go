@@ -287,6 +287,9 @@ var Router = {{ .UseWithoutAlias "github.com/eden-framework/courier" "" }}.NewRo
 
 func init() {
 	Router.Register({{ .UseWithoutAlias "%s" "%s" }}.Router)
+	if !{{ .UseWithoutAlias "github.com/eden-framework/context" "" }}.IsOnline() {
+		Router.Register({{ .UseWithoutAlias "github.com/eden-framework/courier/swagger" "" }}.SwaggerRouter)
+	}
 }
 
 type RootRouter struct {
