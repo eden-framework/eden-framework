@@ -40,7 +40,7 @@ var modelCmd = &cobra.Command{
 
 		for _, arg := range args {
 
-			g := generator.NewSqlFuncGenerator()
+			g := generator.NewModelGenerator()
 			g.WithComments = true
 			g.WithTableInterfaces = true
 			g.StructName = arg

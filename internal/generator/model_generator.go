@@ -11,17 +11,17 @@ import (
 	"path/filepath"
 )
 
-func NewSqlFuncGenerator() *SqlFuncGenerator {
-	return &SqlFuncGenerator{}
+func NewModelGenerator() *ModelGenerator {
+	return &ModelGenerator{}
 }
 
-type SqlFuncGenerator struct {
+type ModelGenerator struct {
 	generator.Config
 	pkg   *packagex.Package
 	model *generator.Model
 }
 
-func (g *SqlFuncGenerator) Load(cwd string) {
+func (g *ModelGenerator) Load(cwd string) {
 	var err error
 	if len(cwd) == 0 {
 		cwd, err = os.Getwd()
@@ -44,7 +44,7 @@ func (g *SqlFuncGenerator) Load(cwd string) {
 
 }
 
-func (g *SqlFuncGenerator) Pick() {
+func (g *ModelGenerator) Pick() {
 	for ident, obj := range g.pkg.TypesInfo.Defs {
 		if typeName, ok := obj.(*types.TypeName); ok {
 			if typeName.Name() == g.StructName {
@@ -56,7 +56,7 @@ func (g *SqlFuncGenerator) Pick() {
 	}
 }
 
-func (g *SqlFuncGenerator) Output(outputPath string) Outputs {
+func (g *ModelGenerator) Output(outputPath string) Outputs {
 	if g.model == nil {
 		return nil
 	}

@@ -8,7 +8,7 @@ import (
 func TestSqlFuncGenerator(t *testing.T) {
 	cwd, _ := os.Getwd()
 	for _, name := range []string{"User", "Org"} {
-		g := NewSqlFuncGenerator()
+		g := NewModelGenerator()
 		g.WithComments = true
 		g.WithTableName = true
 		g.WithTableInterfaces = true

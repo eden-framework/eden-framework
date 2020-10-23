@@ -31,7 +31,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pelletier/go-toml v1.6.0 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/profzone/envconfig v1.4.6
+	github.com/profzone/envconfig v1.4.7-0.20201023033232-7c4ac8aaab6a
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.5.0

@@ -4,6 +4,7 @@ import (
 	"github.com/eden-framework/courier"
 	"github.com/eden-framework/courier/client"
 	"github.com/eden-framework/courier/httpx"
+	"github.com/eden-framework/courier/status_error"
 	"github.com/eden-framework/courier/transport_http"
 	"github.com/eden-framework/reflectx"
 	"github.com/go-courier/oas"
@@ -41,7 +42,8 @@ var (
 )
 
 var (
-	PkgImportPathClient = reflectx.ImportGoPath(reflect.TypeOf(client.Client{}).PkgPath())
+	PkgImportPathClient    = reflectx.ImportGoPath(reflect.TypeOf(client.Client{}).PkgPath())
+	PkgImportPathStatusErr = reflectx.ImportGoPath(reflect.TypeOf(status_error.StatusErrorCode(0)).PkgPath())
 )
 
 var (
