@@ -49,6 +49,15 @@ func NewApplication(runner func(ctx *context.WaitStopContext) error, opts ...Opt
 		Use:   app.p.Name,
 		Short: app.p.Desc,
 		Run: func(cmd *cobra.Command, args []string) {
+			if len(app.onInit) > 0 {
+				for _, initializer := range app.onInit {
+					err := initializer()
+					if err != nil && app.onInitStrict {
+						panic(err)
+					}
+				}
+			}
+
 			go runner(ctx)
 			app.WaitStop(func(ctx *context.WaitStopContext) error {
 				ctx.Cancel()
@@ -98,15 +107,6 @@ func (app *Application) Start() {
 
 	// initialize global object
 	autoconf.Initialize(app.envConfig...)
-
-	if len(app.onInit) > 0 {
-		for _, initializer := range app.onInit {
-			err := initializer()
-			if err != nil && app.onInitStrict {
-				panic(err)
-			}
-		}
-	}
 
 	if err := app.cmd.Execute(); err != nil {
 		logrus.Error(err)
