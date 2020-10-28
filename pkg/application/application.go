@@ -24,7 +24,7 @@ type Application struct {
 	apolloConfig    *apollo.ApolloBaseConfig
 	envConfig       []interface{}
 
-	onInit       func() error
+	onInit       []func() error
 	onInitStrict bool
 }
 
@@ -99,10 +99,12 @@ func (app *Application) Start() {
 	// initialize global object
 	autoconf.Initialize(app.envConfig...)
 
-	if app.onInit != nil {
-		err := app.onInit()
-		if err != nil && app.onInitStrict {
-			panic(err)
+	if len(app.onInit) > 0 {
+		for _, initializer := range app.onInit {
+			err := initializer()
+			if err != nil && app.onInitStrict {
+				panic(err)
+			}
 		}
 	}
 

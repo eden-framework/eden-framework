@@ -9,7 +9,7 @@ import (
 
 type Option func(app *Application)
 
-func WithInitializer(init func() error, strict bool) Option {
+func WithInitializer(strict bool, init ...func() error) Option {
 	return func(app *Application) {
 		app.onInit = init
 		app.onInitStrict = strict
