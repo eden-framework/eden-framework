@@ -9,6 +9,13 @@ import (
 
 type Option func(app *Application)
 
+func WithInitializer(init func() error, strict bool) Option {
+	return func(app *Application) {
+		app.onInit = init
+		app.onInitStrict = strict
+	}
+}
+
 func WithApollo(conf *apollo.ApolloBaseConfig) Option {
 	return func(app *Application) {
 		app.apolloConfig = conf

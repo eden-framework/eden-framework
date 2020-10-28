@@ -23,6 +23,9 @@ type Application struct {
 	envConfigPrefix string
 	apolloConfig    *apollo.ApolloBaseConfig
 	envConfig       []interface{}
+
+	onInit       func() error
+	onInitStrict bool
 }
 
 func NewApplication(runner func(ctx *context.WaitStopContext) error, opts ...Option) *Application {
@@ -95,6 +98,13 @@ func (app *Application) Start() {
 
 	// initialize global object
 	autoconf.Initialize(app.envConfig...)
+
+	if app.onInit != nil {
+		err := app.onInit()
+		if err != nil && app.onInitStrict {
+			panic(err)
+		}
+	}
 
 	if err := app.cmd.Execute(); err != nil {
 		logrus.Error(err)
