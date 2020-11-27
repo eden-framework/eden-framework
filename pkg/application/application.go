@@ -82,19 +82,15 @@ func (app *Application) Start() {
 	os.Setenv(internal.EnvVarKeyServiceName, strings.Replace(app.p.Name, "service-", "", 1))
 	os.Setenv(internal.EnvVarKeyProjectGroup, app.p.Group)
 
-	// config from env
 	var confs []interface{}
 	if app.apolloConfig != nil && os.Getenv("GOENV") != "LOCAL" {
 		confs = append(confs, app.apolloConfig)
 	} else {
 		confs = append(confs, app.envConfig...)
 	}
-	envVars := autoconf.FromEnv(app.envConfigPrefix, confs)
+	envVars := autoconf.GetDefaultFromEnv(app.envConfigPrefix, confs)
 
-	// config from apollo
-	autoconf.FromApollo(app.apolloConfig, app.envConfig)
-
-	// output config env variables
+	// output default config env variables
 	if os.Getenv("GOENV") != "PROD" {
 		cwd, _ := os.Getwd()
 
@@ -104,6 +100,11 @@ func (app *Application) Start() {
 		k8sGenerator := generator.NewK8sGenerator(app.envConfig)
 		generator.Generate(k8sGenerator, cwd, cwd)
 	}
+
+	// config from env
+	autoconf.FromEnv(app.envConfigPrefix, confs)
+	// config from apollo
+	autoconf.FromApollo(app.apolloConfig, app.envConfig)
 
 	// initialize global object
 	autoconf.Initialize(app.envConfig...)

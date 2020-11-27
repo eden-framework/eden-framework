@@ -8,7 +8,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.0.7
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.577
 	github.com/eden-framework/apollo v0.0.1
-	github.com/eden-framework/autoconf v0.0.3
+	github.com/eden-framework/autoconf v0.0.4
 	github.com/eden-framework/codegen v0.0.1
 	github.com/eden-framework/context v0.0.2
 	github.com/eden-framework/courier v1.0.4
@@ -31,16 +31,16 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/pelletier/go-toml v1.6.0 // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/profzone/envconfig v1.5.1
+	github.com/profzone/envconfig v1.5.2
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.5.0
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6 // indirect
-	golang.org/x/sys v0.0.0-20201112073958-5cba982894dd // indirect
+	golang.org/x/sys v0.0.0-20201126233918-771906719818 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	golang.org/x/tools v0.0.0-20201013053347-2db1cd791039
-	gopkg.in/yaml.v2 v2.2.8
+	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.18.8
 	k8s.io/apimachinery v0.18.8
 	k8s.io/client-go v12.0.0+incompatible
