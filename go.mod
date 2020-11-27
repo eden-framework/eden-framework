@@ -8,7 +8,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.0.7
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.577
 	github.com/eden-framework/apollo v0.0.1
-	github.com/eden-framework/autoconf v0.0.4
+	github.com/eden-framework/autoconf v0.0.5-0.20201127094307-a7ab11d4ef78
 	github.com/eden-framework/codegen v0.0.1
 	github.com/eden-framework/context v0.0.2
 	github.com/eden-framework/courier v1.0.4
