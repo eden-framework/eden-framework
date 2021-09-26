@@ -141,8 +141,8 @@ func (d *K8sGenerator) Output(outputPath string) Outputs {
 		logrus.Panic(err)
 	}
 
-	outputs.Add(path.Join(outputPath, "build/deploy.default.yml"), deploymentBuffer.String())
-	outputs.Add(path.Join(outputPath, "build/service.default.yml"), serviceBuffer.String())
+	outputs.Add(path.Join(outputPath, "./deploy.default.yml"), deploymentBuffer.String())
+	outputs.Add(path.Join(outputPath, "./service.default.yml"), serviceBuffer.String())
 	return outputs
 }
 
