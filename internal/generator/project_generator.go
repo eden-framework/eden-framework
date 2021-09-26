@@ -86,3 +86,7 @@ func (p *ProjectGenerator) Output(outputPath string) Outputs {
 
 	return outputs
 }
+
+func (p *ProjectGenerator) Finally() {
+
+}

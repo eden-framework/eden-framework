@@ -146,6 +146,10 @@ func (d *K8sGenerator) Output(outputPath string) Outputs {
 	return outputs
 }
 
+func (d *K8sGenerator) Finally() {
+
+}
+
 func findServerPorts(config []interface{}) (ports []int32) {
 	for _, c := range config {
 		val := reflect.ValueOf(c)

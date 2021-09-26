@@ -106,3 +106,7 @@ func (c *ClientGenerator) Output(outputPath string) Outputs {
 
 	return outputs
 }
+
+func (c *ClientGenerator) Finally() {
+
+}

@@ -37,9 +37,8 @@ require (
 	github.com/spf13/viper v1.5.0
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6 // indirect
-	golang.org/x/sys v0.0.0-20201126233918-771906719818 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
-	golang.org/x/tools v0.0.0-20201013053347-2db1cd791039
+	golang.org/x/tools v0.1.5
 	gopkg.in/yaml.v2 v2.4.0
 	k8s.io/api v0.18.8
 	k8s.io/apimachinery v0.18.8

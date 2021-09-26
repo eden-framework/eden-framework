@@ -72,6 +72,10 @@ func (g *ModelGenerator) Output(outputPath string) Outputs {
 	}
 }
 
+func (g *ModelGenerator) Finally() {
+
+}
+
 type Config struct {
 	StructName string
 	TableName  string

@@ -7,6 +7,7 @@ import (
 	"github.com/eden-framework/plugins"
 	"github.com/sirupsen/logrus"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 )
@@ -64,6 +65,30 @@ func (s *ServiceGenerator) Load(path string) {
 func (s *ServiceGenerator) Pick() {
 }
 
+func (s *ServiceGenerator) mustModInit() {
+	cmd := exec.Command("go", "mod", "init", s.opt.PackageName)
+	logrus.Infof("command executing: %s", cmd.String())
+	err := cmd.Run()
+	if err != nil {
+		logrus.Panicf("go mod init err: %v\n", err)
+	}
+
+	cmd = exec.Command("go", "mod", "edit", "-replace=k8s.io/client-go=k8s.io/client-go@v0.18.8")
+	err = cmd.Run()
+	if err != nil {
+		logrus.Panicf("go mod edit err: %v\n", err)
+	}
+}
+
+func (s *ServiceGenerator) mustModTidy() {
+	cmd := exec.Command("go", "mod", "tidy")
+	logrus.Infof("command executing: %s", cmd.String())
+	err := cmd.Run()
+	if err != nil {
+		logrus.Panicf("go mod tidy err: %v\n", err)
+	}
+}
+
 func (s *ServiceGenerator) Output(outputPath string) Outputs {
 	outputs := Outputs{}
 
@@ -71,24 +96,19 @@ func (s *ServiceGenerator) Output(outputPath string) Outputs {
 	p := path.Join(outputPath, s.opt.Name)
 	createPath(p)
 
-	// go.mod file
-	mod := files.NewModFile(s.opt.PackageName, "1.14")
-	mod.AddReplace("k8s.io/client-go", "", "k8s.io/client-go", "v0.18.8")
-	mod.AddRequired("github.com/eden-framework/eden-framework", s.opt.FrameworkVersion)
-	mod.AddRequired("github.com/sirupsen/logrus", "v1.6.0")
-	mod.AddRequired("github.com/spf13/cobra", "v0.0.5")
-	outputs.WriteFile(path.Join(p, "go.mod"), mod.String())
-
 	err := os.Chdir(p)
 	if err != nil {
-		logrus.Panicf("os.Chdir failed: %v", err)
+		logrus.Panicf("os.Chdir failed: %v\n", err)
 	}
+
+	// go.mod file init
+	s.mustModInit()
 
 	// plugin
 	ldr := plugins.NewLoader(p)
 	defer ldr.Clear()
 
-	if len(s.opt.Plugins) >= 0 {
+	if len(s.opt.Plugins) > 0 {
 		for _, plugName := range s.opt.Plugins {
 			detail := s.opt.GetPluginDetailByPackageName(plugName)
 			zipFileName := fmt.Sprintf("%s-%s", strings.ReplaceAll(detail.RepoFullName, "/", "-"), detail.Version)
@@ -146,6 +166,10 @@ func (s *ServiceGenerator) Output(outputPath string) Outputs {
 	outputs.Add(mainFile.FileFullName, mainFile.String())
 
 	return outputs
+}
+
+func (s *ServiceGenerator) Finally() {
+
 }
 
 func createPath(p string) {

@@ -13,6 +13,7 @@ type Generator interface {
 	Load(path string)
 	Pick()
 	Output(outputPath string) Outputs
+	Finally()
 }
 
 type Outputs map[string]string

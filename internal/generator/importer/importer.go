@@ -3,10 +3,10 @@ package importer
 import (
 	"bytes"
 	"fmt"
-	"github.com/eden-framework/packagex"
 	str "github.com/eden-framework/strings"
 	"github.com/sirupsen/logrus"
 	"io"
+	"os/exec"
 	"strings"
 )
 
@@ -22,10 +22,22 @@ func NewPackageImporter(packagePath string) *PackageImporter {
 	}
 }
 
+func (i *PackageImporter) mustGetPackage(packageList []string) {
+	for _, p := range packageList {
+		cmd := exec.Command("go", "get", p)
+		logrus.Infof("command executing: %s", cmd.String())
+		err := cmd.Run()
+		if err != nil {
+			logrus.Panicf("go get err: %v\n", err)
+		}
+	}
+}
+
 func (i *PackageImporter) AddImport(importPath string, p *Package) {
 	if _, ok := i.pkgs[importPath]; ok {
 		return
 	}
+	i.mustGetPackage([]string{importPath})
 	i.pkgs[importPath] = p
 }
 
@@ -33,15 +45,16 @@ func (i *PackageImporter) Import(pkgNamePattern, searchPath string, useAlias boo
 	pkgNamePattern = ParseVendor(pkgNamePattern)
 	p, ok := i.pkgs[pkgNamePattern]
 	if !ok {
-		pkg, err := packagex.LoadFrom(pkgNamePattern, searchPath)
-		if err != nil {
-			logrus.Panic(err)
-		}
+		pkgName := RetrievePackageName(pkgNamePattern)
 		p = &Package{
-			Package: pkg.Package,
+			Name:    pkgName,
+			PkgPath: pkgNamePattern,
 		}
 		if useAlias {
 			p.Alias = str.ToLowerSnakeCase(pkgNamePattern)
+		}
+		if searchPath == "" {
+			i.mustGetPackage([]string{pkgNamePattern})
 		}
 		i.pkgs[pkgNamePattern] = p
 	}

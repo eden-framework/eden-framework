@@ -115,6 +115,10 @@ func (a *OpenApiGenerator) Output(outputPath string) Outputs {
 	}
 }
 
+func (a *OpenApiGenerator) Finally() {
+
+}
+
 func runnerFunc(node ast.Node) (runner *ast.FuncDecl) {
 	switch n := node.(type) {
 	case *ast.CallExpr:

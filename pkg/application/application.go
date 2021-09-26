@@ -28,7 +28,7 @@ type Application struct {
 	onInitStrict bool
 }
 
-func NewApplication(runner func(ctx *context.WaitStopContext) error, opts ...Option) *Application {
+func NewApplication(runner func(ctx *context.WaitStopContext) error, testMode bool, opts ...Option) *Application {
 	p := &project.Project{}
 	ctx := context.NewWaitStopContext()
 	err := p.UnmarshalFromFile("", "")
@@ -58,11 +58,18 @@ func NewApplication(runner func(ctx *context.WaitStopContext) error, opts ...Opt
 				}
 			}
 
-			go runner(ctx)
-			app.WaitStop(func(ctx *context.WaitStopContext) error {
-				ctx.Cancel()
-				return nil
-			})
+			if testMode {
+				err := runner(ctx)
+				if err != nil {
+					panic(err)
+				}
+			} else {
+				go runner(ctx)
+				app.WaitStop(func(ctx *context.WaitStopContext) error {
+					ctx.Cancel()
+					return nil
+				})
+			}
 		},
 	}
 

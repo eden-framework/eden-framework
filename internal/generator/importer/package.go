@@ -1,13 +1,13 @@
 package importer
 
 import (
-	"golang.org/x/tools/go/packages"
 	"strconv"
 )
 
 type Package struct {
-	Alias string
-	*packages.Package
+	Name    string
+	Alias   string
+	PkgPath string
 }
 
 func (p *Package) GetSelector() string {

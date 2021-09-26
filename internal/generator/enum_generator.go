@@ -81,3 +81,7 @@ func (e *EnumGenerator) Output(outputPath string) Outputs {
 	}
 	return outputs
 }
+
+func (e *EnumGenerator) Finally() {
+
+}

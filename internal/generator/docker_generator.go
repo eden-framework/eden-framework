@@ -64,3 +64,7 @@ func (d *DockerGenerator) Output(outputPath string) Outputs {
 	outputs.Add(path.Join(outputPath, "build/configs/default.yml"), configDefaultFile.String())
 	return outputs
 }
+
+func (d *DockerGenerator) Finally() {
+
+}
