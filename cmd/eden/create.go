@@ -21,6 +21,7 @@ import (
 	"github.com/AlecAivazis/survey/v2/terminal"
 	"github.com/eden-framework/eden-framework/internal/generator"
 	"github.com/eden-framework/eden-framework/internal/project"
+	"github.com/eden-framework/eden-framework/internal/project/repo"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
@@ -51,51 +52,51 @@ var createCmd = &cobra.Command{
 		}
 
 		// get the tag list of eden-framework
-		//fmt.Println("fetch the tag list of eden-framework...")
-		//cli := repo.NewClient("https", "api.github.com", 80)
-		//tags, err := cli.GetTags("eden-framework/eden-framework")
-		//if err != nil {
-		//	logrus.Panicf("cannot get tag list of repo. err=%v", err)
-		//}
+		fmt.Println("fetch the tag list of eden-framework...")
+		cli := repo.NewClient("https", "api.github.com", 80)
+		tags, err := cli.GetTags("eden-framework/eden-framework")
+		if err != nil {
+			logrus.Panicf("cannot get tag list of repo. err=%v", err)
+		}
 		var tagList []string
-		//for _, t := range tags {
-		//	tagList = append(tagList, t.Name)
-		//}
+		for _, t := range tags {
+			tagList = append(tagList, t.Name)
+		}
 		tagList = append(tagList, "v1.1.9")
 		if len(tagList) == 0 {
 			logrus.Panic("cannot get tag list of repo. tag list is empty")
 		}
 
 		// get the plugin list of eden-framework
-		//fmt.Println("fetch the plugin list of eden-framework...")
-		//plugins, err := cli.GetPlugins()
-		//if err != nil {
-		//	logrus.Panicf("cannot get plugin list of eden-framework. err=%v", err)
-		//}
+		fmt.Println("fetch the plugin list of eden-framework...")
+		plugins, err := cli.GetPlugins()
+		if err != nil {
+			logrus.Panicf("cannot get plugin list of eden-framework. err=%v", err)
+		}
 		var pluginList []string
 		var answers generator.ServiceOption
-		//for _, p := range plugins {
-		//	tags, err := cli.GetTags(p.FullName)
-		//	if err != nil {
-		//		logrus.Panicf("cannot get tag list of repo [%s]. err=%v", p.FullName, err)
-		//	}
-		//
-		//	var pkgDisplayName, version string
-		//	var pluginDetail generator.PluginDetail
-		//	if len(tags) > 0 {
-		//		version = tags[0].Name
-		//		pkgDisplayName = fmt.Sprintf("%s@%s", p.GetPackagePath(), version)
-		//		pluginDetail.Tag = tags[0]
-		//	} else {
-		//		pkgDisplayName = p.GetPackagePath()
-		//	}
-		//	pluginDetail.RepoFullName = p.FullName
-		//	pluginDetail.PackageName = pkgDisplayName
-		//	pluginDetail.PackagePath = p.GetPackagePath()
-		//	pluginDetail.Version = version
-		//	answers.PluginDetails = append(answers.PluginDetails, pluginDetail)
-		//	pluginList = append(pluginList, pkgDisplayName)
-		//}
+		for _, p := range plugins {
+			tags, err := cli.GetTags(p.FullName)
+			if err != nil {
+				logrus.Panicf("cannot get tag list of repo [%s]. err=%v", p.FullName, err)
+			}
+
+			var pkgDisplayName, version string
+			var pluginDetail generator.PluginDetail
+			if len(tags) > 0 {
+				version = tags[0].Name
+				pkgDisplayName = fmt.Sprintf("%s@%s", p.GetPackagePath(), version)
+				pluginDetail.Tag = tags[0]
+			} else {
+				pkgDisplayName = p.GetPackagePath()
+			}
+			pluginDetail.RepoFullName = p.FullName
+			pluginDetail.PackageName = pkgDisplayName
+			pluginDetail.PackagePath = p.GetPackagePath()
+			pluginDetail.Version = version
+			answers.PluginDetails = append(answers.PluginDetails, pluginDetail)
+			pluginList = append(pluginList, pkgDisplayName)
+		}
 		pluginList = append(pluginList, "abc")
 
 		var qs = []*survey.Question{
@@ -214,7 +215,7 @@ var createCmd = &cobra.Command{
 			}...)
 		}
 
-		err := survey.Ask(qs, &answers)
+		err = survey.Ask(qs, &answers)
 		if err != nil {
 			if err == terminal.InterruptErr {
 				return
