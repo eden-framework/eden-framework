@@ -24,7 +24,10 @@ func ProcessDeployment(p *Project, env, deployConfig, serviceConfig string) erro
 	if env == "" {
 		return errors.New("deployment must specify a environment name")
 	}
-	envVars := LoadEnv(env, p.Feature)
+	var envVars map[string]string
+	if strings.ToLower(env) != "prod" {
+		envVars = LoadEnv(env, p.Feature)
+	}
 
 	kubeConfigKey := str.ToUpperSnakeCase("KubeConfig" + env)
 	kubeConfig := viper.GetString(kubeConfigKey)
