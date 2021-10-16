@@ -19,6 +19,10 @@ type StatusErrGenerator struct {
 	statusErrorCodes status_error.StatusErrorCodeMap
 }
 
+func (s *StatusErrGenerator) Finally() {
+	panic("implement me")
+}
+
 func NewStatusErrGenerator() *StatusErrGenerator {
 	return &StatusErrGenerator{
 		statusErrorCodes: status_error.StatusErrorCodeMap{},

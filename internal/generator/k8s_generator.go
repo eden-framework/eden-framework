@@ -56,15 +56,10 @@ func (d *K8sGenerator) Output(outputPath string) Outputs {
 			Replicas: pointer.Int32(1),
 			Selector: &metav1.LabelSelector{
 				MatchLabels: map[string]string{
-					"workload.user.cattle.io/workloadselector": files.EnvVar(project.EnvKeyProjectSelector),
+					"app": files.EnvVar(project.EnvKeyProjectName),
 				},
 			},
 			Template: apiv1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: map[string]string{
-						"workload.user.cattle.io/workloadselector": files.EnvVar(project.EnvKeyProjectSelector),
-					},
-				},
 				Spec: apiv1.PodSpec{
 					Containers: []apiv1.Container{
 						{
@@ -105,7 +100,7 @@ func (d *K8sGenerator) Output(outputPath string) Outputs {
 		},
 		Spec: apiv1.ServiceSpec{
 			Selector: map[string]string{
-				"workload.user.cattle.io/workloadselector": files.EnvVar(project.EnvKeyProjectSelector),
+				"app": files.EnvVar(project.EnvKeyProjectName),
 			},
 			Ports: []apiv1.ServicePort{},
 		},

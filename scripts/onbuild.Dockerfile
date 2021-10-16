@@ -6,7 +6,7 @@ RUN cd $(go env GOROOT)/src/runtime \
     && mv /proc_id.go . \
     && go install
 
-RUN sed -i "s|http://dl-cdn.alpinelinux.org|http://mirrors.aliyun.com|g" /etc/apk/repositories
+RUN sed -i "s/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g" /etc/apk/repositories
 
 RUN apk add --no-cache curl git openssh wget unzip gcc libc-dev
 
