@@ -25,7 +25,9 @@ func ProcessDeployment(p *Project, env, deployConfig, serviceConfig string) erro
 		return errors.New("deployment must specify a environment name")
 	}
 	var envVars map[string]string
+	fmt.Printf("CURRENT env: %s", env)
 	if strings.ToLower(env) != "prod" {
+		fmt.Printf("strings.ToLower(env): %s", strings.ToLower(env))
 		envVars = LoadEnv(env, p.Feature)
 	}
 
@@ -138,7 +140,7 @@ func loadEnvFromFiles(envName string, feature string) map[string]string {
 
 func loadEnvFromFile(envName string) map[string]string {
 	filename := "build/configs/" + strings.ToLower(envName) + ".yml"
-	logrus.Infof("try to load env vars from %s ...\n", color.GreenString(filename))
+	logrus.Infof("try to load env vars from %s ...", color.GreenString(filename))
 	envFileContent, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil
