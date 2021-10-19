@@ -16,6 +16,7 @@ limitations under the License.
 package main
 
 import (
+	"fmt"
 	"github.com/eden-framework/eden-framework/internal/project"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -32,6 +33,7 @@ var ciDeployCmd = &cobra.Command{
 	Use:   "deploy",
 	Short: "ci ship a project as a image",
 	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("Start deployment...")
 		err := project.ProcessDeployment(currentProject, ciDeployCmdEnv, ciDeployCmdDeployConfigFile, ciDeployCmdServiceConfigFile)
 		if err != nil {
 			logrus.Panic(err)

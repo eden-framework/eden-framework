@@ -27,7 +27,6 @@ func ProcessDeployment(p *Project, env, deployConfig, serviceConfig string) erro
 	var envVars map[string]string
 	fmt.Printf("CURRENT env: %s\n", env)
 	if strings.ToLower(env) != "prod" {
-		fmt.Printf("strings.ToLower(env): %s\n", strings.ToLower(env))
 		envVars = LoadEnv(env, p.Feature)
 	}
 

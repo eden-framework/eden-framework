@@ -1,4 +1,4 @@
-FROM docker:19.03.12
+FROM docker:20.10.8
 
 ENV GOLANG_VERSION 1.14.4
 
@@ -66,7 +66,7 @@ RUN cd $(go env GOROOT)/src/runtime \
     && mv /proc_id.go . \
     && go install
 
-RUN apk add --no-cache curl git openssh wget unzip
+RUN apk add --no-cache curl git wget unzip
 
 COPY ./ /go/src/eden-framework/eden-framework
 RUN cd /go/src/eden-framework/eden-framework/cmd/eden && go install
