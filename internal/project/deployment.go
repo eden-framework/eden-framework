@@ -25,9 +25,9 @@ func ProcessDeployment(p *Project, env, deployConfig, serviceConfig string) erro
 		return errors.New("deployment must specify a environment name")
 	}
 	var envVars map[string]string
-	fmt.Printf("CURRENT env: %s", env)
+	fmt.Printf("CURRENT env: %s\n", env)
 	if strings.ToLower(env) != "prod" {
-		fmt.Printf("strings.ToLower(env): %s", strings.ToLower(env))
+		fmt.Printf("strings.ToLower(env): %s\n", strings.ToLower(env))
 		envVars = LoadEnv(env, p.Feature)
 	}
 
