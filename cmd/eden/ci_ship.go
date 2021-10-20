@@ -16,6 +16,7 @@ limitations under the License.
 package main
 
 import (
+	"fmt"
 	"github.com/eden-framework/eden-framework/internal/project"
 	"github.com/spf13/cobra"
 )
@@ -27,6 +28,7 @@ var ciShipCmd = &cobra.Command{
 	Use:   "ship",
 	Short: "ci ship a project as a image",
 	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("Start shipping...")
 		currentProject.Run(project.CommandsForShipping(currentProject, shipFlagPush)...)
 	},
 }
