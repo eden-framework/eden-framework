@@ -1,10 +1,10 @@
 package generator
 
 import (
-	"github.com/eden-framework/courier/status_error"
-	"github.com/eden-framework/eden-framework/internal/generator/files"
-	"github.com/eden-framework/eden-framework/internal/generator/scanner"
-	"github.com/eden-framework/packagex"
+	"gitee.com/eden-framework/courier/status_error"
+	"gitee.com/eden-framework/eden-framework/internal/generator/files"
+	"gitee.com/eden-framework/eden-framework/internal/generator/scanner"
+	"gitee.com/eden-framework/packagex"
 	"github.com/sirupsen/logrus"
 	"go/types"
 	"os"

@@ -1,13 +1,13 @@
 package application
 
 import (
-	"github.com/eden-framework/apollo"
-	"github.com/eden-framework/autoconf"
-	"github.com/eden-framework/context"
-	"github.com/eden-framework/eden-framework/internal"
-	"github.com/eden-framework/eden-framework/internal/generator"
-	"github.com/eden-framework/eden-framework/internal/project"
-	str "github.com/eden-framework/strings"
+	"gitee.com/eden-framework/apollo"
+	"gitee.com/eden-framework/autoconf"
+	"gitee.com/eden-framework/context"
+	"gitee.com/eden-framework/eden-framework/internal"
+	"gitee.com/eden-framework/eden-framework/internal/generator"
+	"gitee.com/eden-framework/eden-framework/internal/project"
+	str "gitee.com/eden-framework/strings"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"

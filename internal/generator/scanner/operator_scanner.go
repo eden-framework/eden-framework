@@ -2,11 +2,11 @@ package scanner
 
 import (
 	"fmt"
-	"github.com/eden-framework/courier/httpx"
-	"github.com/eden-framework/courier/status_error"
-	"github.com/eden-framework/courier/transport_http"
-	"github.com/eden-framework/packagex"
-	"github.com/eden-framework/reflectx"
+	"gitee.com/eden-framework/courier/httpx"
+	"gitee.com/eden-framework/courier/status_error"
+	"gitee.com/eden-framework/courier/transport_http"
+	"gitee.com/eden-framework/packagex"
+	"gitee.com/eden-framework/reflectx"
 	"github.com/go-courier/oas"
 	"github.com/sirupsen/logrus"
 	"go/ast"

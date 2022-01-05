@@ -5,7 +5,7 @@ import (
 	"encoding"
 	"errors"
 
-	github_com_eden_framework_enumeration "github.com/eden-framework/enumeration"
+	github_com_eden_framework_enumeration "gitee.com/eden-framework/enumeration"
 )
 
 var InvalidDroneCiTriggerEvent = errors.New("invalid DroneCiTriggerEvent")

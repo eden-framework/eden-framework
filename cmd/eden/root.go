@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/eden-framework/eden-framework/internal/project"
-	_ "github.com/eden-framework/eden-framework/internal/workflows"
+	"gitee.com/eden-framework/eden-framework/internal/project"
+	_ "gitee.com/eden-framework/eden-framework/internal/workflows"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

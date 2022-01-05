@@ -3,10 +3,10 @@ package files
 import (
 	"bytes"
 	"fmt"
-	"github.com/eden-framework/eden-framework/internal/generator/importer"
-	"github.com/eden-framework/eden-framework/internal/generator/operator"
-	"github.com/eden-framework/eden-framework/internal/generator/scanner"
-	str "github.com/eden-framework/strings"
+	"gitee.com/eden-framework/eden-framework/internal/generator/importer"
+	"gitee.com/eden-framework/eden-framework/internal/generator/operator"
+	"gitee.com/eden-framework/eden-framework/internal/generator/scanner"
+	str "gitee.com/eden-framework/strings"
 	"github.com/go-courier/oas"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -84,11 +84,11 @@ func (c *ClientFile) WriteTypeInterface(w io.Writer) (err error) {
 				c.Importer.Merge(annotate[scanner.XAnnotationRevert].Importer())
 			} else {
 				requestStr := fmt.Sprintf("%s %s, ", "req", operator.RequestOf(op.ID()))
-				interfaceMethod = op.ID() + `(` + requestStr + `metas... ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `) (resp *` + operator.ResponseOf(op.ID()) + `, err error)
+				interfaceMethod = op.ID() + `(` + requestStr + `metas... ` + c.Importer.Use("gitee.com/eden-framework/courier.Metadata") + `) (resp *` + operator.ResponseOf(op.ID()) + `, err error)
 `
 			}
 		} else {
-			interfaceMethod = op.ID() + `(metas... ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `) (resp *` + operator.ResponseOf(op.ID()) + `, err error)
+			interfaceMethod = op.ID() + `(metas... ` + c.Importer.Use("gitee.com/eden-framework/courier.Metadata") + `) (resp *` + operator.ResponseOf(op.ID()) + `, err error)
 `
 		}
 
@@ -135,7 +135,7 @@ func (c  *`+c.ClientName+`) Init() {
 		op := c.ops[key]
 		if annotate := op.Annotation(); annotate[scanner.XAnnotationRevert] != nil && op.CanRevert() {
 			if target := op.RevertTarget(); target != "" {
-				_, err = io.WriteString(w, c.Importer.Use("github.com/eden-framework/revert.RegisterRevertFunc")+`("`+target+`", c.`+op.ID()+`)
+				_, err = io.WriteString(w, c.Importer.Use("gitee.com/eden-framework/revert.RegisterRevertFunc")+`("`+target+`", c.`+op.ID()+`)
 `)
 			}
 		}
@@ -146,8 +146,8 @@ func (c  `+c.ClientName+`) CheckService() {
 	err := c.Request(c.Name+".Check", "HEAD", "/", nil).
 		Do().
 		Into(nil)
-	statusErr := `+c.Importer.Use("github.com/eden-framework/courier/status_error.FromError")+`(err)
-	if statusErr.Code == int64(`+c.Importer.Use("github.com/eden-framework/courier/status_error.RequestTimeout")+`) {
+	statusErr := `+c.Importer.Use("gitee.com/eden-framework/courier/status_error.FromError")+`(err)
+	if statusErr.Code == int64(`+c.Importer.Use("gitee.com/eden-framework/courier/status_error.RequestTimeout")+`) {
 		panic(fmt.Errorf("service %s have some error %s", c.Name, statusErr))
 	}
 }
@@ -194,11 +194,11 @@ type `+operator.RequestOf(op.ID())+" ")
 				c.Importer.Merge(annotate[scanner.XAnnotationRevert].Importer())
 			} else {
 				requestStr := fmt.Sprintf("%s %s, ", "req", operator.RequestOf(op.ID()))
-				interfaceMethod := op.ID() + `(` + requestStr + `metas... ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `) (resp *` + operator.ResponseOf(op.ID()) + `, err error)`
+				interfaceMethod := op.ID() + `(` + requestStr + `metas... ` + c.Importer.Use("gitee.com/eden-framework/courier.Metadata") + `) (resp *` + operator.ResponseOf(op.ID()) + `, err error)`
 				operationBody = `
 func (c ` + c.ClientName + `) ` + interfaceMethod + ` {
 	resp = &` + operator.ResponseOf(op.ID()) + `{}
-	resp.Meta = ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `{}
+	resp.Meta = ` + c.Importer.Use("gitee.com/eden-framework/courier.Metadata") + `{}
 
 	err = c.Request(c.Name + ".` + op.ID() + `", "` + op.Method() + `", "` + op.Path() + `", req, metas...).
 		Do().
@@ -210,11 +210,11 @@ func (c ` + c.ClientName + `) ` + interfaceMethod + ` {
 `
 			}
 		} else {
-			interfaceMethod := op.ID() + `(metas... ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `) (resp *` + operator.ResponseOf(op.ID()) + `, err error)`
+			interfaceMethod := op.ID() + `(metas... ` + c.Importer.Use("gitee.com/eden-framework/courier.Metadata") + `) (resp *` + operator.ResponseOf(op.ID()) + `, err error)`
 			operationBody = `
 func (c ` + c.ClientName + `) ` + interfaceMethod + ` {
 	resp = &` + operator.ResponseOf(op.ID()) + `{}
-	resp.Meta = ` + c.Importer.Use("github.com/eden-framework/courier.Metadata") + `{}
+	resp.Meta = ` + c.Importer.Use("gitee.com/eden-framework/courier.Metadata") + `{}
 
 	err = c.Request(c.Name + ".` + op.ID() + `", "` + op.Method() + `", "` + op.Path() + `", nil, metas...).
 		Do().
@@ -238,7 +238,7 @@ func (c ` + c.ClientName + `) ` + interfaceMethod + ` {
 
 		_, err = io.WriteString(w, `
 type `+operator.ResponseOf(op.ID())+`  struct {
-	Meta `+c.Importer.Use("github.com/eden-framework/courier.Metadata")+`
+	Meta `+c.Importer.Use("gitee.com/eden-framework/courier.Metadata")+`
 	Body `)
 		if err != nil {
 			return

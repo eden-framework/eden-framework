@@ -3,9 +3,9 @@ package files
 import (
 	"bytes"
 	"fmt"
-	"github.com/eden-framework/eden-framework/internal/generator/importer"
-	"github.com/eden-framework/eden-framework/internal/generator/operator"
-	str "github.com/eden-framework/strings"
+	"gitee.com/eden-framework/eden-framework/internal/generator/importer"
+	"gitee.com/eden-framework/eden-framework/internal/generator/operator"
+	str "gitee.com/eden-framework/strings"
 	"github.com/go-courier/oas"
 	"github.com/sirupsen/logrus"
 	"io"

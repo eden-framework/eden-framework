@@ -3,8 +3,8 @@ package generator
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eden-framework/eden-framework/internal/generator/scanner"
-	"github.com/eden-framework/packagex"
+	"gitee.com/eden-framework/eden-framework/internal/generator/scanner"
+	"gitee.com/eden-framework/packagex"
 	"github.com/go-courier/oas"
 	"github.com/sirupsen/logrus"
 	"go/ast"

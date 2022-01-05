@@ -1,7 +1,7 @@
 package workflows
 
 import (
-	"github.com/eden-framework/eden-framework/internal/project"
+	"gitee.com/eden-framework/eden-framework/internal/project"
 )
 
 func init() {

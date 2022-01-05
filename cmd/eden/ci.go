@@ -17,7 +17,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/eden-framework/eden-framework/internal/project"
+	"gitee.com/eden-framework/eden-framework/internal/project"
 	"github.com/spf13/cobra"
 	"os"
 	"regexp"

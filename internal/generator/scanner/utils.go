@@ -1,12 +1,12 @@
 package scanner
 
 import (
-	"github.com/eden-framework/courier"
-	"github.com/eden-framework/courier/client"
-	"github.com/eden-framework/courier/httpx"
-	"github.com/eden-framework/courier/status_error"
-	"github.com/eden-framework/courier/transport_http"
-	"github.com/eden-framework/reflectx"
+	"gitee.com/eden-framework/courier"
+	"gitee.com/eden-framework/courier/client"
+	"gitee.com/eden-framework/courier/httpx"
+	"gitee.com/eden-framework/courier/status_error"
+	"gitee.com/eden-framework/courier/transport_http"
+	"gitee.com/eden-framework/reflectx"
 	"github.com/go-courier/oas"
 	"go/ast"
 	"go/constant"

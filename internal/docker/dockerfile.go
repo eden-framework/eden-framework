@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/eden-framework/context"
-	str "github.com/eden-framework/strings"
+	"gitee.com/eden-framework/context"
+	str "gitee.com/eden-framework/strings"
 )
 
 func EnvVarInDocker(key string) string {

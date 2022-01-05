@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/eden-framework/pointer"
+	"gitee.com/eden-framework/pointer"
 )
 
 func NewService(image string) *Service {

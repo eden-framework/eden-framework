@@ -2,10 +2,10 @@ package project
 
 import (
 	"fmt"
-	"github.com/eden-framework/context"
-	"github.com/eden-framework/eden-framework/internal/project/drone"
-	"github.com/eden-framework/eden-framework/internal/project/drone/enums"
-	str "github.com/eden-framework/strings"
+	"gitee.com/eden-framework/context"
+	"gitee.com/eden-framework/eden-framework/internal/project/drone"
+	"gitee.com/eden-framework/eden-framework/internal/project/drone/enums"
+	str "gitee.com/eden-framework/strings"
 	"strings"
 )
 

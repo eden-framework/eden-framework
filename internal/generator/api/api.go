@@ -1,6 +1,6 @@
 package api
 
-import "github.com/eden-framework/strings"
+import "gitee.com/eden-framework/strings"
 
 type Api struct {
 	ServiceName string                    `json:"name"`

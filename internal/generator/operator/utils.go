@@ -1,7 +1,7 @@
 package operator
 
 import (
-	"github.com/eden-framework/eden-framework/internal/generator/importer"
+	"gitee.com/eden-framework/eden-framework/internal/generator/importer"
 	"github.com/go-courier/oas"
 	"regexp"
 	"strings"

@@ -3,7 +3,7 @@ package importer
 import (
 	"bytes"
 	"fmt"
-	str "github.com/eden-framework/strings"
+	str "gitee.com/eden-framework/strings"
 	"github.com/sirupsen/logrus"
 	"io"
 	"os/exec"

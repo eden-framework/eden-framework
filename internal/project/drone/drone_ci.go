@@ -1,7 +1,7 @@
 package drone
 
 import (
-	"github.com/eden-framework/eden-framework/internal/project/drone/enums"
+	"gitee.com/eden-framework/eden-framework/internal/project/drone/enums"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"

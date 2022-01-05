@@ -2,7 +2,7 @@ package generator
 
 import (
 	"fmt"
-	str "github.com/eden-framework/strings"
+	str "gitee.com/eden-framework/strings"
 	"github.com/fatih/color"
 	"log"
 	"os"

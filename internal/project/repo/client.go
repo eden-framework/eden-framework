@@ -2,7 +2,7 @@ package repo
 
 import (
 	"fmt"
-	"github.com/eden-framework/courier/client"
+	"gitee.com/eden-framework/courier/client"
 	"github.com/profzone/envconfig"
 	"net/http"
 	"strings"
@@ -16,10 +16,10 @@ type Client struct {
 	*client.Client
 }
 
-func NewClient(mode, host string, port int16) *Client {
+func NewClient(mode, host string, port int16, org string) *Client {
 	cli := &Client{
-		tagUri:      "/repos/%s/tags",
-		repoListUri: "/orgs/eden-framework/repos",
+		tagUri:      "/api/v5/repos/" + org + "/%s/tags",
+		repoListUri: "/api/v5/orgs/" + org + "/repos",
 		Client: &client.Client{
 			Host:    host,
 			Mode:    mode,
@@ -49,9 +49,9 @@ func (c *Client) GetPlugins() (RepoResponse, error) {
 	return resp, nil
 }
 
-func (c *Client) GetTags(repoFullName string) (TagsResponse, error) {
+func (c *Client) GetTags(repoName string) (TagsResponse, error) {
 	var resp TagsResponse
-	request := c.Request("", http.MethodGet, fmt.Sprintf(c.tagUri, repoFullName), nil)
+	request := c.Request("", http.MethodGet, fmt.Sprintf(c.tagUri, repoName), nil)
 	err := request.Do().Into(&resp)
 	if err != nil {
 		return nil, err

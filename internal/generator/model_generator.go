@@ -1,9 +1,9 @@
 package generator
 
 import (
-	"github.com/eden-framework/codegen"
-	"github.com/eden-framework/packagex"
-	"github.com/eden-framework/sqlx/generator"
+	"gitee.com/eden-framework/codegen"
+	"gitee.com/eden-framework/packagex"
+	"gitee.com/eden-framework/sqlx/generator"
 	"github.com/sirupsen/logrus"
 	"go/types"
 	"os"

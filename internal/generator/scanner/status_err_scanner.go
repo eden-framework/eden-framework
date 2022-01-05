@@ -2,8 +2,8 @@ package scanner
 
 import (
 	"fmt"
-	"github.com/eden-framework/courier/status_error"
-	"github.com/eden-framework/packagex"
+	"gitee.com/eden-framework/courier/status_error"
+	"gitee.com/eden-framework/packagex"
 	"go/ast"
 	"go/types"
 	"sort"
@@ -115,7 +115,7 @@ func (scanner *StatusErrScanner) appendStateErrs(typeFunc *types.Func, statusErr
 }
 
 func (scanner *StatusErrScanner) init() {
-	pkg := scanner.pkg.Pkg("github.com/eden-framework/courier/status_error")
+	pkg := scanner.pkg.Pkg("gitee.com/eden-framework/courier/status_error")
 	if pkg == nil {
 		return
 	}

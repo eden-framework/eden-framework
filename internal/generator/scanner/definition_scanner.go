@@ -2,9 +2,9 @@ package scanner
 
 import (
 	"fmt"
-	"github.com/eden-framework/packagex"
-	"github.com/eden-framework/reflectx"
-	str "github.com/eden-framework/strings"
+	"gitee.com/eden-framework/packagex"
+	"gitee.com/eden-framework/reflectx"
+	str "gitee.com/eden-framework/strings"
 	"go/types"
 	"reflect"
 	"regexp"

@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/eden-framework/eden-framework/internal/generator/importer"
-	"github.com/eden-framework/eden-framework/internal/generator/scanner"
-	"github.com/eden-framework/enumeration"
-	"github.com/eden-framework/packagex"
-	str "github.com/eden-framework/strings"
+	"gitee.com/eden-framework/eden-framework/internal/generator/importer"
+	"gitee.com/eden-framework/eden-framework/internal/generator/scanner"
+	"gitee.com/eden-framework/enumeration"
+	"gitee.com/eden-framework/packagex"
+	str "gitee.com/eden-framework/strings"
 	"github.com/go-courier/oas"
 	"io"
 	"sort"
@@ -56,7 +56,7 @@ func (g *TypeGenerator) TypeIndirect(schema *oas.Schema) (string, bool) {
 		}
 
 		typeFullName := fmt.Sprint(schema.Extensions[scanner.XGoVendorType])
-		isInCommonLib := strings.Contains(typeFullName, "github.com/eden-framework")
+		isInCommonLib := strings.Contains(typeFullName, "gitee.com/eden-framework")
 
 		if schema.Type == "string" || schema.Type == "boolean" || schema.Enum != nil || isInCommonLib {
 
@@ -77,7 +77,7 @@ func (g *TypeGenerator) TypeIndirect(schema *oas.Schema) (string, bool) {
 
 			if schema.Type == "boolean" {
 				typeName = "Bool"
-				pkgImportName = "github.com/eden-framework/enumeration"
+				pkgImportName = "gitee.com/eden-framework/enumeration"
 				isInCommonLib = true
 			}
 

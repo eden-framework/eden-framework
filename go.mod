@@ -1,25 +1,25 @@
-module github.com/eden-framework/eden-framework
+module gitee.com/eden-framework/eden-framework
 
 go 1.14
 
 replace k8s.io/client-go => k8s.io/client-go v0.18.8
 
 require (
+	gitee.com/eden-framework/apollo v0.0.2
+	gitee.com/eden-framework/autoconf v0.0.5
+	gitee.com/eden-framework/codegen v0.0.2
+	gitee.com/eden-framework/context v0.0.4
+	gitee.com/eden-framework/courier v1.0.6
+	gitee.com/eden-framework/enumeration v1.0.1
+	gitee.com/eden-framework/packagex v0.0.2
+	gitee.com/eden-framework/plugins v0.0.7
+	gitee.com/eden-framework/pointer v0.0.3
+	gitee.com/eden-framework/reflectx v0.0.3
+	gitee.com/eden-framework/sqlx v0.0.3
+	gitee.com/eden-framework/strings v0.0.2
+	gitee.com/eden-framework/timex v0.0.3
 	github.com/AlecAivazis/survey/v2 v2.0.7
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.577
-	github.com/eden-framework/apollo v0.0.1
-	github.com/eden-framework/autoconf v0.0.5-0.20201127094307-a7ab11d4ef78
-	github.com/eden-framework/codegen v0.0.1
-	github.com/eden-framework/context v0.0.2
-	github.com/eden-framework/courier v1.0.4
-	github.com/eden-framework/enumeration v1.0.0
-	github.com/eden-framework/packagex v0.0.1
-	github.com/eden-framework/plugins v0.0.6
-	github.com/eden-framework/pointer v0.0.2
-	github.com/eden-framework/reflectx v0.0.2
-	github.com/eden-framework/sqlx v0.0.1
-	github.com/eden-framework/strings v0.0.1
-	github.com/eden-framework/timex v0.0.2
 	github.com/fatih/color v1.9.0
 	github.com/go-courier/oas v1.2.0
 	github.com/go-courier/ptr v1.0.1 // indirect

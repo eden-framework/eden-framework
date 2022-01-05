@@ -2,9 +2,9 @@ package generator
 
 import (
 	"fmt"
+	"gitee.com/eden-framework/eden-framework/internal/generator/files"
+	"gitee.com/eden-framework/eden-framework/internal/project"
 	"github.com/AlecAivazis/survey/v2/core"
-	"github.com/eden-framework/eden-framework/internal/generator/files"
-	"github.com/eden-framework/eden-framework/internal/project"
 	"path"
 )
 
@@ -50,7 +50,7 @@ func NewProjectGenerator(opt ProjectOption) *ProjectGenerator {
 
 	var withApolloFlag string
 	if opt.ApolloSupport {
-		withApolloFlag = fmt.Sprintf(" -ldflags \"-X github.com/eden-framework/apollo.Branch=%s.json\"", files.EnvVarInBash(project.EnvKeyCIBranch))
+		withApolloFlag = fmt.Sprintf(" -ldflags \"-X gitee.com/eden-framework/apollo.Branch=%s.json\"", files.EnvVarInBash(project.EnvKeyCIBranch))
 	}
 	p.Scripts = map[string]project.Script{
 		"build": []string{

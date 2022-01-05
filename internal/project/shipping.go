@@ -2,7 +2,7 @@ package project
 
 import (
 	"fmt"
-	"github.com/eden-framework/eden-framework/internal/docker"
+	"gitee.com/eden-framework/eden-framework/internal/docker"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"

@@ -3,8 +3,8 @@ package files
 import (
 	"bytes"
 	"fmt"
-	"github.com/eden-framework/courier/status_error"
-	"github.com/eden-framework/eden-framework/internal/generator/importer"
+	"gitee.com/eden-framework/courier/status_error"
+	"gitee.com/eden-framework/eden-framework/internal/generator/importer"
 	"github.com/sirupsen/logrus"
 	"io"
 )
@@ -46,7 +46,7 @@ func init() {
 
 	for _, code := range c.errCodes {
 		_, err = io.WriteString(w, fmt.Sprintf("%s.StatusErrorCodes.Register(\"%s\", %d, \"%s\", \"\", %v)\n",
-			c.Importer.UseWithoutAlias("github.com/eden-framework/courier/status_error", ""),
+			c.Importer.UseWithoutAlias("gitee.com/eden-framework/courier/status_error", ""),
 			code.Key,
 			code.Code,
 			code.Msg,

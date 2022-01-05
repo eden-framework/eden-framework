@@ -2,8 +2,8 @@ package files
 
 import (
 	"encoding/json"
-	"github.com/eden-framework/context"
-	str "github.com/eden-framework/strings"
+	"gitee.com/eden-framework/context"
+	str "gitee.com/eden-framework/strings"
 	"reflect"
 	"strconv"
 	"strings"

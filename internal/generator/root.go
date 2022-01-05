@@ -2,8 +2,8 @@ package generator
 
 import (
 	"fmt"
-	"github.com/eden-framework/eden-framework/internal/generator/format"
-	"github.com/eden-framework/timex"
+	"gitee.com/eden-framework/eden-framework/internal/generator/format"
+	"gitee.com/eden-framework/timex"
 	"golang.org/x/tools/imports"
 	"reflect"
 	"strings"

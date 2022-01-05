@@ -1,8 +1,8 @@
 package operator
 
 import (
-	"github.com/eden-framework/enumeration"
-	str "github.com/eden-framework/strings"
+	"gitee.com/eden-framework/enumeration"
+	str "gitee.com/eden-framework/strings"
 	"strings"
 )
 

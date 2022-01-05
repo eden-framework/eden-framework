@@ -3,7 +3,7 @@ package k8s
 import (
 	"bytes"
 	"fmt"
-	"github.com/eden-framework/context"
+	"gitee.com/eden-framework/context"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	appsv1 "k8s.io/api/apps/v1"

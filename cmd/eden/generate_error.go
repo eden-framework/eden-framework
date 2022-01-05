@@ -17,7 +17,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/eden-framework/eden-framework/internal/generator"
+	"gitee.com/eden-framework/eden-framework/internal/generator"
 	"github.com/spf13/cobra"
 	"os"
 )

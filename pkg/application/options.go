@@ -1,8 +1,8 @@
 package application
 
 import (
-	"github.com/eden-framework/apollo"
-	"github.com/eden-framework/reflectx"
+	"gitee.com/eden-framework/apollo"
+	"gitee.com/eden-framework/reflectx"
 	"github.com/sirupsen/logrus"
 	"reflect"
 )

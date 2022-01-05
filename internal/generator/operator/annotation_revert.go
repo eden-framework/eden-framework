@@ -1,8 +1,8 @@
 package operator
 
 import (
-	"github.com/eden-framework/eden-framework/internal/generator/importer"
-	"github.com/eden-framework/eden-framework/internal/generator/scanner"
+	"gitee.com/eden-framework/eden-framework/internal/generator/importer"
+	"gitee.com/eden-framework/eden-framework/internal/generator/scanner"
 )
 
 func init() {
@@ -68,7 +68,7 @@ func (r ` + ResponseOf(op.ID()) + `) GetRevertID() uint64 {
 }
 
 func (a *AnnotationRevert) generateInterface(op Op) string {
-	return op.ID() + `(id uint64, metas... ` + a.ipt.Use("github.com/eden-framework/courier.Metadata") + `) (err error)`
+	return op.ID() + `(id uint64, metas... ` + a.ipt.Use("gitee.com/eden-framework/courier.Metadata") + `) (err error)`
 }
 
 func (a *AnnotationRevert) generateImplement(op Op) string {

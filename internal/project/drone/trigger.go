@@ -1,6 +1,6 @@
 package drone
 
-import "github.com/eden-framework/eden-framework/internal/project/drone/enums"
+import "gitee.com/eden-framework/eden-framework/internal/project/drone/enums"
 
 type PipelineTriggerIncludeAndExcludeString struct {
 	Include []string `yaml:"include" json:"include"`

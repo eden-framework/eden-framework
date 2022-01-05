@@ -2,7 +2,7 @@ package project
 
 import (
 	"fmt"
-	"github.com/eden-framework/context"
+	"gitee.com/eden-framework/context"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"

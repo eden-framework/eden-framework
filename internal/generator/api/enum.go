@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/eden-framework/enumeration"
+	"gitee.com/eden-framework/enumeration"
 	"sort"
 )
 

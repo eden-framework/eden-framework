@@ -17,11 +17,11 @@ package main
 
 import (
 	"fmt"
+	"gitee.com/eden-framework/eden-framework/internal/generator"
+	"gitee.com/eden-framework/eden-framework/internal/project"
+	"gitee.com/eden-framework/eden-framework/internal/project/repo"
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/AlecAivazis/survey/v2/terminal"
-	"github.com/eden-framework/eden-framework/internal/generator"
-	"github.com/eden-framework/eden-framework/internal/project"
-	"github.com/eden-framework/eden-framework/internal/project/repo"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"os"
@@ -36,11 +36,11 @@ var createCmd = &cobra.Command{
 	Short: "create and initialize a project",
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(currentProject.Group) == 0 {
-			currentProject.Group = "profzone"
+			currentProject.Group = "eden-framework"
 		}
 
 		if len(currentProject.Owner) == 0 {
-			currentProject.Owner = "profzone"
+			currentProject.Owner = "eden-framework"
 		}
 
 		if len(currentProject.ProgramLanguage) == 0 {
@@ -53,16 +53,15 @@ var createCmd = &cobra.Command{
 
 		// get the tag list of eden-framework
 		fmt.Println("fetch the tag list of eden-framework...")
-		cli := repo.NewClient("https", "api.github.com", 80)
-		tags, err := cli.GetTags("eden-framework/eden-framework")
+		cli := repo.NewClient("https", "gitee.com", 80, "eden-framework")
+		tags, err := cli.GetTags("eden-framework")
 		if err != nil {
 			logrus.Panicf("cannot get tag list of repo. err=%v", err)
 		}
-		var tagList []string
+		var tagList = make([]string, 0)
 		for _, t := range tags {
 			tagList = append(tagList, t.Name)
 		}
-		tagList = append(tagList, "v1.1.9")
 		if len(tagList) == 0 {
 			logrus.Panic("cannot get tag list of repo. tag list is empty")
 		}
@@ -71,9 +70,9 @@ var createCmd = &cobra.Command{
 		fmt.Println("fetch the plugin list of eden-framework...")
 		plugins, err := cli.GetPlugins()
 		if err != nil {
-			logrus.Panicf("cannot get plugin list of eden-framework. err=%v", err)
+			logrus.Errorf("cannot get plugin list of eden-framework. err=%v", err)
 		}
-		var pluginList []string
+		var pluginList = make([]string, 0)
 		var answers generator.ServiceOption
 		for _, p := range plugins {
 			tags, err := cli.GetTags(p.FullName)
@@ -97,7 +96,6 @@ var createCmd = &cobra.Command{
 			answers.PluginDetails = append(answers.PluginDetails, pluginDetail)
 			pluginList = append(pluginList, pkgDisplayName)
 		}
-		pluginList = append(pluginList, "abc")
 
 		var qs = []*survey.Question{
 			{
@@ -163,56 +161,58 @@ var createCmd = &cobra.Command{
 		}
 
 		if createCmdInitProject {
-			qs = append(qs, []*survey.Question{
-				{
-					Name: "desc",
-					Prompt: &survey.Input{
-						Message: "项目描述",
-						Default: currentProject.Desc,
+			qs = append(
+				qs, []*survey.Question{
+					{
+						Name: "desc",
+						Prompt: &survey.Input{
+							Message: "项目描述",
+							Default: currentProject.Desc,
+						},
+						Validate: survey.Required,
 					},
-					Validate: survey.Required,
-				},
-				{
-					Name: "group",
-					Prompt: &survey.Input{
-						Message: "项目所属应用",
-						Default: currentProject.Group,
+					{
+						Name: "group",
+						Prompt: &survey.Input{
+							Message: "项目所属应用",
+							Default: currentProject.Group,
+						},
+						Validate: survey.Required,
 					},
-					Validate: survey.Required,
-				},
-				{
-					Name: "owner",
-					Prompt: &survey.Input{
-						Message: "项目所属用户组",
-						Default: currentProject.Owner,
+					{
+						Name: "owner",
+						Prompt: &survey.Input{
+							Message: "项目所属用户组",
+							Default: currentProject.Owner,
+						},
+						Validate: survey.Required,
 					},
-					Validate: survey.Required,
-				},
-				{
-					Name: "version",
-					Prompt: &survey.Input{
-						Message: "项目版本号 (x.x.x)",
-						Default: currentProject.Version.String(),
+					{
+						Name: "version",
+						Prompt: &survey.Input{
+							Message: "项目版本号 (x.x.x)",
+							Default: currentProject.Version.String(),
+						},
+						Validate: survey.Required,
 					},
-					Validate: survey.Required,
-				},
-				{
-					Name: "project_language",
-					Prompt: &survey.Select{
-						Message: "项目所用编程语言",
-						Options: append(project.RegisteredBuilders.SupportProgramLanguages(), "custom"),
-						Default: currentProject.ProgramLanguage,
+					{
+						Name: "project_language",
+						Prompt: &survey.Select{
+							Message: "项目所用编程语言",
+							Options: append(project.RegisteredBuilders.SupportProgramLanguages(), "custom"),
+							Default: currentProject.ProgramLanguage,
+						},
 					},
-				},
-				{
-					Name: "workflow",
-					Prompt: &survey.Select{
-						Message: "项目 workflow",
-						Options: append(project.PresetWorkflows.List(), "custom"),
-						Default: currentProject.Workflow.Extends,
+					{
+						Name: "workflow",
+						Prompt: &survey.Select{
+							Message: "项目 workflow",
+							Options: append(project.PresetWorkflows.List(), "custom"),
+							Default: currentProject.Workflow.Extends,
+						},
 					},
-				},
-			}...)
+				}...,
+			)
 		}
 
 		err = survey.Ask(qs, &answers)

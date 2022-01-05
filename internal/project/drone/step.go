@@ -1,7 +1,7 @@
 package drone
 
 import (
-	"github.com/eden-framework/eden-framework/internal/project/drone/enums"
+	"gitee.com/eden-framework/eden-framework/internal/project/drone/enums"
 	"github.com/imdario/mergo"
 )
 

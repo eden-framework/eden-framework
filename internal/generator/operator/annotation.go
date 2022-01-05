@@ -1,6 +1,6 @@
 package operator
 
-import "github.com/eden-framework/eden-framework/internal/generator/importer"
+import "gitee.com/eden-framework/eden-framework/internal/generator/importer"
 
 var annotationMap = map[string]Annotation{}
 
